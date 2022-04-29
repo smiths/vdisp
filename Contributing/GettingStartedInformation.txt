@@ -1,0 +1,116 @@
+Summer Research Assistant Getting Started Information
+
+With the start of your summer job in mind, here is some practical getting started information.  Below you will find practical information and your initial tasks.  Since this is a long e-mail I will highlight here the information items you should attend to first.  The details on each task are in the enumerated list that follows.
+
+- send me your GitHub id
+- create a GitLab account and send me your id
+- test your card access to ITB 236 or 237 (you may need to visit Laurie LeBlanc to enable access)
+
+
+1. Introductions
+
+Here is the project team for this summer.
+
+Dr. Spencer Smith (smiths@mcmaster.ca)
+Dr. Dieter Stolle (stolle@mcmaster.ca)
+Emil Soleymani (soleymae@mcmaster.ca)
+
+
+2. Practical Information
+
+Start date: Monday, May 2, 2022
+
+End date: Friday, Aug 19, 2022
+
+Dress code: Please wear whatever clothes you are comfortable working in.  Most of our summer students dress the same in the summer as they do during the academic year.
+
+Workspace: You will be given a workspace in ITB 236 or 237.  You will be given card access to the room.    Room 236 has some (unlocked) storage under the tables but for the most part you shouldn't leave items in the room overnight.
+
+Meetings: Our meetings will be held both in-person and virtually.
+
+Laptop: Please bring your own laptop.  (Past students have preferred this, but if it is an issue to provide your own laptop, please let me know.)
+
+Hours: 35 hours per week, 7 hours per day (Monday to Friday) with a one-hour unpaid lunch.  You can take a half-hour lunch if you prefer, but a lunch break is required.  We will maintain a regular workday.  However, there is some flexibility in the start time.  Any time between 8:30 am and 9:30 am is fine.  In some cases, you may need to alter your work schedule for personal reasons.  This is fine, but we need to discuss the proposed alterations in advance.
+
+Please use a spreadsheet to keep track of your hours and the tasks that you spend your time on.  For the first week, please send the spreadsheet to Dr. Smith at the end of each day.  The purpose of communicating this information is to help advise and understand; it is not to "check up on you."  :-)
+
+First meeting: Monday, May 2 at 9:30 am in ITB/167 (Dr. Smith's office)  (Dr. Stolle is currently in Germany, so he will be unavailable for this meeting.)  During this meeting, we will discuss orientation information and getting started tasks.  We will also do our job hazard analysis during this meeting.
+
+Second meeting: Wednesday, May 4 at 10:30 am (EDT) (4:30 pm in Germany) on Zoom.  During this meeting, the science and engineering of settlement analysis will be introduced.
+
+Regular meetings: We will usually meet once a week. We'll settle on a regular time soon.
+
+
+3. Repos
+
+We use several repos for our work.  I'll list them below.  In some cases you will need to create an account or access will have to be given.  I'll list the specific tasks in the next section.
+
+a. GitLab (CAS server)
+
+i. Software Engineering for Science: https://gitlab.cas.mcmaster.ca/SEforSC/se4sc
+- public repo
+- resources 
+- grad student and undergrad student work
+- paper drafts
+- research proposal drafts
+- you will be able to push to master
+
+ii. Publications: https://gitlab.cas.mcmaster.ca/smiths/pub
+- private (within CAS) repo
+- bibliographic information (in BibTeX) for papers and other resources relevant to our project
+- pdf versions of papers that are hard to find online
+- when you create a bib file, look here (in the References.bib file) first to see if the bib data is already available
+- if you find a new reference, please add it to the References.bib file, along with a pdf version, if you don't have a link to an online version
+- citations should be named using the Author Year style.  For one or two authors their last names are listed and then the year.  For more than two authors, the first author's last name is listed followed by Et al. (https://www.mcgill.ca/library/files/library/cse-name-year-citation-style-guide.pdf)
+- you will be able to push to master
+
+iii. Software Engineering Course Notes: https://gitlab.cas.mcmaster.ca/smiths/se2aa4_cs2me3
+- public repo
+- the course notes for CS 2ME3 / SE 2AA4
+- on some occasions we may refer to some of the concepts from software engineering, this repo might be referenced in those situations
+- you cannot push, but you can do a pull request, if necessary
+
+b. vdisp: https://github.com/smiths/vdisp
+- the main home of our work
+
+
+4. Initial Tasks
+
+If you have questions or challenges while completing the steps below, please let me know.
+
+Once you get settled, here is a list of tasks to get you started:
+
+a. Verify you can access all GitLab account on CAS server.  You can access GitLab at https://gitlab.cas.mcmaster.ca/users/sign_in.  For CAS students, you can follow the instructions on screen to create an account, if you haven’t already.  For the nonCAS students, we will need to contact a system administrator (Derek or Sebastian)
+
+b. GitHub account.  If you do not have one, please create one.  Send your account id to Dr. Smith.  Verify that you can access the GitHub repos listed above.
+
+c. Learn the basics of git (if you don't already know them).  An overview of git can be found at: 
+https://gitlab.cas.mcmaster.ca/smiths/se2aa4_cs2me3/-/tree/master/Tutorials/T01a-VM-VersionControl/slides
+
+d. Learn the basics of LaTeX.  We will be using LaTeX for our written documents.  You can find an overview at:
+https://gitlab.cas.mcmaster.ca/smiths/se2aa4_cs2me3/-/tree/master/Tutorials%2FT02a-LaTeX
+
+e. Complete the issues that will be assigned to you.  
+
+f. If you are new to software development tools, you will want to review the lessons on Software Carpentry at http://software-carpentry.org/lessons/.  In particular, the lessons on the Unix Shell.
+
+g. Consent to Provide Limited Personal Information about Highly Qualified Personnel (HQP) to NSERC.  I will send a separate e-mail about this.
+
+h. Install git, latex, numpy, scipy.  You may want to install an editor for LaTeX and source code.  
+
+i. Install VSCode.
+
+j. Connect with Dr. Smith on Linked-In
+
+
+5. Dr. Smith To Do
+
+- add student to vdisp repo
+- add students to se4sc repo
+- assign initial issues
+- Consent to Provide Limited Personal Information about Highly Qualified Personnel (HQP) to NSERC e-mail
+
+
+Please do not hesitate to write if you have any questions, comments or concerns.
+
+Best wishes.
