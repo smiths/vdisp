@@ -2,8 +2,8 @@ Summer Research Assistant Getting Started Information
 
 With the start of your summer job in mind, here is some practical getting started information.  Below you will find practical information and your initial tasks.  Since this is a long e-mail I will highlight here the information items you should attend to first.  The details on each task are in the enumerated list that follows.
 
-- send me your GitHub id
-- create a GitLab account and send me your id
+- send me your GitHub username
+- create a GitLab account and send me your username
 - test your card access to ITB 236 or 237 (you may need to visit Laurie LeBlanc to enable access)
 
 
@@ -82,7 +82,7 @@ Once you get settled, here is a list of tasks to get you started:
 
 a. Verify you can access all GitLab account on CAS server.  You can access GitLab at https://gitlab.cas.mcmaster.ca/users/sign_in.  For CAS students, you can follow the instructions on screen to create an account, if you haven’t already.  For the nonCAS students, we will need to contact a system administrator (Derek or Sebastian)
 
-b. GitHub account.  If you do not have one, please create one.  Send your account id to Dr. Smith.  Verify that you can access the GitHub repos listed above.
+b. GitHub account.  If you do not have one, please create one.  Send your account username to Dr. Smith.  Verify that you can access the GitHub repos listed above.
 
 c. Learn the basics of git (if you don't already know them).  An overview of git can be found at: 
 https://gitlab.cas.mcmaster.ca/smiths/se2aa4_cs2me3/-/tree/master/Tutorials/T01a-VM-VersionControl/slides
