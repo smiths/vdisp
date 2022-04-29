@@ -1,3 +1,6 @@
+## DS_Store for Mac computers
+.DS_Store
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
