@@ -1,6 +1,10 @@
 ## DS_Store for Mac computers
 .DS_Store
 
+##  Executable and object files
+*.exe
+*.o
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
