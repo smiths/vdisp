@@ -34,7 +34,7 @@ Hours: 35 hours per week, 7 hours per day (Monday to Friday) with a one-hour unp
 
 Please use a spreadsheet to keep track of your hours and the tasks that you spend your time on.  For the first week, please send the spreadsheet to Dr. Smith at the end of each day.  The purpose of communicating this information is to help advise and understand; it is not to "check up on you."  :-)
 
-First meeting: Monday, May 2 at 9:30 am in ITB/167 (Dr. Smith's office)  (Dr. Stolle is currently in Germany, so he will be unavailable for this meeting.)  During this meeting, we will discuss orientation information and getting started tasks.  We will also do our job hazard analysis during this meeting.
+First meeting: Monday, May 2 at 9:30 am in ITB/167 (Dr. Smith's office)  (Dr. Stolle is currently in Germany, so he will be unavailable for this meeting.)  During this meeting, we will discuss orientation information and getting started tasks.  We will also do our job hazard analysis (JHA) during this meeting.
 
 Second meeting: Wednesday, May 4 at 10:30 am (EDT) (4:30 pm in Germany) on Zoom.  During this meeting, the science and engineering of settlement analysis will be introduced.
 
@@ -101,6 +101,8 @@ h. Install git, latex, numpy, scipy.  You may want to install an editor for LaTe
 i. Install VSCode.
 
 j. Connect with Dr. Smith on Linked-In
+
+k. Safety Training follow-up from JHA:  You should register for the training courses in Mosaic and then they will be available on Avenue the following day: https://hr.mcmaster.ca/employees/health_safety_well-being/our-safety/health-and-safety-training/
 
 
 5. Dr. Smith To Do
