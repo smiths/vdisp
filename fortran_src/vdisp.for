@@ -32,17 +32,20 @@
       WRITE(6,21)
    22 READ(5,*)N,IE(N,1)
    25 L=L+1
-      IF(N-L)35,35,30
+      IF(N-L .gt. 0) GOTO 30
+   35 WRITE(6,32)L,IE(L,1) 
+      IF(NEL-L .gt. 0) GOTO 22
+   40 CONTINUE 
+      WRITE(6,390)
+      GOTO 400
    30 IE(L,1)=IE(L-1,1) 
       WRITE(6,32)L,IE(L,1)
       GOTO 25
-   35 WRITE(6,32)L,IE(L,1) 
-      IF(NEL-L)40,40,22
-   40 CONTINUE 
-      WRITE(6,390)
   400 READ(5,*) M,G(M),WC(M),EO(M)
   401 FORMAT(I5,3F10.3) 
-      IF(NMAT-M)403,405,400
+      IF(NMAT-M .lt. 0) GOTO 403
+      IF(NMAT-M .eq. 0) GOTO 405
+      GOTO 400
   403 WRITE(6,404) M
 
   405 DO M=1,NMAT
@@ -407,16 +410,18 @@ C	SPLINE TO CALCULATE VARIABLES
   210 ID=NCONF*NCT 
       II=ID-NCONF+1
       JJ=NCONF-1
-      DO 220 I=II,ID 
+      DO I=II,ID 
       J=NCONF-JJ 
       X(J)=XX(I) 
       Y(J)=U(I)
-  220 JJ=JJ-1
+      JJ=JJ-1
+      ENDDO
       CALL SOLV(N) 
       IC=1
-      DO 225 I=II,ID 
+      DO I=II,ID 
       UX(I)=S(IC)
-  225 IC=IC+1
+      IC=IC+1
+      ENDDO
       NCT=NCT+1
       IF(NCT.LE.NSTR)GO TO 210
       NCT=1
@@ -425,16 +430,18 @@ C	SPLINE TO CALCULATE VARIABLES
       ID=IT+NCT
       II=ID-IT 
       JJ=NSTR-1
-      DO 235 I=II,ID,NCONF 
+      DO I=II,ID,NCONF 
       J=NSTR-JJ
       X(J)=YY(I) 
       Y(J)=U(I)
-  235 JJ=JJ-1
+      JJ=JJ-1
+      ENDDO
       CALL SOLV(N) 
       IC=1
-      DO 240 I=II,ID,NCONF 
+      DO I=II,ID,NCONF 
       UY(I)=S(IC)
-  240 IC=IC+1
+      IC=IC+1
+      ENDDO
       NCT=NCT+1
       IF(NCT.LE.NCONF)GO TO 230
       NCT=1
@@ -442,16 +449,18 @@ C	SPLINE TO CALCULATE VARIABLES
   243 ID=NCONF*NCT 
       II=ID-NCONF+1
       JJ=NCONF-1
-      DO 245 I=II,ID 
+      DO I=II,ID 
       J=NCONF-JJ 
       X(J)=XX(I) 
       Y(J)=UY(I)
-  245 JJ=JJ-1
+      JJ=JJ-1
+      ENDDO
       CALL SOLV(N) 
       IC=1
-      DO 250 I=II,ID 
+      DO I=II,ID 
       UXY(I)=S(IC)
-  250 IC=IC+1
+      IC=IC+1
+      ENDDO
       NCT=NCT+1
       IF(NCT.LE.NSTR)GO TO 243
       RETURN 
@@ -464,37 +473,44 @@ C
       COMMON/SPLIN/X(100),Y(100),S(100)
       DIMENSION A(100),B(100),C(100),D(100),F(100),GG(100),H(100) 
       N1=N-1
-      DO 2010 I=2,N
- 2010 H(I)=X(I)-X(I-1)
-      DO 2020 I=2,N
- 2020 A(I)=1./H(I) 
+      DO I=2,N
+      H(I)=X(I)-X(I-1)
+      ENDDO
+      DO I=2,N
+      A(I)=1./H(I) 
+      ENDDO
       A(1)=0.
-      DO 2030 I=2,N1
+      DO I=2,N1
       T1=1./H(I)+1./H(I+1)
- 2030 B(I)=2.*T1
+      B(I)=2.*T1
+      ENDDO
       B(1)=2.*(1./H(2)) 
       B(N)=2.*(1./H(N)) 
-      DO 2040 I=1,N1
- 2040 C(I)=1./H(I+1) 
+      DO I=1,N1
+      C(I)=1./H(I+1) 
+      ENDDO
       C(N)=0.
-      DO 2050 I=2,N1
+      DO I=2,N1
       T1=(Y(I)-Y(I-1))/(H(I)*H(I)) 
       T2=(Y(I+1)-Y(I))/(H(I+1)*H(I+1))
- 2050 D(I)=3.*(T1+T2)
+      D(I)=3.*(T1+T2)
+      ENDDO
       T1=(Y(2)-Y(1))/(H(2)*H(2)) 
       D(1)=3.*T1
       T2=(Y(N)-Y(N-1))/(H(N)*H(N)) 
       D(N)=3.*T2     
 C	FORWARD PASS 
       GG(1)=C(1)/B(1) 
-      DO 2100 I=2,N1
+      DO I=2,N1
       T1=B(I)-A(I)*GG(I-1)
- 2100 GG(I)=C(I)/T1
+      GG(I)=C(I)/T1
+      ENDDO
       F(1)=D(1)/B(1) 
-      DO 2110 I=2,N 
+      DO I=2,N 
       TEM=D(I)-A(I)*F(I-1) 
       T1=B(I)-A(I)*GG(I-1)
- 2110 F(I)=TEM/T1
+      F(I)=TEM/T1
+      ENDDO
 C	BACK SOLUTION 
       S(N)=F(N)
       I=N-1
@@ -582,8 +598,9 @@ C
       H(15)=F4*G4*UXY(K) 
       H(16)=F3*G4*UXY(L) 
       UC=0.0
-      DO 480 KK=1,16
-  480 UC=UC+H(KK)
+      DO KK=1,16
+      UC=UC+H(KK)
+      ENDDO
   430 CONTINUE 
       RETURN 
       END
