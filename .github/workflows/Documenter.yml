@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - wip-julia-ci
+      - main
     tags: '*'
   pull_request:
 jobs:
