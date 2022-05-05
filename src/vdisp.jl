@@ -1,7 +1,7 @@
 module vdisp
 export lerp
 
-function lerp(a::Tuple{Float64, Float64}, b::Tuple{Float64, Float64}, x::Float64)
+function lerp(a::Tuple{Float64,Float64}, b::Tuple{Float64,Float64}, x::Float64)
     x1 = a[1]
     y1 = a[2]
     x2 = b[1]
@@ -10,10 +10,9 @@ function lerp(a::Tuple{Float64, Float64}, b::Tuple{Float64, Float64}, x::Float64
         println("Warning: both points are equal!")
         return y1
     end
-    numerator = y1 * (x2-x) + y2 * (x-x1)
+    numerator = y1 * (x2 - x) + y2 * (x - x1)
     denominator = x2 - x1
-    # println(numerator/denominator)
-    return numerator/denominator
- end
+    return numerator / denominator
+end
 
 end # module

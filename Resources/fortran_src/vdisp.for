@@ -38,7 +38,7 @@
    40 CONTINUE 
       WRITE(6,390)
       GOTO 400
-   30 IE(L,1)=IE(L-1,1) 
+   30 IE(L,1)=IE(L-1,1)
       WRITE(6,32)L,IE(L,1)
       GOTO 25
   400 READ(5,*) M,G(M),WC(M),EO(M)
@@ -81,8 +81,8 @@ C	CALCULATION OF EFFECTIVE OVERBURDEN PRESSURE
       IF(NOPT.NE.0.OR.IOPTION.EQ.0)GOTO 120
       MO=IFIX(DGWT/DX) 
       IF(MO.GT.NNP)MO=NNP 
-
-      DOI=1,MO
+C     Previously there was error in line below 
+      DO I=1,MO
       BN=DGWT/DX-FLOAT(I-1) 
       P(I)=P(I)+BN*DX*GAW
       ENDDO
