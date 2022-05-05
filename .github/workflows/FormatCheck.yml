@@ -31,6 +31,6 @@ jobs:
           julia  -e 'using JuliaFormatter; format(".", verbose=true)'
       - name: Install Lint package and lint code
         run: |
-          julia -e 'using Pkg; Pkg.add(PackageSpec(name="Lint"))'
+          julia -e 'using Pkg; Pkg.add("Lint")'
           julia -e 'using Lint; lintpkg('.')'
       
