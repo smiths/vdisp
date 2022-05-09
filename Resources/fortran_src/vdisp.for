@@ -81,8 +81,8 @@ C	CALCULATION OF EFFECTIVE OVERBURDEN PRESSURE
       IF(NOPT.NE.0.OR.IOPTION.EQ.0)GOTO 120
       MO=IFIX(DGWT/DX) 
       IF(MO.GT.NNP)MO=NNP 
-
-      DOI=1,MO
+C     Line below previously had type (no space b/w DO I)
+      DO I=1,MO
       BN=DGWT/DX-FLOAT(I-1) 
       P(I)=P(I)+BN*DX*GAW
       ENDDO
