@@ -1,5 +1,7 @@
 \documentclass[11pt,fleqn]{article}
 
+\usepackage{blindtext}
+
 \newcommand{\indentpar}{\phantom{=}}
 \newcommand{\bli}{\begin{itemize}}
 \newcommand{\eli}{\end{itemize}}
@@ -7,23 +9,18 @@
 \begin{document}
 
     %% Title Page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \begin{center}
+      
+      \title{Inconsistencies in Settlement Analysis Textbook and FORTRAN Code}
+      \date{May 9th, 2022}
+      \author{Emil Soleymani, Dr.~Spencer Smith\\ McMaster University}
+      \maketitle
 
-        {\large \textbf{VDispl}}\\[2mm]
-        {\large \textbf{Soil Settlement Analysis Software}}\\[2mm]
-        {\huge \textbf{Inconsistencies in Settlements Textbook and FORTRAN Code}}\\[6mm]
-        {\large \textbf{Dr.~Spencer Smith, Emil Soleymani}}\\[2mm]
-        {\large \textbf{McMaster University}}\\[6mm]
-        {\large Revised: May 9, 2022}
-      
-      \end{center}
-      
       \medskip
 
       % Description
       \indentpar During review of the legacy FORTRAN code for the VDispl software, 
       we referenced the Settlements Analysis book linked in the README 
-      file in order to correlate each calculation with its corresponding 
+      file to correlate each calculation with its corresponding 
       theories and formulas. This process revealed many potential errors 
       in the code and the formulas presented in the textbook, along with 
       some inconsistencies between calculations made in the code and 
