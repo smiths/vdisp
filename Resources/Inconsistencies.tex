@@ -1,0 +1,66 @@
+\documentclass[11pt,fleqn]{article}
+
+\newcommand{\indentpar}{\phantom{=}}
+\newcommand{\bli}{\begin{itemize}}
+\newcommand{\eli}{\end{itemize}}
+
+\begin{document}
+
+    %% Title Page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \begin{center}
+
+        {\large \textbf{Soil Settlement Analysis Software}}\\[2mm]
+        {\large \textbf{VDispl}}\\[2mm]
+        {\large \textbf{Spring 2022}}\\[8mm]
+        {\huge \textbf{Inconsistencies in Settlements Textbook and FORTRAN Code}}\\[6mm]
+        {\large \textbf{Dr.~Spencer Smith, Emil Soleymani}}\\[2mm]
+        {\large \textbf{McMaster University}}\\[6mm]
+        {\large Revised: May 9, 2022}
+      
+      \end{center}
+      
+      \medskip
+
+      % Description
+      \indentpar During review of the legacy FORTRAN code for the VDispl software, 
+      we referenced the Settlements Analysis book linked in the README 
+      file in order to correlate each calculation with its corresponding 
+      theories and formulas. This process revealed many potential errors 
+      in the code and the formulas presented in the textbook, along with 
+      some inconsistencies between calculations made in the code and 
+      calculations shown in the textbook. This document is a compilation 
+      of all such occurrences.
+      
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    \pagebreak
+    
+    %% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    \section*{Notes}
+    \indentpar All references to FORTRAN code are relative to line numbers 
+    in the \emph{most recent} version of the code, found under 
+    \textbf{Resources/fortran\_src/vdisp.for} while all references to the pages
+    in the Settlements Analysis textbook refer to a page number of the PDF linked 
+    in the README.md file.
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    \medskip
+
+    %% Errors in Textbook %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \section*{Potential Errors in Textbook}
+    \indentpar Having examined the many formulas in the book during the research and 
+    analysis of the FORTRAN code, we have come across some potential errors in the
+    textbook, ranging from variable names to questionable units.
+    \subsection*{Units for unit weight of water, $\gamma_w$:} 
+    \indentpar On page 12 of the Settlements Analysis PDF, 
+    under heading \(3\), there is a reference to a constant $\gamma_w$, 
+    which represents the unit weight of water. This constant is known
+    to be 9.807 $kN/m^3$ in SI units, however the textbook lists it as 
+    0.031tsf. The unit tsf — tonnes per square foot — seems to be a unit
+    of pressure which can be converted to $N/m^2$. We have no current 
+    explanation for this discrepancy.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+     
+\end{document}
