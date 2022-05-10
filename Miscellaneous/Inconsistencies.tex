@@ -46,9 +46,11 @@
 
     %% Errors in Textbook %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section*{Potential Errors in Textbook}
+
     \indentpar Having examined the many formulas in the book during the research and 
     analysis of the FORTRAN code, we have come across some potential errors in the
     textbook, ranging from variable names to questionable units.
+   
     \subsection*{Units for unit weight of water, $\gamma_w$:} 
     \indentpar On page 12 of the Settlements Analysis PDF, 
     under heading (3), there is a reference to a constant $\gamma_w$, 
@@ -57,6 +59,7 @@
     0.031tsf. The unit tsf — tonnes per square foot — seems to be a unit
     of pressure which can be converted to $N/m^2$. We have no current 
     explanation for this discrepancy.
+
     \subsection*{Leonard's and Frost Model:}
     \indentpar On page 169 of the Settlements Analysis PDF, 
     the equation (F-1) has a variable $c_i$ which represents 
@@ -80,6 +83,33 @@
     Analysis PDF has a variable called $K_p$. The textbook never describes 
     nor mentions this variable. It does however mention a variable $K_d$, and also
     provides a formula for it. It seems equation (F-5) has a typo in the subscript.
+
+    \subsection*{Output File Explanation:}
+    \indentpar In Appendix F, Table F-3 (p. 167) of the Settlements Analysis Textbook,
+    there is a typo in the explanation of the logic for deciding to output “Equilibrium 
+    saturated above water table” or “Equilibrium hydrostatic profile above water table“.
+    On line 13, the conditional statement checks for NOPT$=0$ instead of NOPT$=1$. The 
+    truth table should match the following, where $f=1$ means the program outputs “Equilibrium 
+    saturated above water table”, else program outputs “Equilibrium hydrostatic profile above 
+    water table“:
+    \begin{center}
+        \begin{tabular}{|c|c|c|}
+            \hline 
+            IOPTION & NOPT & $f$ \\
+            \hline 
+            0 & 0 & 1 \\
+            \hline
+            0 & 1 & 1 \\
+            \hline 
+            1 & 0 & 0 \\
+            \hline 
+            1 & 1 & 1 \\
+            \hline
+        \end{tabular}
+        \\
+        \medskip
+        \textit{Note}: $f \equiv$ IOPTION$\Rightarrow$NOPT  
+    \end{center}
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
      
 \end{document}
