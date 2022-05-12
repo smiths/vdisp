@@ -1,5 +1,25 @@
 module vdisp
-export lerp
+
+include("./InputParser.jl")
+using .InputParser
+
+export lerp, readInputFile
+
+# Path to input_data.dat
+INPUT_DATA_PATH = ".data/input_data.dat"
+
+function readInputFile()
+    println("Parsing data...\n")
+    inputData = InputData(INPUT_DATA_PATH)
+    println("\nParsing done!\n")
+
+    println("Problem: ", inputData.problemName)
+    println("Model: ", inputData.model)
+    println("Nodal Points: ", inputData.nodalPoints)
+    println("Soil Layer Numbers: ", inputData.soilLayerNumber)
+    println("Applied Pressure at Points: ", inputData.appliedPressureAtPoints)
+    println("Strain at Points: ", inputData.strainAtPoints)
+end
 
 function lerp(a::Tuple{Float64, Float64}, b::Tuple{Float64, Float64}, x::Float64)
     x1 = a[1]
@@ -12,7 +32,6 @@ function lerp(a::Tuple{Float64, Float64}, b::Tuple{Float64, Float64}, x::Float64
     end
     numerator = y1 * (x2-x) + y2 * (x-x1)
     denominator = x2 - x1
-    # println(numerator/denominator)
     return numerator/denominator
  end
 
