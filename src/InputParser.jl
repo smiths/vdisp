@@ -13,7 +13,12 @@ module InputParser
 export Model, Foundation, InputData
 
 # This code repeats many times in InputData constructor
-# Parses String at input[index] and returns an array A such that size(A) == items
+"""
+    parseCurrentLine(input, items, index)
+
+Parses the string and *index*-th index of *input* array. Makes sure there are *items*
+values separated by spaces in the string. 
+"""
 function parseCurrentLine(input::Array{String}, items::Int, index::Int)
     currentLine = input[index]
     # Tabs ruin splitting by space
