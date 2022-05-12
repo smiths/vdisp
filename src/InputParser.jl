@@ -6,10 +6,11 @@ module InputParser
 # this wont matter since we should never be referring to the integer 
 # values explicitly anyways
 @enum Model ConsolidationSwell LeonardFrost Schmertmann CollapsibleSoil SchmertmannElastic 
+@enum Foundation ErrorFoundation RectangularSlab LongStripFooting 
 
 # These are variables/objects visible to all modules
 # that include InputParser module
-export Model, InputData
+export Model, Foundation, InputData
 
 # This code repeats many times in InputData constructor
 # Parses String at input[index] and returns an array A such that size(A) == items
@@ -37,7 +38,7 @@ struct InputData
     problemName::String
     numProblems::Int
     model::Model
-    foundation::Bool
+    foundation::Foundation
     nodalPoints::Int
     elements::Int
     bottomPointIndex::Int
@@ -95,8 +96,12 @@ struct InputData
         modelOption = parse(Int64, dataLine1[2])
         model = Model(modelOption) # Int -> Enum conversion
         foundationOption = parse(Int64, dataLine1[3]) # Rectangular Slab or Long Strip Footing
-        # TODO: for robustness make sure foundationOption is 0 or 1
-        foundation = (foundationOption == 1) ? true : false
+        foundation = (foundationOption == 1) ? RectangularSlab : (foundationOption == 2) ? LongStripFooting : ErrorFoundation
+        if foundation == ErrorFoundation
+            println("Error: Invalid input for foundation on line $(lastLineIndex+1)")
+            println("\tExpected either 1 or 2, not $(foundationOption)")
+            return # or instead of returning we can default to foundation = RectangularSlab
+        end
         nodalPoints = parse(Int64, dataLine1[4])
         elements = nodalPoints - 1
         bottomPointIndex = parse(Int64, dataLine1[5])
