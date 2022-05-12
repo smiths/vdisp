@@ -5,8 +5,8 @@ using .InputParser
 
 export lerp, readInputFile
 
-# Path to input_data.dat
-INPUT_DATA_PATH = ".data/input_data.dat"
+# Path to input_data.dat from runtests.jl
+INPUT_DATA_PATH = "../src/.data/input_data.dat"
 
 function readInputFile()
     println("Parsing data...\n")
