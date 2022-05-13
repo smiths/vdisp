@@ -328,7 +328,7 @@ struct InputData
         heaveActiveZoneDepth = 0.0
         groundToHeaveDepth = 0.0
         if model == ConsolidationSwell
-            currentLineData = parseCurrentLine(input, 2, lastLineIndex+2)
+            currentLineData = parseCurrentLine(input, 2, lastLineIndex+1)
             if currentLineData == -1
                 return
             end

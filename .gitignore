@@ -311,4 +311,4 @@ Manifest.toml
 .vscode/
 
 # Ignore output data
-./src/.data/output_data.dat
+src/.data/output_data.dat

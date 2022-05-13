@@ -8,30 +8,15 @@ using .InputParser
 
 export lerp, readInputFile
 
-# Path to input_data.dat from runtests.jl
-INPUT_DATA_PATH = "../src/.data/input_data.dat"
-OUTPUT_DATA_PATH = "../src/.data/output_data.dat"
-
-function readInputFile()
-    println("Parsing data...\n")
-    inputData = InputData(INPUT_DATA_PATH)
-    println("\nParsing done!\n")
-
-    println("Problem: ", inputData.problemName)
-    println("Model: ", inputData.model)
-    println("Nodal Points: ", inputData.nodalPoints)
-    println("Soil Layer Numbers: ", inputData.soilLayerNumber)
-    println("Applied Pressure at Points: ", inputData.appliedPressureAtPoints)
-    println("Strain at Points: ", inputData.strainAtPoints)
-
+function readInputFile(inputPath::String, outputPath::String)
     # Instantiate OutputData object
-    outputData = OutputData(INPUT_DATA_PATH)
+    outputData = OutputData(inputPath)
     
-    f = OutputFormat.performGetModelOutput
-    g = OutputFormat.getHeader
-    h = OutputFormat.performGetFoundationOutput
+    header = OutputFormat.getHeader
+    model = OutputFormat.performGetModelOutput
+    foundation = OutputFormat.performGetFoundationOutput
 
-    OutputFormat.writeOutput([f,h,g,f,g], outputData, OUTPUT_DATA_PATH)
+    OutputFormat.writeOutput([header, model, foundation], outputData, outputPath)
 end
 
 """
