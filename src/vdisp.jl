@@ -1,5 +1,8 @@
 module vdisp
 
+include("./OutputFormat.jl")
+using .OutputFormat
+
 include("./InputParser.jl")
 using .InputParser
 
@@ -7,6 +10,7 @@ export lerp, readInputFile
 
 # Path to input_data.dat from runtests.jl
 INPUT_DATA_PATH = "../src/.data/input_data.dat"
+OUTPUT_DATA_PATH = "../src/.data/output_data.dat"
 
 function readInputFile()
     println("Parsing data...\n")
@@ -19,7 +23,17 @@ function readInputFile()
     println("Soil Layer Numbers: ", inputData.soilLayerNumber)
     println("Applied Pressure at Points: ", inputData.appliedPressureAtPoints)
     println("Strain at Points: ", inputData.strainAtPoints)
+
+    # Instantiate OutputData object
+    outputData = OutputData(INPUT_DATA_PATH)
+    
+    f = OutputFormat.performGetModelOutput
+    g = OutputFormat.getHeader
+
+    OutputFormat.writeOutput([f,f,g,f,g], outputData, OUTPUT_DATA_PATH)
 end
+
+readInputFile()
 
 """
     lerp(a, b, x)
