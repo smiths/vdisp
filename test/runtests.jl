@@ -4,8 +4,8 @@ using vdisp
 include("../src/OutputFormat.jl")
 using .OutputFormat
 
-@enum Model ConsolidationSwell LeonardFrost Schmertmann CollapsibleSoil SchmertmannElastic 
-@enum Foundation ErrorFoundation RectangularSlab LongStripFooting 
+include("../src/InputParser.jl")
+using .InputParser
 
 # Path to input and output files from runtests.jl
 INPUT_DATA_PATH = "../src/.data/input_data.dat"
@@ -24,8 +24,8 @@ OUTPUT_TEST_PATH = "../test/.testdata/test_output_1.dat"
     @test inputData.bottomPointIndex == 7
     @test inputData.soilLayers == 2
     @test inputData.dx == 0.5
-    @test inputData.model == ConsolidationSwell
-    @test inputData.foundation == RectangularSlab
+    @test inputData.model == InputParser.ConsolidationSwell
+    @test inputData.foundation == InputParser.RectangularSlab
 end
 
 @testset "Test lerp function" begin
