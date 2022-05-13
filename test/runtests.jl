@@ -1,6 +1,9 @@
 using Test
 using vdisp
 
+include("../src/OutputFormat.jl")
+using .OutputFormat
+
 @enum Model ConsolidationSwell LeonardFrost Schmertmann CollapsibleSoil SchmertmannElastic 
 @enum Foundation ErrorFoundation RectangularSlab LongStripFooting 
 
