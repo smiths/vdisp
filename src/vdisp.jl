@@ -33,8 +33,6 @@ function readInputFile()
     OutputFormat.writeOutput([f,f,g,f,g], outputData, OUTPUT_DATA_PATH)
 end
 
-readInputFile()
-
 """
     lerp(a, b, x)
 
