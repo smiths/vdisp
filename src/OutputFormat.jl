@@ -1,8 +1,12 @@
 module OutputFormat
+
 include("./InputParser.jl")
 include("./ModelBehaviour.jl")
+include("./FoundationBehaviour.jl")
+
 using .InputParser
 using .ModelBehaviour
+using .FoundationBehaviour
 
 export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader
 
@@ -27,15 +31,26 @@ function writeOutput(order::Array{Function}, outputData::OutputData, path::Strin
 end
 
 ### CONSTANT BEHAVIOUR FUNCTIONS ###
-# TODO: writeHeader, getHeaderValues
-getHeader(outputData::OutputData) = "Title: $(outputData.inputData.problemName)\nNodal Points: $(outputData.inputData.nodalPoints), Base Nodal Point Index: $(outputData.inputData.bottomPointIndex)\n"
+# Header
+function writeHeader(outputData::OutputData, path::String)
+    open(path, "a") do file
+        write(file, getHeader(outputData))
+    end
+end
+getHeader(outputData::OutputData) = "Title: $(outputData.inputData.problemName)\nNodal Points: $(outputData.inputData.nodalPoints), Base Nodal Point Index: $(outputData.inputData.bottomPointIndex)\nNumber of different soil layers: $(outputData.inputData.soilLayers)\nIncrement depth(dx): $(outputData.inputData.dx)\n"
+getHeaderValues(outputData::OutputData) = (outputData.inputData.problemName, outputData.inputData.nodalPoints, outputData.inputData.bottomPointIndex, outputData.inputData.soilLayers, outputData.inputData.dx)
 ####################################
 
 ### CHANGING BEHAVIOUR FUNCTIONS ###
 # ModelOutputBehaviour
-performWriteModelOutput(outputData::OutputData, path::String) = ModelBehaviour.writeOutput(getModelOutBehaviour(outputData), path)
+performWriteModelOutput(outputData::OutputData, path::String) = ModelBehaviour.writeModelOutput(getModelOutBehaviour(outputData), path)
 performGetModelOutput(outputData::OutputData) = ModelBehaviour.getModelOutput(getModelOutBehaviour(outputData))
 performGetModelValue(outputData::OutputData) = ModelBehaviour.getModelValue(getModelOutBehaviour(outputData))
+
+# FoundationOutputBehaviour
+performWriteFoundationOutput(outputData::OutputData, path::String) = FoundationBehaviour.writeFoundationOutput(getFoundationOutBehaviour(outputData), path)
+performGetFoundationOutput(outputData::OutputData) = FoundationBehaviour.getFoundationOutput(getFoundationOutBehaviour(outputData))
+performGetFoundationValue(outputData::OutputData) = FoundationBehaviour.getFoundationValue(getFoundationOutBehaviour(outputData))
 ####################################
 
 
@@ -56,6 +71,16 @@ function getModelOutBehaviour(outputData::OutputData)::ModelBehaviour.ModelOutpu
         modelOutBehaviour = ModelBehaviour.CollapsibleSoilBehaviour()
     end
     return modelOutBehaviour
+end
+# Get FoundationOutputBehaviour instance
+function getFoundationOutBehaviour(outputData::OutputData)
+    foundationOutBehaviour = 0
+    if outputData.inputData.foundation == InputParser.RectangularSlab
+        foundationOutBehaviour = FoundationBehaviour.RectangularSlabBehaviour()
+    else
+        foundationOutBehaviour = FoundationBehaviour.LongStripFootingBehaviour()
+    end
+    return foundationOutBehaviour
 end
 ####################################
 

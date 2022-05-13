@@ -29,8 +29,9 @@ function readInputFile()
     
     f = OutputFormat.performGetModelOutput
     g = OutputFormat.getHeader
+    h = OutputFormat.performGetFoundationOutput
 
-    OutputFormat.writeOutput([f,f,g,f,g], outputData, OUTPUT_DATA_PATH)
+    OutputFormat.writeOutput([f,h,g,f,g], outputData, OUTPUT_DATA_PATH)
 end
 
 """

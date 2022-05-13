@@ -7,7 +7,7 @@ export ModelOutputBehaviour, LeonardFrostBehaviour, ConsolidationSwellBehaviour,
 ###  ModelOutputBehaviour Interface  ############
 abstract type ModelOutputBehaviour end 
 #  ModelOutputBehaviour functions
-function writeOutput(modelOutBehaviour::ModelOutputBehaviour, path::String) 
+function writeModelOutput(modelOutBehaviour::ModelOutputBehaviour, path::String) 
     # Open file at path in append mode, write the output of 
     # the instance of ModelOutputBehaviour
     open(path, "a") do file
