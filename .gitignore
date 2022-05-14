@@ -309,3 +309,6 @@ Manifest.toml
 
 # VS Code Configuration
 .vscode/
+
+# Ignore output data
+src/.data/output_data.dat
