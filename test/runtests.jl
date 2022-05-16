@@ -74,10 +74,3 @@ println("Testing input file 2:")
     @test inputData.pressureDilatometerB[1] == 15.00
     @test inputData.conePenetrationResistance[2] == 100.00
 end
-
-@testset "Test lerp function" begin
-    @test lerp((1.0,1.0),(5.0,5.0),3.0) == 3.0
-    @test lerp((1.0,1.0),(5.0,5.0),5.0) == 5.0
-    @test lerp((0.0,0.0),(0.0,0.0),0.0) == 0.0
-    @test lerp((1.0,2.0),(10.0,20.0),5.0) == 10.0
-end
