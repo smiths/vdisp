@@ -258,9 +258,9 @@ struct InputData
         end
 
         # Read M QC(M)
-        # Note: conePenetrationResistance already initialized above
+        conePenetrationResistance = zeros(Float64, soilLayers+1)
         if model == Schmertmann
-            for i in 1:soilLayers
+            for i in 1:soilLayers+1
                 currentLineData = parseCurrentLine(input, 2, lastLineIndex+i)
                 if currentLineData == -1
                     return
