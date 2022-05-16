@@ -19,3 +19,5 @@ function readInputFile(inputPath::String, outputPath::String)
 
     OutputFormat.writeOutput([header, model, foundation, displacementInfo, equilibriumInfo], outputData, outputPath)
 end
+
+end # module
