@@ -2,7 +2,6 @@ module vdisp
 
 include("./OutputFormat.jl")
 using .OutputFormat
-
 include("./InputParser.jl")
 using .InputParser
 
@@ -15,8 +14,9 @@ function readInputFile(inputPath::String, outputPath::String)
     header = OutputFormat.getHeader
     model = OutputFormat.performGetModelOutput
     foundation = OutputFormat.performGetFoundationOutput
+    displacementInfo = OutputFormat.performGetDisplacementOutput
 
-    OutputFormat.writeOutput([header, model, foundation], outputData, outputPath)
+    OutputFormat.writeOutput([header, model, foundation, displacementInfo], outputData, outputPath)
 end
 
 """

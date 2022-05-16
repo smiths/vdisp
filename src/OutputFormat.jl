@@ -3,10 +3,12 @@ module OutputFormat
 include("./InputParser.jl")
 include("./ModelBehaviour.jl")
 include("./FoundationBehaviour.jl")
+include("./DisplacementBehaviour.jl")
 
 using .InputParser
 using .ModelBehaviour
 using .FoundationBehaviour
+using .DisplacementBehaviour
 
 export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader
 
@@ -51,6 +53,11 @@ performGetModelValue(outputData::OutputData) = ModelBehaviour.getModelValue(getM
 performWriteFoundationOutput(outputData::OutputData, path::String) = FoundationBehaviour.writeFoundationOutput(getFoundationOutBehaviour(outputData), path)
 performGetFoundationOutput(outputData::OutputData) = FoundationBehaviour.getFoundationOutput(getFoundationOutBehaviour(outputData))
 performGetFoundationValue(outputData::OutputData) = FoundationBehaviour.getFoundationValue(getFoundationOutBehaviour(outputData))
+
+# DisplacementInfoBehaviour
+performWriteDisplacementOutput(outputData::OutputData, path::String) = DisplacementBehaviour.writeDisplacementOutput(getDisplacementInfoBehaviour(outputData), path)
+performGetDisplacementOutput(outputData::OutputData) = DisplacementBehaviour.getDisplacementOutput(getDisplacementInfoBehaviour(outputData))
+performGetDisplacementValue(outputData::OutputData) = DisplacementBehaviour.getDisplacementValue(getDisplacementInfoBehaviour(outputData))
 ####################################
 
 
@@ -81,6 +88,16 @@ function getFoundationOutBehaviour(outputData::OutputData)
         foundationOutBehaviour = FoundationBehaviour.LongStripFootingBehaviour()
     end
     return foundationOutBehaviour
+end
+# Get DisplacementInfoBehaviour instance
+function getDisplacementInfoBehaviour(outputData::OutputData)
+    displacementInfoBehaviour = 0
+    if outputData.inputData.outputIncrements == true
+        displacementInfoBehaviour = DisplacementBehaviour.DisplacementEachDepthBehaviour()
+    else
+        displacementInfoBehaviour = DisplacementBehaviour.TotalDisplacementBehaviour()
+    end
+    return displacementInfoBehaviour
 end
 ####################################
 
