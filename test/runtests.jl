@@ -1,7 +1,7 @@
 using Test
 using vdisp
 
-include("../src/OutputFormat.jl")
+include("../src/OutputFormat/OutputFormat.jl")
 using .OutputFormat
 
 include("../src/InputParser.jl")

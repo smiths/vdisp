@@ -1,8 +1,5 @@
 module DisplacementBehaviour
 
-include("./InputParser.jl")
-using .InputParser
-
 export DisplacementInfoBehaviour, TotalDisplacementBehaviour, DisplacementEachDepthBehaviour, writeDisplacementOutput, getDisplacementOutput, getDisplacementValue
 
 ### DisplacementInfoBehaviour interface #########

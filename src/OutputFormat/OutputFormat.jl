@@ -1,14 +1,16 @@
 module OutputFormat
 
-include("./InputParser.jl")
+include("../InputParser.jl")
 include("./ModelBehaviour.jl")
 include("./FoundationBehaviour.jl")
 include("./DisplacementBehaviour.jl")
+include("./EquilibriumBehaviour.jl")
 
 using .InputParser
 using .ModelBehaviour
 using .FoundationBehaviour
 using .DisplacementBehaviour
+using .EquilibriumBehaviour
 
 export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader
 
@@ -27,6 +29,9 @@ function writeOutput(order::Array{Function}, outputData::OutputData, path::Strin
         i = 1
         for f in order
             write(file, f(outputData))
+            # Seperate each section with empty line
+            # We can make this an option that user can toggle
+            write(file, "\n") 
             i += 1
         end
     end
@@ -58,6 +63,11 @@ performGetFoundationValue(outputData::OutputData) = FoundationBehaviour.getFound
 performWriteDisplacementOutput(outputData::OutputData, path::String) = DisplacementBehaviour.writeDisplacementOutput(getDisplacementInfoBehaviour(outputData), path)
 performGetDisplacementOutput(outputData::OutputData) = DisplacementBehaviour.getDisplacementOutput(getDisplacementInfoBehaviour(outputData))
 performGetDisplacementValue(outputData::OutputData) = DisplacementBehaviour.getDisplacementValue(getDisplacementInfoBehaviour(outputData))
+
+# EquilibriumInfoBehaviour
+performWriteEquilibriumOutput(outputData::OutputData, path::String) =  EquilibriumBehaviour.writeEquilibriumOutput(getEquilibriumInfoBehaviour(outputData), path)
+performGetEquilibriumOutput(outputData::OutputData) = EquilibriumBehaviour.getEquilibriumOutput(getEquilibriumInfoBehaviour(outputData))
+performGetEquilibriumValue(outputData::OutputData) = EquilibriumBehaviour.getEquilibriumValue(getEquilibriumInfoBehaviour(outputData))
 ####################################
 
 
@@ -98,6 +108,17 @@ function getDisplacementInfoBehaviour(outputData::OutputData)
         displacementInfoBehaviour = DisplacementBehaviour.TotalDisplacementBehaviour()
     end
     return displacementInfoBehaviour
+end
+# Get EquilibriumInfoBehaviour instance
+function getEquilibriumInfoBehaviour(outputData::OutputData)
+    # !equilibriumMoistureProfile or NOpt = Saturated
+    # Convert from enum to boolean. NOpt here is called leonardFrostModel.
+    leonardFrostModel = (Int(outputData.inputData.model) == 1) ? true : false
+    if !outputData.inputData.equilibriumMoistureProfile || leonardFrostModel
+        return EquilibriumBehaviour.EquilibriumSaturatedBehaviour()
+    else
+        return EquilibriumBehaviour.EquilibriumHydrostaticBehaviour()
+    end
 end
 ####################################
 

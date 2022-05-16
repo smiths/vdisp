@@ -1,5 +1,6 @@
 module ModelBehaviour
-include("InputParser.jl")
+
+include("../InputParser.jl")
 using .InputParser
 
 export ModelOutputBehaviour, LeonardFrostBehaviour, ConsolidationSwellBehaviour, SchmertmannBehaviour, CollapsibleSoilBehaviour, SchmertmannElasticBehaviour, writeOutput, getModelOutput, getModelValue
@@ -30,7 +31,7 @@ struct ConsolidationSwellBehaviour <: ModelOutputBehaviour
     ConsolidationSwellBehaviour() = new(InputParser.ConsolidationSwell)
 end
 # ConsolidationSwellBehaviour functions
-getOutput(behaviour::ConsolidationSwellBehaviour) = "Model: " * string(behaviour.model)
+getOutput(behaviour::ConsolidationSwellBehaviour) = "Model: Consolidation Swell"
 getValue(behaviour::ConsolidationSwellBehaviour) = behaviour.model
 ################################################
 
@@ -40,7 +41,7 @@ struct LeonardFrostBehaviour <: ModelOutputBehaviour
     LeonardFrostBehaviour() = new(InputParser.LeonardFrost)
 end
 # LeonardFrostBehaviour functions
-getOutput(behaviour::LeonardFrostBehaviour) = "Model: " * string(behaviour.model)
+getOutput(behaviour::LeonardFrostBehaviour) = "Model: Leonard and Frost"
 getValue(behaviour::LeonardFrostBehaviour) = behaviour.model
 ################################################
 
@@ -50,7 +51,7 @@ struct SchmertmannBehaviour <: ModelOutputBehaviour
     SchmertmannBehaviour() = new(InputParser.Schmertmann)
 end
 # SchmertmannBehaviour functions
-getOutput(behaviour::SchmertmannBehaviour) = "Model: " * string(behaviour.model)
+getOutput(behaviour::SchmertmannBehaviour) = "Model: Schmertmann"
 getValue(behaviour::SchmertmannBehaviour) = behaviour.model
 ################################################
 
@@ -60,7 +61,7 @@ struct SchmertmannElasticBehaviour <: ModelOutputBehaviour
     SchmertmannElasticBehaviour() = new(InputParser.SchmertmannElastic)
 end
 # SchmertmannElasticBehaviour functions
-getOutput(behaviour::SchmertmannElasticBehaviour) = "Model: " * string(behaviour.model)
+getOutput(behaviour::SchmertmannElasticBehaviour) = "Model: Schmertmann"
 getValue(behaviour::SchmertmannElasticBehaviour) = behaviour.model
 ################################################
 
@@ -70,7 +71,7 @@ struct CollapsibleSoilBehaviour <: ModelOutputBehaviour
     CollapsibleSoilBehaviour() = new(InputParser.CollapsibleSoil)
 end
 # CollapsibleSoilBehaviour functions
-getOutput(behaviour::CollapsibleSoilBehaviour) = "Model: " * string(behaviour.model)
+getOutput(behaviour::CollapsibleSoilBehaviour) = "Model: Collapsible Soil"
 getValue(behaviour::CollapsibleSoilBehaviour) = behaviour.model
 ################################################
 

@@ -1,6 +1,6 @@
 module FoundationBehaviour
 
-include("./InputParser.jl")
+include("../InputParser.jl")
 using .InputParser
 
 export FoundationOutputBehaviour, writeFoundationOutput, getFoundationOutput, getFoundationValue, RectangularSlabBehaviour, LongStripFootingBehaviour
@@ -26,7 +26,7 @@ struct RectangularSlabBehaviour <: FoundationOutputBehaviour
     foundation::Foundation
     RectangularSlabBehaviour()=new(InputParser.RectangularSlab)
 end
-getOutput(behaviour::RectangularSlabBehaviour) = "Foundation type: "*string(behaviour.foundation)
+getOutput(behaviour::RectangularSlabBehaviour) = "Foundation Type: Rectangular Slab"
 getValue(behaviour::RectangularSlabBehaviour) = behaviour.foundation
 ####################################################
 
@@ -35,7 +35,7 @@ struct LongStripFootingBehaviour <: FoundationOutputBehaviour
     foundation::Foundation
     LongStripFootingBehaviour()=new(InputParser.LongStripFooting)
 end
-getOutput(behaviour::LongStripFootingBehaviour) = "Foundation type: "*string(behaviour.foundation)
+getOutput(behaviour::LongStripFootingBehaviour) = "Foundation Type: Long Strip Footing"
 getValue(behaviour::LongStripFootingBehaviour) = behaviour.foundation
 ####################################################
 
