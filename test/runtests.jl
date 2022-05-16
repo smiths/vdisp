@@ -113,7 +113,7 @@ println("Testing input file 4:")
     @test inputData.bottomPointIndex == 7
     @test inputData.soilLayers == 2
     @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.Schmertmann)
+    @test string(inputData.model) == string(InputParser.CollapsibleSoil)
     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
     @test inputData.soilLayerNumber[1] == 1
     @test inputData.soilLayerNumber[7] == 1
