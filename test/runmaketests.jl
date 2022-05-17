@@ -8,8 +8,8 @@ include("../src/InputParser.jl")
 using .InputParser
 
 # Paths to test input files from runtests.jl
-INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:4]
-OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:4]
+INPUT_TEST_PATHS = ["./test/testdata/test_input_$x.dat" for x in 1:4]
+OUTPUT_TEST_PATHS = ["./test/testdata/test_output_$x.dat" for x in 1:4]
 
 println("Testing input file 1:")
 @testset "Test input file 1" begin

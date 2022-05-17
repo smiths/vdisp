@@ -1,5 +1,5 @@
 test: FORCE
 	cd test
-	julia --project="." test/runtests.jl
+	julia --project="." test/runmaketests.jl
 
 FORCE: 
