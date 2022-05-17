@@ -5,12 +5,14 @@ include("./ModelBehaviour.jl")
 include("./FoundationBehaviour.jl")
 include("./DisplacementBehaviour.jl")
 include("./EquilibriumBehaviour.jl")
+include("./ForcePointBehaviour.jl")
 
 using .InputParser
 using .ModelBehaviour
 using .FoundationBehaviour
 using .DisplacementBehaviour
 using .EquilibriumBehaviour
+using .ForcePointBehaviour
 
 export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader
 
@@ -26,13 +28,12 @@ end
 function writeOutput(order::Array{Function}, outputData::OutputData, path::String)
     # w - overwrite file contents 
     open(path, "w") do file
-        i = 1
         for f in order
             write(file, f(outputData))
+
             # Seperate each section with empty line
             # We can make this an option that user can toggle
             write(file, "\n") 
-            i += 1
         end
     end
 end
@@ -68,6 +69,11 @@ performGetDisplacementValue(outputData::OutputData) = DisplacementBehaviour.getD
 performWriteEquilibriumOutput(outputData::OutputData, path::String) =  EquilibriumBehaviour.writeEquilibriumOutput(getEquilibriumInfoBehaviour(outputData), path)
 performGetEquilibriumOutput(outputData::OutputData) = EquilibriumBehaviour.getEquilibriumOutput(getEquilibriumInfoBehaviour(outputData))
 performGetEquilibriumValue(outputData::OutputData) = EquilibriumBehaviour.getEquilibriumValue(getEquilibriumInfoBehaviour(outputData))
+
+# ForcePointBehaviour
+performWriteForcePointOutput(outputData::OutputData, path::String) = ForcePointBehaviour.writeForcePointOutput(getForcePointOutputBehaviour(outputData), path)
+performGetForcePointOutput(outputData::OutputData) = ForcePointBehaviour.getForcePointOutput(getForcePointOutputBehaviour(outputData))
+performGetForcePointValue(outputData::OutputData) = ForcePointBehaviour.getForcePointValue(getForcePointOutputBehaviour(outputData))
 ####################################
 
 
@@ -119,6 +125,15 @@ function getEquilibriumInfoBehaviour(outputData::OutputData)
     else
         return EquilibriumBehaviour.EquilibriumHydrostaticBehaviour()
     end
+end
+# Get ForcePointOutputBehaviour instance
+function getForcePointOutputBehaviour(outputData::OutputData)
+    center = outputData.inputData.center
+    if center 
+        return CenterForceBehaviour()
+    end
+    foundation = outputData.inputData.foundation
+    return EdgeForceBehaviour(foundation)
 end
 ####################################
 

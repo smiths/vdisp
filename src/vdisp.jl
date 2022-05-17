@@ -5,7 +5,7 @@ using .OutputFormat
 include("./InputParser.jl")
 using .InputParser
 
-export lerp, readInputFile
+export readInputFile
 
 function readInputFile(inputPath::String, outputPath::String)
     # Instantiate OutputData object
@@ -16,8 +16,9 @@ function readInputFile(inputPath::String, outputPath::String)
     foundation = OutputFormat.performGetFoundationOutput
     displacementInfo = OutputFormat.performGetDisplacementOutput
     equilibriumInfo = OutputFormat.performGetEquilibriumOutput
+    forcePointOut = OutputFormat.performGetForcePointOutput
 
-    OutputFormat.writeOutput([header, model, foundation, displacementInfo, equilibriumInfo], outputData, outputPath)
+    OutputFormat.writeOutput([header, model, foundation, displacementInfo, equilibriumInfo, forcePointOut], outputData, outputPath)
 end
 
 end # module
