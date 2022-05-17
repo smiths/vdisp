@@ -22,21 +22,16 @@ end
 
 ### ConsolidationSwellCalculationBehaviour "class" ####
 struct ConsolidationSwellCalculationBehaviour <: CalculationOutputBehaviour
-    #TODO: instead of passing in inputData, pass
-    # in required data only
-    inputData::InputData
-    ConsolidationSwellCalculationBehaviour(inputData::InputData) = new(inputData)
+    nodalPoints::Int
+    ConsolidationSwellCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
 end
 function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
-    # Temp print statement
-    println("Calculating Consolidation Swell Model: ")
     # getValue does the calculations
     t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3:$(t[3])"
+    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
 end
 function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
-    inData = behaviour.inputData
-    x = inData.nodalPoints
+    x = behaviour.nodalPoints
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -46,21 +41,16 @@ end
 
 ### LeonardFrostCalculationBehaviour "class" ####
 struct LeonardFrostCalculationBehaviour <: CalculationOutputBehaviour
-    #TODO: instead of passing in inputData, pass
-    # in required data only
-    inputData::InputData
-    LeonardFrostCalculationBehaviour(inputData::InputData) = new(inputData)
+    nodalPoints::Int
+    LeonardFrostCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
 end
 function getOutput(behaviour::LeonardFrostCalculationBehaviour)
-    # Temp print statement
-    println("Calculating Leonard and Frost Model: ")
     # getValue does the calculations
     t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3:$(t[3])"
+    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
 end
 function getValue(behaviour::LeonardFrostCalculationBehaviour)
-    inData = behaviour.inputData
-    x = inData.nodalPoints
+     x = behaviour.nodalPoints
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -70,21 +60,16 @@ end
 
 ### SchmertmannCalculationBehaviour "class" ####
 struct SchmertmannCalculationBehaviour <: CalculationOutputBehaviour
-    #TODO: instead of passing in inputData, pass
-    # in required data only
-    inputData::InputData
-    SchmertmannCalculationBehaviour(inputData::InputData) = new(inputData)
+    nodalPoints::Int
+    SchmertmannCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
 end
 function getOutput(behaviour::SchmertmannCalculationBehaviour)
-    # Temp print statement
-    println("Calculating Schmertmann Model: ")
     # getValue does the calculations
     t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3:$(t[3])"
+    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
 end
 function getValue(behaviour::SchmertmannCalculationBehaviour)
-    inData = behaviour.inputData
-    x = inData.nodalPoints
+     x = behaviour.nodalPoints
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -94,21 +79,16 @@ end
 
 ### CollapsibleSoilCalculationBehaviour "class" ####
 struct CollapsibleSoilCalculationBehaviour <: CalculationOutputBehaviour
-    #TODO: instead of passing in inputData, pass
-    # in required data only
-    inputData::InputData
-    CollapsibleSoilCalculationBehaviour(inputData::InputData) = new(inputData)
+    nodalPoints::Int
+    CollapsibleSoilCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
 end
 function getOutput(behaviour::CollapsibleSoilCalculationBehaviour)
-    # Temp print statement
-    println("Calculating Collapsible Soil Model: ")
     # getValue does the calculations
     t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3:$(t[3])"
+    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
 end
 function getValue(behaviour::CollapsibleSoilCalculationBehaviour)
-    inData = behaviour.inputData
-    x = inData.nodalPoints
+     x = behaviour.nodalPoints
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -118,21 +98,16 @@ end
 
 ### SchmertmannElasticCalculationBehaviour "class" ####
 struct SchmertmannElasticCalculationBehaviour <: CalculationOutputBehaviour
-    #TODO: instead of passing in inputData, pass
-    # in required data only
-    inputData::InputData
-    SchmertmannElasticCalculationBehaviour(inputData::InputData) = new(inputData)
+    nodalPoints::Int
+    SchmertmannElasticCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
 end
 function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
-    # Temp print statement
-    println("Calculating Schmertmann Elastic Model: ")
     # getValue does the calculations
     t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3:$(t[3])"
+    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
 end
 function getValue(behaviour::SchmertmannElasticCalculationBehaviour)
-    inData = behaviour.inputData
-    x = inData.nodalPoints
+     x = behaviour.nodalPoints
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
