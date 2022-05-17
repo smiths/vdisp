@@ -1,0 +1,57 @@
+\documentclass[11pt,fleqn]{article}
+
+\usepackage{blindtext}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+\urlstyle{same}
+
+\newcommand{\indentpar}{\phantom{=}}
+\newcommand{\bli}{\begin{itemize}}
+\newcommand{\eli}{\end{itemize}}
+
+\begin{document}
+
+    %% Title Page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      
+      \title{Verification and Validation Plan for VDisp Software}
+      \date{May 16th, 2022}
+      \author{Emil Soleymani, Dr.~Spencer Smith\\ McMaster University}
+      \maketitle
+
+      \medskip
+
+      % Description
+      \indentpar In order to verify the validity of the \emph{VDisp} software, we came
+      up with various Unit and System tests. The Settlements Analysis textbook (linked in \emph{README.md} 
+      file) outlined four very good sample input files, with their expected outputs 
+      already displayed. These were the perfect starting points in terms of system tests, however 
+      they did not cover many possible input combinations. Thus, we had to come up with many of 
+      our own system tests. This document outlines the details of the Unit and System tests
+      used to verify the \emph{VDisp} software.
+      
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    \pagebreak
+
+    %% System Tests %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \section*{System Tests}
+    \indentpar We explain the system tests used in the validation and verification
+    of the \emph{VDisp} software below.
+    \subsection*{Test Input Files from Appendix F}
+    \indentpar In Appendix F of the Settlements Analysis Textbook, under section (F-3) 
+    on p.171, there are 4 sample input files along with their respective expected outputs.
+    We copied these input files, storing them in the directory located at 
+    \href{https://github.com/smiths/vdisp/tree/main/test/.testdata}{\emph{“vdisp/test/.testdata”}}.
+    We made our \emph{InputParser} module parse each of these files, making sure no errors arose and 
+    that each piece of data was parsed correctly. The test cases can be found in the 
+    \href{https://github.com/smiths/vdisp/tree/main/test/runtests.jl}{\emph{runtests.jl}} file.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
