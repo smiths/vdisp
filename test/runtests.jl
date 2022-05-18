@@ -10,14 +10,6 @@ using .InputParser
 # Paths to test input files from runtests.jl
 INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:4]
 OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:4]
-if !isempty(ARGS)
-    if ARGS[1] == "maketest"
-        INPUT_TEST_PATHS = ["./test/testdata/test_input_$x.dat" for x in 1:4]
-        OUTPUT_TEST_PATHS = ["./test/testdata/test_output_$x.dat" for x in 1:4]
-    else
-        println("Invalid command line argument: $(ARGS[1])!")
-    end
-end
 
 println("Testing input file 1:")
 @testset "Test input file 1" begin
