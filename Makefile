@@ -12,4 +12,15 @@ FORCE:
 cleanOutput: 
 	cd src/.data && rm output*.dat
 
-clean: cleanOutput
+cleanMIS:
+	cd docs/Design/MIS && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
+
+cleanMG:
+	cd docs/Design/MG && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
+
+cleanMisc:
+	cd Miscellaneous && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
+
+cleanDocs: cleanMisc cleanMG cleanMIS
+
+clean: cleanOutput cleanDocs
