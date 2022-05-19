@@ -1,0 +1,441 @@
+\documentclass[12pt, titlepage]{article}
+
+\usepackage{amsmath, mathtools}
+
+\usepackage[round]{natbib}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{colortbl}
+\usepackage{xr}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{xfrac}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage[section]{placeins}
+\usepackage{caption}
+\usepackage{fullpage}
+
+\hypersetup{
+colorlinks=true,       % false: boxed links; true: colored links
+linkcolor=red,          % color of internal links (change box color with linkbordercolor)
+citecolor=blue,      % color of links to bibliography
+filecolor=magenta,  % color of file links
+urlcolor=cyan          % color of external links
+}
+
+\usepackage{array}
+
+\begin{document}
+
+\title{Module Interface Specification for VDisp}
+\author{Emil Soleymani, Dr.~Spencer Smith}
+\date{\today}
+\maketitle
+
+\section{Revision History}
+
+\begin{tabularx}{\textwidth}{p{3cm}p{2cm}X}
+\toprule {\bf Date} & {\bf Version} & {\bf Notes}\\
+\midrule
+May 18, 2022 & 1.0 & Initial Draft\\
+\bottomrule
+\end{tabularx}
+
+~\newpage
+
+\section{Symbols, Abbreviations, and Acronyms}
+\emph{\# TODO}
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\pagenumbering{arabic}
+
+\section{Introduction}
+
+The following document details the Module Interface Specifications for \emph{VDisp}
+
+Complementary documents include the System Requirement Specifications
+and Module Guide.  The full documentation and implementation can be
+found at \url{...}.  
+
+\section{Notation}
+
+
+The structure of the MIS for modules comes from \citet{HoffmanAndStrooper1995},
+with the addition that template modules have been adapted from
+\cite{GhezziEtAl2003}.  The mathematical notation comes from Chapter 3 of
+\citet{HoffmanAndStrooper1995}.  For instance, the symbol := is used for a
+multiple assignment statement and conditional rules follow the form $(c_1
+\Rightarrow r_1 | c_2 \Rightarrow r_2 | ... | c_n \Rightarrow r_n )$.
+
+The following table summarizes the primitive data types used by VDisp. 
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\noindent 
+\begin{tabular}{l l p{7.5cm}} 
+\toprule 
+\textbf{Data Type} & \textbf{Notation} & \textbf{Description}\\ 
+\midrule
+character & char & a single symbol or digit\\
+integer & $\mathbb{Z}$ & a number without a fractional component in (-$\infty$, $\infty$) \\
+natural number & $\mathbb{N}$ & a number without a fractional component in [1, $\infty$) \\
+real & $\mathbb{R}$ & any number in (-$\infty$, $\infty$)\\
+\bottomrule
+\end{tabular} 
+\end{center}
+
+\noindent
+The specification of VDisp uses some derived data types: sequences, strings, and
+tuples. Sequences are lists filled with elements of the same data type. Strings
+are sequences of characters. Tuples contain a list of values, potentially of
+different types. In addition, VDisp uses functions, which
+are defined by the data types of their inputs and outputs. Local functions are
+described by giving their type signature followed by their specification.
+
+\section{Module Decomposition}
+
+The following table is taken directly from the Module Guide document for this project.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{p{0.3\textwidth} p{0.6\textwidth}}
+\toprule
+\textbf{Level 1} & \textbf{Level 2}\\
+\midrule
+
+{Hardware-Hiding Module} & ~ \\
+\midrule
+
+\multirow{5}{0.3\textwidth}{Behaviour-Hiding Module} & Input Parameters Module\\
+& Output Format Module\\
+& Equation Module\\
+& Control Module\\
+& Display Module \\
+\midrule
+
+{Software-Decision Module} & Plotting Module\\
+\bottomrule
+
+\end{tabular}
+\caption{Module Hierarchy}
+\label{TblMH}
+\end{table}
+  
+\newpage
+~\newpage
+
+\section{MIS of Input Parameters Module} \label{InputParametersModule} 
+
+\subsection{Module}
+InputFormat
+\subsection{Uses}
+None
+\subsection{Syntax}
+
+\subsubsection{Exported Types}
+InputData\\
+Model \\
+Foundation
+\subsubsection{Exported Access Programs}
+
+\emph{\# TODO: Add exceptions}
+\begin{center}
+\begin{tabular}{p{2cm} p{4cm} p{4cm} p{2cm}}
+\hline
+\textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
+\hline
+InputData & String & InputData & none \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Semantics}
+
+\subsubsection{State Variables}
+
+\emph{TODO: Copy these over from SRS once made}
+
+\subsubsection{Environment Variables}
+
+inputFile: String[] \emph{\#f[i] is the ith string in text file f}
+
+\subsubsection{Assumptions}
+
+\emph{\# TODO: comments in input file are denoted with a "\#"}
+\begin{itemize}
+  \item Input file is in correct file format
+  \item Input file will be fully parsed, with its corresponding values 
+  stored properly in an InputData instance before any attempts to access 
+  them
+\end{itemize}
+
+\subsubsection{Access Routine Semantics}
+
+\noindent InputData(s):
+\begin{itemize}
+\item transition: 
+The filename $s$ is first associated with input file $f$, which is
+used to modify state variables using the following procedural specification:
+  \begin{enumerate}
+    \item Read data sequentially from $f$ to populate the state variables
+    from \emph{\# TODO: insert requirement here}
+    \item Calculate the derived quantities (all other state variables) as follows:
+      \begin{itemize}
+        \item \emph{\# TODO: list derived values}
+        \item \emph{e.x. model:Model is derived from modelOutput:Int}
+      \end{itemize}
+    \item \emph{\# TODO: Come up with constraints on variables (e.x $nodalPoints > 0$, 
+    $0.5 \le poissoinsRatio \le 1$) then make local function verifyParams()}
+  \end{enumerate}
+\item output: $out := $ inputData:InputData where inputData has parameters specified from file $f$ 
+\item exception: $exc := $ a file named $s$ cannot be found OR the format of file $f$ is incorrect 
+$\Rightarrow$ FileError
+\end{itemize}
+
+\subsubsection{Local Functions}
+
+$\text{validFile}(S): String \rightarrow \mathbb{B}$
+\begin{itemize}
+  \item output: $out := true$ iff file $S$ is in valid format
+  \item exception: $exc := $ a file named $s$ cannot be found OR the format of file $f$ is incorrect 
+  $\Rightarrow$ FileError
+\end{itemize}
+
+\noindent $\text{verifyParams}(inputData): \text{InputData} \rightarrow \mathbb{B}$
+\begin{itemize}
+  \item output: $out := $ none
+  \item exception: $exc := $ 
+  \begin{align*}
+  \neg(inputData.nodalPoints > 0) &\Rightarrow \text{badNodalPoints} \\
+  \neg(0 \le inputData.modelOption \le 4) &\Rightarrow \text{badModelOption} \\
+  \emph{etc...} \\
+  \end{align*}
+\end{itemize}
+
+\subsection{Considerations}
+The value of each state variable can be accessed through its name 
+(getter). An access program is available for each state variable. 
+There are no setters for the state variables, since the values will 
+be set \emph{(and checked)} by the InputData constructor and not changed
+for the life of the InputData instance. 
+
+\pagebreak
+\section{MIS of Control Module} \label{ControlModule} 
+
+\subsection{Module}
+main
+\subsection{Uses}
+InputFormat, OutputFormat
+\subsection{Syntax}
+
+\subsubsection{Exported Constants}
+
+\subsubsection{Exported Access Programs}
+
+\begin{center}
+\begin{tabular}{p{2cm} p{4cm} p{4cm} p{2cm}}
+\hline
+\textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
+\hline
+main & - & - & - \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Semantics}
+
+\subsubsection{State Variables}
+None.
+
+\subsubsection{Access Routine Semantics}
+
+\noindent main():
+\begin{itemize}
+\item transition: Modify state of InputFormat module and the 
+environment variables for the \emph{Plot?} and OutputFormat 
+modules by following these steps:
+  \begin{itemize}
+    \item Get (inputFile:String) and (outputFile:string) from user
+    \item \emph{\# TODO: List steps}
+  \end{itemize}
+\end{itemize}
+
+\pagebreak
+\section{MIS of Output Format Module} \label{OutputFormatModule} 
+
+\subsection{Module}
+OutputFormat
+\subsection{Uses}
+InputFormat, Equation \emph{\# TODO: Not specified yet}
+\subsection{Syntax}
+
+\subsubsection{Exported Types}
+OutputData
+\subsubsection{Exported Access Programs}
+% \begin{tabular}{p{4cm} p{5cm} p{2cm} p{3.5cm}}
+\begin{center}
+\begin{tabular}{p{0.25\textwidth} p{0.25\textwidth} p{0.15\textwidth} p{0.2\textwidth}}
+\hline
+\textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
+\hline
+OutputData & String & OutputData & FileError \\
+writeOutput & OutputData,String, Function[] & None & TODO \\
+writeHeader & OutputData,String & None & TODO \\
+.... & .... & .... & .... \\
+performWriteModel Output & OutputData,String & None & TODO \\
+.... & .... & .... & .... \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Semantics}
+
+\subsubsection{State Variables}
+inputData:InputData
+
+\subsubsection{Environment Variables}
+outputFile:string
+\subsubsection{Access Routine Semantics}
+
+\noindent OutputData(s):
+\begin{itemize}
+\item transition: this.inputData := InputData(s)
+\item output: $out :=  $ this
+\end{itemize}
+
+\noindent writeOutput(outputData, s, funcs):
+\begin{itemize}
+\item transition: The filename $s$ is first associated with output file $out$, which is
+used to write state variables using the following procedural specification:
+  \begin{enumerate}
+    \item Clear any existing contents of file $out$
+    \item For each function $f$ in funcs
+      \begin{itemize}
+        \item Call function $f$, passing in outputData as argument
+        \item Write return value of $f(\text{outputData})$ to file $out$
+      \end{itemize}
+  \end{enumerate}
+\end{itemize}
+
+\noindent writeHeader(outputData, s):
+\begin{itemize}
+  \item transition: The filename $s$ is first associated with output file $out$, which is
+  used to write state variables using the following procedural specification:
+    \begin{enumerate}
+      \item Append “Title: “$\|$outputData.inputData.problemName to file $out$
+      \item Append “Nodal Points: “$\|$outputData.inputData.nodalPoints to file $out$
+      \item Append “Base Nodal Point Index: “$\|$outputData.inputData.bottomPointIndex to file $out$
+      \item Append “Number of Different Soil Layers: “$\|$outputData.inputData.soilLayers to file $out$
+      \item Append “Increment Depth: “$\|$outputData.inputData.dx to file $out$
+    \end{enumerate}
+  \end{itemize}
+
+\medskip
+\emph{\# TODO: Specify rest of the functions}
+
+\subsubsection{Local Functions}
+None.
+
+\subsection{Considerations}
+$x \| y$ denotes the concatenation of strings $x$ and $y$
+
+\pagebreak
+\section{MIS of Module Name} \label{Module} 
+
+\subsection{Module}
+
+\subsection{Uses}
+
+\subsection{Syntax}
+
+\subsubsection{Exported Constants}
+
+\subsubsection{Exported Access Programs}
+
+\begin{center}
+\begin{tabular}{p{2cm} p{4cm} p{4cm} p{2cm}}
+\hline
+\textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
+\hline
+accessProg & - & - & - \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Semantics}
+
+\subsubsection{State Variables}
+
+Not all modules will have state variables.  State variables give the module
+  a memory.
+
+\subsubsection{Environment Variables}
+
+This section is not necessary for all modules.  Its purpose is to capture
+  when the module has external interaction with the environment, such as for a
+  device driver, screen interface, keyboard, file, etc.
+
+\subsubsection{Assumptions}
+
+Try to minimize assumptions and anticipate programmer errors via
+  exceptions, but for practical purposes assumptions are sometimes appropriate.
+
+\subsubsection{Access Routine Semantics}
+
+\noindent accessProg():
+\begin{itemize}
+\item transition: if appropriate
+\item output: 
+\item exception:  
+\end{itemize}
+
+A module without environment variables or state variables is unlikely to
+  have a state transition.  In this case a state transition can only occur if
+  the module is changing the state of another module.
+
+Modules rarely have both a transition and an output.  In most cases you
+  will have one or the other.
+
+\subsubsection{Local Functions}
+
+As appropriate: These functions are for the purpose of specification.
+  They are not necessarily something that is going to be implemented
+  explicitly.  Even if they are implemented, they are not exported; they only
+  have local scope.
+
+\newpage
+
+\bibliographystyle {plainnat}
+\bibliography {../../../refs/References}
+
+\newpage
+
+\section{Appendix} \label{Appendix}
+
+\begin{table}[h!]
+  \caption{Possible Exceptions}
+  \label{TblExceptions}
+  \centering
+  \begin{tabular}{p{0.3\textwidth} p{0.6\textwidth}}
+  \toprule
+  \textbf{Message ID} & \textbf{Error Message}\\
+  \midrule
+  {FileError} & Error: File not found \\
+  {badNodalPoints} & Error: Number of nodal points must be $>$ 0 \\
+  ... & ... \\
+  {warnDX} & Error: It is recommended that $0.01 \le dx \le 3$\\
+  ... & ... \\
+  TODO & TODO \\
+  \bottomrule
+  \end{tabular}
+  \end{table}
+\end{document}

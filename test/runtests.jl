@@ -7,11 +7,6 @@ using .OutputFormat
 include("../src/InputParser.jl")
 using .InputParser
 
-# Path to input and output files from runtests.jl
-INPUT_DATA_PATH = "../src/.data/input_data.dat"
-OUTPUT_DATA_PATH = "../src/.data/output_data.dat"
-readInputFile(INPUT_DATA_PATH, OUTPUT_DATA_PATH)
-
 # Paths to test input files from runtests.jl
 INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:4]
 OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:4]
