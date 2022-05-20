@@ -59,6 +59,7 @@ function parseCurrentLine(input::Array{String}, items::Int, index::Int)
     currentLine = replace(currentLine, "\t" => " ")
     currentLineData = split(currentLine, " ")
     currentLineData = filter(x -> x != "", currentLineData)
+    println(currentLineData)
     # Check if data is there
     if size(currentLineData)[1] < items
         throw(NotEnoughValuesError(Int(NotEnoughValuesErrorId), items, size(currentLineData)[1], index))
@@ -113,8 +114,18 @@ struct InputData
         end
 
         # Only allow lines that have non empty space chars
+        # input_not_empty = filter(contains(r"[^\s]"), input)
+        # Remove comments
+        input = [] # Reinitialize array of lines
+        for line in input_not_empty
+            # Split at comment
+            line_split = split(line, "#")
+            # Add all data before comment to output
+            push!(input, line_split[1])
+        end
+        # Get rid of empty lines (these lines only contained comments before)
         input = filter(contains(r"[^\s]"), input)
-        
+
         # Keep track of last line read
         lastLineIndex = 0
 
@@ -134,6 +145,7 @@ struct InputData
                 throw(ParsingError())
             end
         end
+
         # Parse each value
         numProblems = 0
         model = CollapsibleSoil
@@ -146,7 +158,7 @@ struct InputData
                 println("Error, invalid value on line $(lastLineIndex+1)!")
             elseif isa(e, BoundsError)
                 # File ran out of lines
-                println("Error, encountered end of file unexpectedly!")
+                println("1 Error, encountered end of file unexpectedly!")
             else
                 # Some other problem
                 println("Unexpected error occured while reading file at $(filePath)")
