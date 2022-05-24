@@ -18,9 +18,12 @@ cleanMIS:
 cleanMG:
 	cd docs/Design/MG && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
 
+cleanSRS:
+	cd docs/Design/SRS && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
+
 cleanMisc:
 	cd Miscellaneous && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
 
-cleanDocs: cleanMisc cleanMG cleanMIS
+cleanDocs: cleanMisc cleanMG cleanMIS cleanSRS
 
-clean: cleanOutput cleanDocs
+clean: cleanDocs cleanOutput
