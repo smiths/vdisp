@@ -13,12 +13,14 @@ function readInputFile(inputPath::String, outputPath::String)
     
     header = OutputFormat.getHeader
     model = OutputFormat.performGetModelOutput
-    foundation = OutputFormat.performGetFoundationOutput
+    foundationOut = OutputFormat.performGetFoundationOutput
     displacementInfo = OutputFormat.performGetDisplacementOutput
     equilibriumInfo = OutputFormat.performGetEquilibriumOutput
     forcePointOut = OutputFormat.performGetForcePointOutput
+    foundationDepth = OutputFormat.getFoundationDepth
+    soilTable = OutputFormat.getSoilTable
 
-    OutputFormat.writeOutput([header, model, foundation, displacementInfo, equilibriumInfo, forcePointOut], outputData, outputPath)
+    OutputFormat.writeOutput([header, model, foundationOut, foundationDepth, soilTable ,displacementInfo, equilibriumInfo, forcePointOut], outputData, outputPath)
 end
 
 end # module
