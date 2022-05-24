@@ -19,8 +19,13 @@ function readInputFile(inputPath::String, outputPath::String)
     forcePointOut = OutputFormat.performGetForcePointOutput
     foundationDepth = OutputFormat.getFoundationDepth
     soilTable = OutputFormat.getSoilTable
+    calculationOut = OutputFormat.performGetCalculationOutput
 
-    OutputFormat.writeOutput([header, model, foundationOut, foundationDepth, soilTable ,displacementInfo, equilibriumInfo, forcePointOut], outputData, outputPath)
+    OutputFormat.writeOutput([header, model, foundationOut, foundationDepth, soilTable ,displacementInfo, equilibriumInfo, forcePointOut, calculationOut], outputData, outputPath)
+end
+
+if size(ARGS)[1] == 2
+    readInputFile(ARGS[1], ARGS[2])
 end
 
 end # module
