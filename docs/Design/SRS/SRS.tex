@@ -19,6 +19,8 @@
 
 \usepackage[round]{natbib}
 
+\newcommand{\indentpar}{\phantom{=}}
+
 %\usepackage{refcheck}
 
 \hypersetup{
@@ -118,58 +120,36 @@ description of the unit and the SI name.
 %\begin{table}[ht]
   \noindent \begin{tabular}{l l l} 
     \toprule		
-    \textbf{symbol} & \textbf{unit} & \textbf{SI}\\
+    \textbf{Symbol} & \textbf{Unit} & \textbf{SI}\\
     \midrule 
-    \si{\metre} & length & metre\\
+    \si{\metre} & length & meter\\
     \si{\kilogram} & mass	& kilogram\\
     \si{\second} & time & second\\
-    \si{\newton} & force & Newton\\
-    \si{\pascal} & pressure & Pascal\\
+    \si{\radian} & angle & radians\\
+    \si{\newton}=\si{\kilogram\meter\per\square\second} & force & newton\\
+    \si{\pascal}=\si{\newton\per\square\meter} & pressure & pascal\\
+    \emph{Add imperial} units & ... & ..\\
     \bottomrule
   \end{tabular}
   %	\caption{Provide a caption}
 %\end{table}
 
-Only include the units that your SRS actually uses.
-
-Derived units, like newtons, pascal, etc, should show their derivation
-    (the units they are derived from) if their constituent units are in the
-    table of units (that is, if the units they are derived from are used in the
-    document).  For instance, the derivation of pascals as
-    $\si{\pascal}=\si{\newton\per\square\meter}$ is shown if newtons and m are
-    both in the table.  The derivations of newtons would not be shown if kg and
-    s are not both in the table.
-
-The symbol for units named after people use capital letters, but the name
-  of the unit itself uses lower case.  For instance, pascals use the symbol Pa,
-  watts use the symbol W, teslas use the symbol T, newtons use the symbol N,
-  etc.  The one exception to this is degree Celsius.  Details on writing metric
-  units can be found on the 
-  \href{https://www.nist.gov/pml/weights-and-measures/writing-metric-units}
-  {NIST} web-page.
-
 \subsection{Table of Symbols}
 
-The table that follows summarizes the symbols used in this document along with
-their units.  The choice of symbols was made to be consistent with the heat
-transfer literature and with existing documentation for solar water heating
-systems.  The symbols are listed in alphabetical order.
-
-\renewcommand{\arraystretch}{1.2}
-%\noindent \begin{tabularx}{1.0\textwidth}{l l X}
-\noindent \begin{longtable*}{l l p{12cm}} \toprule
-\textbf{symbol} & \textbf{unit} & \textbf{description}\\
-\midrule 
-$A_C$ & \si[per-mode=symbol] {\square\metre} & coil surface area
+\noindent \begin{tabular}{l p{12cm} l} 
+  \toprule		
+  \textbf{Symbol} & \textbf{Description} & \textbf{Units}\\
+  \midrule 
+  $e$ & Void ratio & ? \\
+  $K_0$ & Coefficient of lateral earth pressure & ?\\
+  $\sigma_v$ & Vertical stress & meter\\
+  $\sigma_{v}'$ & Effective stress & meter\\
+  $\gamma_w$ & Unit weight of water & \si{\newton\per\cubic\metre} \\
+  $\phi_s$ & Plane strain angle & \si{\radian}\\
+  \bottomrule
+\end{tabular}
 \\
-$A_\text{in}$ & \si[per-mode=symbol] {\square\metre} & surface area over 
-which heat is transferred in
-\\ 
-\bottomrule
-\end{longtable*}
-Use your problems actual symbols.  The si package is a good idea to use for
-  units.
-
+\emph{TODO: Add all constants, arrange in alphabetical order, add caption for table?}
 \subsection{Abbreviations and Acronyms}
 
 \renewcommand{\arraystretch}{1.2}
@@ -186,12 +166,12 @@ Use your problems actual symbols.  The si package is a good idea to use for
   PS & Physical System Description\\
   R & Requirement\\
   SRS & Software Requirements Specification\\
-  \emph{VDisp} & put an expanded version of your program name here (as appropriate)\\
+  \emph{VDisp} & Software Settlement Analysis Software\\
   T & Theoretical Model\\
   \bottomrule
 \end{tabular}\\
 
-Add any other abbreviations or acronyms that you add
+\emph{Should we add MG to this? Or MIS?}
 
 \subsection{Mathematical Notation}
 
@@ -276,42 +256,49 @@ The overall goal of the SRS is that someone that meets the Characteristics
 
 \section{Introduction}
 
-The introduction section is written to introduce the problem.  It starts
-  general and focuses on the problem domain. The general advice is to start with
-a paragraph or two that describes the problem, followed by a ``roadmap''
-paragraph.  A roadmap orients the reader by telling them what sub-sections to
-expect in the Introduction section.
+\indentpar \indentpar Our cities and towns are in constant need of new infrastructure due to the expanding and 
+evolving nature of our societies. With architects planning new buildings every day, there is a never 
+ending need for experienced geotechnical engineers to perform the complex task of soil settlement analysis 
+prior to laying down the foundation. The \emph{VDisp} software aims to provide undergraduate Civil Engineering 
+students the tools they need to make the simple analyses expected from them in their studies, while also providing 
+them with visualizations and real-time interaction as a means of educational enhancement. \\
+
+ The following section provides an overview of the Software Requirements Specification (SRS) 
+for the soil settlement analysis software. The developed program will be referred to as \emph{VDisp}. 
+This section explains the purpose of this document, the scope of the requirements, the characteristics 
+of the intended reader, and the organization of the document.
+
 
 \subsection{Purpose of Document}
 
-This section summarizes the purpose of the SRS document.  It does not focus
-  on the problem itself.  The problem is described in the ``Problem
-  Description'' section (Section~\ref{Sec_pd}).  The purpose is for the document
-  in the context of the project itself, not in the context of the CAS 741
-  course.  Although the ``purpose'' of the document is to get a grade in 741,
-  you should not mention this.  Instead, ``fake it'' as if this is a real
-  project.  The purpose section will be similar between projects.  The purpose
-  of the document is the purpose of the SRS, including communication, planning
-  for the design stage, etc.
+\indentpar \indentpar The primary purpose of this document is to record the requirements of 
+the \emph{VDisp} software. Goals, assumptions, theoretical models, 
+definitions, and other model derivation information are specified, allowing 
+the reader to fully understand and verify the purpose and scientific basis 
+of \emph{VDisp}. Except for system constraints, this SRS will 
+remain abstract, describing what problem the software is solving, but not how to 
+solve it. \\
+
+This document will be used as a starting point for subsequent development phases, 
+including writing the design specification and the software verification and validation plan. 
+The design document will show how the requirements are to be realized, including decisions on 
+the numerical algorithms and programming environment. The verification and validation plan will 
+show the steps that will be used to increase confidence in the software documentation and the 
+implementation. Although the SRS fits in a series of documents that follow the so-called waterfall 
+model, the actual development process is not constrained in any way. Even when the waterfall model 
+is not followed, as Parnas and Clements point out parnasClements1986(\emph{TODO: add citation}), the most logical way to present 
+the documentation is still to "fake" a rational design process.
 
 \subsection{Scope of Requirements} 
 
-Modelling the real world requires simplification.  The full complexity of
-  the actual physics, chemistry, biology is too much for existing models, and
-  for existing computational solution techniques.  Rather than say what is in
-  the scope, it is usually easier to say what is not.  You can think of it as
-  the scope is initially everything, and then it is constrained to create the
-  actual scope.  For instance, the problem can be restricted to 2 dimensions, or
-  it can ignore the effect of temperature (or pressure) on the material
-  properties, etc.
-
-The scope section is related to the assumptions section
-  (Section~\ref{sec_assumpt}).  However, the scope and the assumptions are not
-  at the same level of abstraction.  The scope is at a high level.  The focus is
-  on the ``big picture'' assumptions.  The assumptions section lists, and
-  describes, all of the assumptions.
+The scope of the requirements includes soil settlement analysis of rectangular
+slab foundations and long strip footing. This entire document is written assuming 
+homogeneous\emph{(is this how you say same material throughout layer?)} soil layers and is 
+restricted to one-dimensional analysis \emph{(for now)}.
 
 \subsection{Characteristics of Intended Reader} \label{sec_IntendedReader}
+
+\emph{TODO}
 
 This section summarizes the skills and knowledge of the readers of the
   SRS.  It does NOT have the same purpose as the ``User Characteristics''
@@ -330,12 +317,16 @@ The intended reader characteristics should be written as unambiguously and
 
 \subsection{Organization of Document}
 
+\emph{TODO}
+
 This section provides a roadmap of the SRS document.  It will help the
   reader orient themselves.  It will provide direction that will help them
   select which sections they want to read, and in what order.  This section will
   be similar between project.
 
 \section{General System Description}
+
+\emph{TODO}
 
 This section provides general information about the system.  It identifies the
 interfaces between the system and its environment, describes the user
@@ -351,6 +342,8 @@ The purpose of this section is to provide general information about the
   same, while specific details are changed between family members.
 
 \subsection{System Context}
+
+\emph{TODO}
 
 Your system context will include a figure that shows the abstract view of
   the software.  Often in a scientific context, the program can be viewed
@@ -370,6 +363,7 @@ Your system context will include a figure that shows the abstract view of
 
 \begin{figure}[h!]
 \begin{center}
+  \emph{TODO}
 \caption{System Context}
 \label{Fig_SystemContext} 
 \end{center}
@@ -400,6 +394,8 @@ For each of the entities in the system context diagram its responsibilities
 
 \subsection{User Characteristics} \label{SecUserCharacteristics}
 
+\emph{TODO}
+
 This section summarizes the knowledge/skills expected of the user.
   Measuring usability, which is often a required non-function requirement,
   requires knowledge of a typical user.  As mentioned above, the user is a
@@ -411,6 +407,8 @@ This section summarizes the knowledge/skills expected of the user.
 
 \subsection{System Constraints}
 
+\emph{TODO}
+
 System constraints differ from other type of requirements because they
   limit the developers’ options in the system design and they identify how the
   eventual system must fit into the world. This is the only place in the SRS
@@ -421,6 +419,8 @@ System constraints differ from other type of requirements because they
 
 \section{Specific System Description}
 
+\emph{TODO}
+
 This section first presents the problem description, which gives a high-level
 view of the problem to be solved.  This is followed by the solution characteristics
 specification, which presents the assumptions, theories, definitions and finally
@@ -429,10 +429,14 @@ the instance models.  Add any project specific details that are relevant
 
 \subsection{Problem Description} \label{Sec_pd}
 
+\emph{TODO}
+
 \emph{VDisp} is intended to solve ... What problem does your program solve?
 The description here should be in the problem space, not the solution space.
 
 \subsubsection{Terminology and  Definitions}
+
+\emph{TODO}
 
 This section is expressed in words, not with equations.  It provide the
   meaning of the different words and phrases used in the domain of the problem.
@@ -451,6 +455,8 @@ easier to correctly understand the requirements:
 \end{itemize}
 
 \subsubsection{Physical System Description} \label{sec_phySystDescrip}
+
+\emph{TODO}
 
 The purpose of this section is to clearly and unambiguously state the
   physical system that is to be modelled. Effective problem solving requires a
@@ -490,6 +496,8 @@ A figure here makes sense for most SRS documents
 
 \subsubsection{Goal Statements}
 
+\emph{TODO}
+
 The goal statements refine the ``Problem Description''
   (Section~\ref{Sec_pd}).  A goal is a functional objective the system under
   consideration should achieve. Goals provide criteria for sufficient
@@ -511,6 +519,8 @@ The goal statements refine the ``Problem Description''
 \end{itemize}
 
 \subsection{Solution Characteristics Specification}
+
+\emph{TODO}
 
 This section specifies the information in the solution domain of the system
   to be developed. This section is intended to express what is required in
@@ -564,6 +574,8 @@ models can be verified.
 
 \subsubsection{Assumptions} \label{sec_assumpt}
 
+\emph{TODO}
+
 The assumptions are a refinement of the scope.  The scope is general, where
   the assumptions are specific.  All assumptions should be listed, even those
   that domain experts know so well that they are rarely (if ever) written down.
@@ -590,6 +602,8 @@ likely change [LC], in which the respective assumption is used.
 \end{itemize}
 
 \subsubsection{Theoretical Models}\label{sec_theoretical}
+
+\emph{TODO}
 
 Theoretical models are sets of abstract mathematical equations or axioms
   for solving the problem described in Section ``Physical System Description''
@@ -647,6 +661,8 @@ on.  Modify the examples below for your problem, and add additional models
 
 \subsubsection{General Definitions}\label{sec_gendef}
 
+\emph{TODO}
+
 General Definitions (GDs) are a refinement of one or more TMs, and/or of
   other GDs.  The GDs are less abstract than the TMs.  Generally the reduction
   in abstraction is possible through invoking (using/referencing) Assumptions.
@@ -699,12 +715,16 @@ between the environment and the object (\si{\celsius}).
 
 \subsubsection*{Detailed derivation of simplified rate of change of temperature}
 
+\emph{TODO}
+
 This may be necessary when the necessary information does not fit in the
   description field.
 Derivations are important for justifying a given GD.  You want it to be
   clear where the equation came from.
 
 \subsubsection{Data Definitions}\label{sec_datadef}
+
+\emph{TODO}
 
 The Data Definitions are definitions of symbols and equations that are
   given for the problem.  They are not derived; they are simply used by other
@@ -759,6 +779,8 @@ Symbol &$q_C$\\
 \end{minipage}\\
 
 \subsubsection{Data Types}\label{sec_datatypes}
+
+\emph{TODO}
 
 This section is optional.  In many scientific computing programs it isn't
   necessary, since the inputs and outpus are straightforward types, like reals,
