@@ -1,5 +1,9 @@
 module OutputFormat
 
+using Pkg
+Pkg.add("PrettyTables")
+using PrettyTables
+
 include("../InputParser.jl")
 include("./ModelBehaviour.jl")
 include("./FoundationBehaviour.jl")
@@ -13,8 +17,6 @@ using .FoundationBehaviour
 using .DisplacementBehaviour
 using .EquilibriumBehaviour
 using .ForcePointBehaviour
-
-using PrettyTables
 
 export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader
 
