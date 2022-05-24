@@ -1,3 +1,5 @@
+DOC_DIRS ?= docs/Design/MIS docs/Design/MG docs/Design/SRS Miscellaneous
+
 all: run
 
 run:
@@ -10,20 +12,16 @@ test: FORCE
 FORCE: 
 
 cleanOutput: 
-	cd src/.data && rm output*.dat
+	cd src/.data && rm -f output*.dat
 
-cleanMIS:
-	cd docs/Design/MIS && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanMG:
-	cd docs/Design/MG && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanSRS:
-	cd docs/Design/SRS && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanMisc:
-	cd Miscellaneous && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanDocs: cleanMisc cleanMG cleanMIS cleanSRS
+cleanDocs: 
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.aux)
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.fdb_latexmk)
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.fls)
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.log)
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.out)
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.out)
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.synctex.gz)
+	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.toc)
 
 clean: cleanDocs cleanOutput
