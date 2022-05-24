@@ -6,6 +6,7 @@ include("./FoundationBehaviour.jl")
 include("./DisplacementBehaviour.jl")
 include("./EquilibriumBehaviour.jl")
 include("./ForcePointBehaviour.jl")
+include("./CalculationBehaviour.jl")
 
 using .InputParser
 using .ModelBehaviour
@@ -13,6 +14,7 @@ using .FoundationBehaviour
 using .DisplacementBehaviour
 using .EquilibriumBehaviour
 using .ForcePointBehaviour
+using .CalculationBehaviour
 
 using PrettyTables
 
@@ -114,6 +116,11 @@ performGetEquilibriumValue(outputData::OutputData) = EquilibriumBehaviour.getEqu
 performWriteForcePointOutput(outputData::OutputData, path::String) = ForcePointBehaviour.writeForcePointOutput(getForcePointOutputBehaviour(outputData), path)
 performGetForcePointOutput(outputData::OutputData) = ForcePointBehaviour.getForcePointOutput(getForcePointOutputBehaviour(outputData))
 performGetForcePointValue(outputData::OutputData) = ForcePointBehaviour.getForcePointValue(getForcePointOutputBehaviour(outputData))
+
+# CalculationOutputBehaviour
+performWriteCalculationOutput(outputData::OutputData, path::String) = CalculationBehaviour.writeCalculationOutput(getCalculationOutputBehaviour(outputData), path)
+performGetCalculationOutput(outputData::OutputData) = CalculationBehaviour.getCalculationOutput(getCalculationOutputBehaviour(outputData))
+performGetCalculationValue(outputData::OutputData) = CalculationBehaviour.getCalculationValue(getCalculationOutputBehaviour(outputData))
 ####################################
 
 
@@ -174,6 +181,21 @@ function getForcePointOutputBehaviour(outputData::OutputData)
     end
     foundation = outputData.inputData.foundation
     return EdgeForceBehaviour(foundation)
+end
+# Get CalculationOutputBehaviour instance
+function getCalculationOutputBehaviour(outputData::OutputData)
+    inputData = outputData.inputData
+    if string(inputData.model) == string(InputParser.ConsolidationSwell)
+        return ConsolidationSwellCalculationBehaviour(inputData.nodalPoints)
+    elseif string(inputData.model) == string(InputParser.LeonardFrost)
+        return LeonardFrostCalculationBehaviour(inputData.nodalPoints)
+    elseif string(inputData.model) == string(InputParser.Schmertmann)
+        return SchmertmannCalculationBehaviour(inputData.nodalPoints)
+    elseif string(inputData.model) == string(InputParser.CollapsibleSoil)
+        return CollapsibleSoilCalculationBehaviour(inputData.nodalPoints)
+    else
+        return SchmertmannElasticCalculationBehaviour(inputData.nodalPoints)
+    end
 end
 ####################################
 
