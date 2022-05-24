@@ -1,7 +1,5 @@
 module OutputFormat
 
-using Pkg
-Pkg.add("PrettyTables")
 using PrettyTables
 
 include("../InputParser.jl")
