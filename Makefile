@@ -1,3 +1,6 @@
+DOC_DIRS ?= docs/Design/MIS docs/Design/MG docs/Design/SRS Miscellaneous
+LATEX_AUX_EXTENSIONS ?= aux fdb_latexmk fls log out synctex.gz toc
+
 all: run
 
 run:
@@ -10,17 +13,12 @@ test: FORCE
 FORCE: 
 
 cleanOutput: 
-	cd src/.data && rm output*.dat
+	cd src/.data && rm -f output*.dat
 
-cleanMIS:
-	cd docs/Design/MIS && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
+cleanDocs: 
+	for ext in $(LATEX_AUX_EXTENSIONS) ; do \
+		rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.$$ext) ; \
+	done 
+	
 
-cleanMG:
-	cd docs/Design/MG && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanMisc:
-	cd Miscellaneous && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanDocs: cleanMisc cleanMG cleanMIS
-
-clean: cleanOutput cleanDocs
+clean: cleanDocs cleanOutput
