@@ -1,10 +1,12 @@
+DOC_DIRS ?= docs/Design/MIS docs/Design/MG docs/Design/SRS Miscellaneous
+LATEX_AUX_EXTENSIONS ?= aux fdb_latexmk fls log out synctex.gz toc
+
 all: run
 
 run:
 	julia --project=@. src/vdisp.jl "./src/.data/input_data.dat" "./src/.data/output_data.dat"
 
 test: FORCE
-    # julia --project=@. test/runtests.jl maketest
 	cd test && julia --project=@. runtests.jl
 
 FORCE: 
@@ -13,15 +15,9 @@ cleanOutput:
 	cd src/.data && rm output*.dat
 	cd test/testdata && rm test_output*.dat
 
-cleanMIS:
-	cd docs/Design/MIS && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
+cleanDocs: 
+	for ext in $(LATEX_AUX_EXTENSIONS) ; do \
+		rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.$$ext) ; \
+	done 
 
-cleanMG:
-	cd docs/Design/MG && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanMisc:
-	cd Miscellaneous && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
-
-cleanDocs: cleanMisc cleanMG cleanMIS
-
-clean: cleanOutput cleanDocs
+clean: cleanDocs cleanOutput
