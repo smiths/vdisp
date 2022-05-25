@@ -16,7 +16,7 @@ using .EquilibriumBehaviour
 using .ForcePointBehaviour
 using .CalculationBehaviour
 
-export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader
+export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader, getData
 
 # Output Data Struct
 struct OutputData
@@ -158,5 +158,35 @@ function getCalculationOutputBehaviour(outputData::OutputData)
     end
 end
 ####################################
+
+"""
+Creates OutputData instance from given path and returns instance
+of OutputData and its corresponding instance of InputData as a tuple
+"""
+function getData(path::String)
+    outputData = 0
+    try
+        outputData = OutputData(path)
+    catch e
+        id = 0
+        try 
+            id = e.id
+        catch err 
+            println("Unexpected Error! Skipping Tests!")
+            throw(ArgumentError("Bad Input File"))
+        end
+        if id == Int(InputParser.ParsingErrorId)
+            println("Error! Skipping Tests!")
+        elseif id == Int(InputParser.SoilNumberErrorId)
+            println("Error: Invalid input file!")
+            println("\t>Line $(e.line): Soil layer number must be larger than previous one!") 
+        else
+            println("Unexpected Error! Skipping Tests!")
+        end
+        throw(ArgumentError("Bad Input File"))
+    end
+    return (outputData, outputData.inputData)
+end
+
 
 end # module

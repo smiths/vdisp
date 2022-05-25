@@ -13,28 +13,7 @@ OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:4]
 
 println("Testing input file 1:")
 @testset "Test input file 1" begin
-    outputData = 0
-    try
-        outputData = OutputData(INPUT_TEST_PATHS[1])
-    catch e
-        id = 0
-        try 
-            id = e.id
-        catch err 
-            println("Unexpected Error! Skipping Tests!")
-            return
-        end
-        if id == Int(InputParser.ParsingErrorId)
-            println("Error! Skipping Tests!")
-        elseif id == Int(InputParser.SoilNumberErrorId)
-            println("Error: Invalid input file!")
-            println("\t>Line $(e.line): Soil layer number must be larger than previous one!") 
-        else
-            println("Unexpected Error! Skipping Tests!")
-        end
-        return
-    end
-    inputData = getfield(outputData, :inputData)
+    outputData, inputData = getData(INPUT_TEST_PATHS[1])
     @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -63,28 +42,7 @@ end
 
 println("Testing input file 2:")
 @testset "Test input file 2" begin
-    outputData = 0
-    try
-        outputData = OutputData(INPUT_TEST_PATHS[2])
-    catch e
-        id = 0
-        try 
-            id = e.id
-        catch err 
-            println("Unexpected Error! Skipping Tests!")
-            return
-        end
-        if id == Int(InputParser.ParsingErrorId)
-            println("Error! Skipping Tests!")
-        elseif id == Int(InputParser.SoilNumberErrorId)
-            println("Error: Invalid input file!")
-            println("\t>Line $(e.line): Soil layer number must be larger than previous one!") 
-        else
-            println("Unexpected Error! Skipping Tests!")
-        end
-        return
-    end
-    inputData = getfield(outputData, :inputData)
+    outputData, inputData = getData(INPUT_TEST_PATHS[2])
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - LEONARD AND FROST"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -112,28 +70,7 @@ end
 
 println("Testing input file 3:")
 @testset "Test input file 3" begin
-    outputData = 0
-    try
-        outputData = OutputData(INPUT_TEST_PATHS[3])
-    catch e
-        id = 0
-        try 
-            id = e.id
-        catch err 
-            println("Unexpected Error! Skipping Tests!")
-            return
-        end
-        if id == Int(InputParser.ParsingErrorId)
-            println("Error! Skipping Tests!")
-        elseif id == Int(InputParser.SoilNumberErrorId)
-            println("Error: Invalid input file!")
-            println("\t>Line $(e.line): Soil layer number must be larger than previous one!") 
-        else
-            println("Unexpected Error! Skipping Tests!")
-        end
-        return
-    end
-    inputData = getfield(outputData, :inputData)
+    outputData, inputData = getData(INPUT_TEST_PATHS[3])
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -161,28 +98,7 @@ end
 
 println("Testing input file 4:")
 @testset "Test input file 4" begin
-    outputData = 0
-    try
-        outputData = OutputData(INPUT_TEST_PATHS[4])
-    catch e
-        id = 0
-        try 
-            id = e.id
-        catch err 
-            println("Unexpected Error! Skipping Tests!")
-            return
-        end
-        if id == Int(InputParser.ParsingErrorId)
-            println("Error! Skipping Tests!")
-        elseif id == Int(InputParser.SoilNumberErrorId)
-            println("Error: Invalid input file!")
-            println("\t>Line $(e.line): Soil layer number must be larger than previous one!") 
-        else
-            println("Unexpected Error! Skipping Tests!")
-        end
-        return
-    end
-    inputData = getfield(outputData, :inputData)
+    outputData, inputData = getData(INPUT_TEST_PATHS[4])
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
