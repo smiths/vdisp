@@ -39,6 +39,7 @@ println("Testing input file 1:")
     @test inputData.swellIndex[2] == 0.10
     @test inputData.compressionIndex[1] == 0.25
     @test inputData.heaveActiveZoneDepth == 8.00
+    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[1])
 end
 
 println("Testing input file 2:")
@@ -68,6 +69,7 @@ println("Testing input file 2:")
     @test inputData.pressureDilatometerA[1] == 3.00
     @test inputData.pressureDilatometerB[1] == 15.00
     @test inputData.conePenetrationResistance[2] == 100.00
+    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[2])
 end
 
 println("Testing input file 3:")
@@ -97,6 +99,7 @@ println("Testing input file 3:")
     @test inputData.conePenetrationResistance[1] == 70.00
     @test inputData.conePenetrationResistance[2] == 100.00
     @test inputData.conePenetrationResistance[3] == 10.00
+    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[3])
 end
 
 println("Testing input file 4:")
@@ -132,4 +135,5 @@ println("Testing input file 4:")
     @test inputData.strainAtPoints[1,5] == 15.00
     @test inputData.strainAtPoints[2,2] == 0.80
     @test inputData.strainAtPoints[2,4] == 8.00
+    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[4])
 end

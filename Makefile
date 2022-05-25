@@ -7,18 +7,17 @@ run:
 	julia --project=@. src/vdisp.jl "./src/.data/input_data.dat" "./src/.data/output_data.dat"
 
 test: FORCE
-    # julia --project=@. test/runtests.jl maketest
 	cd test && julia --project=@. runtests.jl
 
 FORCE: 
 
 cleanOutput: 
-	cd src/.data && rm -f output*.dat
+	cd src/.data && rm output*.dat
+	cd test/testdata && rm test_output*.dat
 
 cleanDocs: 
 	for ext in $(LATEX_AUX_EXTENSIONS) ; do \
 		rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.$$ext) ; \
 	done 
-	
 
 clean: cleanDocs cleanOutput
