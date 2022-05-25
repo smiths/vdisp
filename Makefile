@@ -11,6 +11,7 @@ FORCE:
 
 cleanOutput: 
 	cd src/.data && rm output*.dat
+	cd test/testdata && rm test_output*.dat
 
 cleanMIS:
 	cd docs/Design/MIS && rm -f *.aux *.fdb_latexmk *.fls *.log *.out *.synctex.gz *.toc
