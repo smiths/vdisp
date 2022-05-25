@@ -1,4 +1,5 @@
 DOC_DIRS ?= docs/Design/MIS docs/Design/MG docs/Design/SRS Miscellaneous
+LATEX_AUX_EXTENSIONS ?= aux fdb_latexmk fls log out synctex.gz toc
 
 all: run
 
@@ -15,13 +16,9 @@ cleanOutput:
 	cd src/.data && rm -f output*.dat
 
 cleanDocs: 
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.aux)
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.fdb_latexmk)
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.fls)
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.log)
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.out)
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.out)
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.synctex.gz)
-	rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.toc)
+	for ext in $(LATEX_AUX_EXTENSIONS) ; do \
+		rm -f $(foreach dir, $(DOC_DIRS), $(dir)/*.$$ext) ; \
+	done 
+	
 
 clean: cleanDocs cleanOutput
