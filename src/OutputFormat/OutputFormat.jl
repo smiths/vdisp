@@ -18,7 +18,7 @@ using .EquilibriumBehaviour
 using .ForcePointBehaviour
 using .CalculationBehaviour
 
-export OutputData, performWriteModelOutput, performGetModelOutput, performGetModelValue, writeOutput, getHeader
+export OutputData, writeOutput, writeDefaultOutput
 
 # Output Data Struct
 struct OutputData
@@ -41,6 +41,10 @@ function writeOutput(order::Array{Function}, outputData::OutputData, path::Strin
         end
     end
 end
+function writeDefaultOutput(outputData::OutputData, path::String)
+    writeOutput([getHeader, performGetModelOutput, performGetFoundationOutput, getFoundationDepth, getSoilTable, getMaterialInfoTable, getDepthToGroundWaterTable, performGetDisplacementOutput, performGetEquilibriumOutput, performGetForcePointOutput, performGetCalculationOutput], outputData, path)
+end
+
 
 ### CONSTANT BEHAVIOUR FUNCTIONS ###
 # Header
@@ -89,6 +93,34 @@ function getSoilTableValues(outputData::OutputData)
     end
     return values
 end
+
+# Material Info Table
+function writeMaterialInfoTable(outputData::OutputData, path::String)
+    open(path, "a") do file
+        write(file, getMaterialInfoTable(outputData))
+    end
+end
+function getMaterialInfoTable(outputData::OutputData)
+    values = getMaterialInfoTableValues(outputData)
+    return pretty_table(String, values; header = ["Material", "Specific Gravity", "Water Content(%)", "Void Ratio"],tf = tf_markdown)
+end
+function getMaterialInfoTableValues(outputData::OutputData)
+    inData = outputData.inputData
+    values = [1 inData.specificGravity[1] inData.waterContent[1] inData.voidRatio[1]]
+    for i=2:inData.soilLayers
+        values = vcat(values, [i inData.specificGravity[i] inData.waterContent[i] inData.voidRatio[i]])
+    end
+    return values
+end
+
+# Depth to Ground Water Table
+function writeDepthToGroundWaterTable(outputData::OutputData, path::String)
+    open(path, "a") do file
+        write(file, getDepthToGroundWaterTable(outputData))
+    end
+end
+getDepthToGroundWaterTable(outputData::OutputData) = "Depth to Ground Water Table: $(getDepthToGroundWaterTableValue(outputData))\n"
+getDepthToGroundWaterTableValue(outputData::OutputData) = outputData.inputData.depthGroundWaterTable
 ####################################
 
 ### CHANGING BEHAVIOUR FUNCTIONS ###
