@@ -42,6 +42,6 @@ end
     # Thus, I copied the exact type from above to the line below
     println("\nTesting file 5, error expexted on line 6:")
     @test_throws Main.OutputFormat.InputParser.ParsingError OutputData(INPUT_TEST_PATHS[5])
-    println("\nTesting file 6, error expected")
+    println("\nTesting file 6, error expexted.")
     @test_throws Main.OutputFormat.InputParser.SoilNumberError OutputData(INPUT_TEST_PATHS[6])
 end
