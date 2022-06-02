@@ -10,9 +10,9 @@ run: vdisp
 	./$?
 
 cleanOutput:
-	rm VDOU.DAT
+	rm -f VDOU.DAT
 
 cleanExec:
-	rm vdisp
+	rm -f vdisp
 
 clean: cleanOutput cleanExec
