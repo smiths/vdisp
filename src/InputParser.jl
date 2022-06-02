@@ -113,8 +113,19 @@ struct InputData
         end
 
         # Only allow lines that have non empty space chars
-        input = filter(contains(r"[^\s]"), input)
-        
+        input_not_empty = filter(contains(r"[^\s]"), input)
+        # Remove comments
+        input = [] # Reinitialize array of lines
+        for line in input_not_empty
+            # Split at comment
+            line_split = split(line, "#")
+            # Add all data before comment to output
+            push!(input, line_split[1])
+        end
+        # Get rid of empty lines (these lines only contained comments before)
+        input::Array{String} = filter(contains(r"[^\s]"), input)
+        # For some reason, not explicitly typing this caused errors
+
         # Keep track of last line read
         lastLineIndex = 0
 
@@ -134,6 +145,7 @@ struct InputData
                 throw(ParsingError())
             end
         end
+
         # Parse each value
         numProblems = 0
         model = CollapsibleSoil

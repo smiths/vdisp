@@ -1,9 +1,11 @@
+# Input Data taken from p.174 of https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf
     FOOTING IN GRANULAR SOIL - LEONARD AND FROST
+# NOTE: Leonard and Frost model will be removed from final product
 1   1   1   17  7   2   0.50
 1   1
 12  2
 16  2
-1   2.700   20.000  1.540
+1   2.700   20.000  1.540   # Material properties
 2   2.650   19.300  0.900
   8.00  0   1
   1.00  3.00    3.00    0
