@@ -7,133 +7,41 @@ using .OutputFormat
 include("../src/InputParser.jl")
 using .InputParser
 
+include("./tests.jl")
+using .Tests
+
 # Paths to test input files from runtests.jl
-INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:4]
+INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:6]
 OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:4]
 
-println("Testing input file 1:")
-@testset "Test input file 1" begin
-    outputData = OutputData(INPUT_TEST_PATHS[1])
-    inputData = getfield(outputData, :inputData)
-    @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
-    @test inputData.nodalPoints == 17
-    @test inputData.bottomPointIndex == 7
-    @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.ConsolidationSwell)
-    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
-    @test inputData.soilLayerNumber[1] == 1
-    @test inputData.soilLayerNumber[7] == 1
-    @test inputData.soilLayerNumber[12] == 2
-    @test inputData.soilLayerNumber[14] == 2
-    @test inputData.soilLayerNumber[16] == 2
-    @test inputData.specificGravity[1] == 2.700
-    @test inputData.voidRatio[1] == 1.540
-    @test inputData.waterContent[2] == 19.300
-    @test inputData.depthGroundWaterTable == 8.00
-    @test inputData.equilibriumMoistureProfile == false
-    @test inputData.appliedPressure == 1.00
-    @test inputData.foundationLength == 3.00
-    @test inputData.center == true
-    @test inputData.swellPressure[1] == 2.00
-    @test inputData.swellIndex[2] == 0.10
-    @test inputData.compressionIndex[1] == 0.25
-    @test inputData.heaveActiveZoneDepth == 8.00
-    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[1])
+testFunctions = [testFile1, testFile2, testFile3, testFile4]
+for i=1:4
+    println("\nTesting input file $(i):")
+    @testset "Test input file $(i)" begin
+        outputData = 0
+        inputData = 0
+        try
+            outputData, inputData = getData(INPUT_TEST_PATHS[i])
+        catch e 
+            return
+        end
+        testFunctions[i](inputData)
+        # use outputData to output file
+    end
 end
 
-println("Testing input file 2:")
-@testset "Test input file 2" begin
-    outputData = OutputData(INPUT_TEST_PATHS[2])
-    inputData = getfield(outputData, :inputData)
-    @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - LEONARD AND FROST"
-    @test inputData.nodalPoints == 17
-    @test inputData.bottomPointIndex == 7
-    @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.LeonardFrost)
-    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
-    @test inputData.soilLayerNumber[1] == 1
-    @test inputData.soilLayerNumber[7] == 1
-    @test inputData.soilLayerNumber[12] == 2
-    @test inputData.soilLayerNumber[14] == 2
-    @test inputData.soilLayerNumber[16] == 2
-    @test inputData.specificGravity[1] == 2.700
-    @test inputData.voidRatio[1] == 1.540
-    @test inputData.waterContent[2] == 19.300
-    @test inputData.depthGroundWaterTable == 8.00
-    @test inputData.equilibriumMoistureProfile == false
-    @test inputData.appliedPressure == 1.00
-    @test inputData.foundationLength == 3.00
-    @test inputData.center == true
-    @test inputData.pressureDilatometerA[1] == 3.00
-    @test inputData.pressureDilatometerB[1] == 15.00
-    @test inputData.conePenetrationResistance[2] == 100.00
-    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[2])
-end
-
-println("Testing input file 3:")
-@testset "Test input file 3" begin
-    outputData = OutputData(INPUT_TEST_PATHS[3])
-    inputData = getfield(outputData, :inputData)
-    @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
-    @test inputData.nodalPoints == 17
-    @test inputData.bottomPointIndex == 7
-    @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.Schmertmann)
-    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
-    @test inputData.soilLayerNumber[1] == 1
-    @test inputData.soilLayerNumber[7] == 1
-    @test inputData.soilLayerNumber[12] == 2
-    @test inputData.soilLayerNumber[14] == 2
-    @test inputData.soilLayerNumber[16] == 2
-    @test inputData.specificGravity[1] == 2.700
-    @test inputData.voidRatio[1] == 1.540
-    @test inputData.waterContent[2] == 19.300
-    @test inputData.depthGroundWaterTable == 8.00
-    @test inputData.equilibriumMoistureProfile == false
-    @test inputData.appliedPressure == 1.00
-    @test inputData.foundationLength == 3.00
-    @test inputData.center == true
-    @test inputData.conePenetrationResistance[1] == 70.00
-    @test inputData.conePenetrationResistance[2] == 100.00
-    @test inputData.conePenetrationResistance[3] == 10.00
-    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[3])
-end
-
-println("Testing input file 4:")
-@testset "Test input file 4" begin
-    outputData = OutputData(INPUT_TEST_PATHS[4])
-    inputData = getfield(outputData, :inputData)
-    @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
-    @test inputData.nodalPoints == 17
-    @test inputData.bottomPointIndex == 7
-    @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.CollapsibleSoil)
-    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
-    @test inputData.soilLayerNumber[1] == 1
-    @test inputData.soilLayerNumber[7] == 1
-    @test inputData.soilLayerNumber[12] == 2
-    @test inputData.soilLayerNumber[14] == 2
-    @test inputData.soilLayerNumber[16] == 2
-    @test inputData.specificGravity[1] == 2.700
-    @test inputData.voidRatio[1] == 1.540
-    @test inputData.waterContent[2] == 19.300
-    @test inputData.depthGroundWaterTable == 8.00
-    @test inputData.equilibriumMoistureProfile == false
-    @test inputData.appliedPressure == 1.00
-    @test inputData.foundationLength == 3.00
-    @test inputData.center == true
-    @test inputData.appliedPressureAtPoints[1,1] == 0.01
-    @test inputData.appliedPressureAtPoints[1,3] == 1.00
-    @test inputData.appliedPressureAtPoints[2,2] == 0.40
-    @test inputData.appliedPressureAtPoints[2,4] == 1.00
-    @test inputData.strainAtPoints[1,1] == 0.00
-    @test inputData.strainAtPoints[1,3] == 2.00
-    @test inputData.strainAtPoints[1,5] == 15.00
-    @test inputData.strainAtPoints[2,2] == 0.80
-    @test inputData.strainAtPoints[2,4] == 8.00
-    OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[4])
+@testset "Testing Error Files" begin
+    # @test_throws ParsingError OutputData(INPUT_TEST_PATHS[5])
+    # I wish the above code would work, however it appears 
+    # that by "exporting" ParsingError in InputParser Julia 
+    # makes a COPY of this error in this class at runtime, thus 
+    # the two error objects are not actually "equal" 
+    # Output in console:
+    #       Expected: ParsingError
+    #       Thrown: Main.OutputFormat.InputParser.ParsingError
+    # Thus, I copied the exact type from above to the line below
+    println("\nTesting file 5, error expected on line 6:")
+    @test_throws Main.OutputFormat.InputParser.ParsingError OutputData(INPUT_TEST_PATHS[5])
+    println("\nTesting file 6, error expected:")
+    @test_throws Main.OutputFormat.InputParser.SoilNumberError OutputData(INPUT_TEST_PATHS[6])
 end
