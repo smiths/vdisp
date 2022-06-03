@@ -30,7 +30,7 @@ for i=1:TEST_FILES
         catch e 
             return
         end
-        testFunctions[i](inputData)
+        testFunctions[i](outputData)
         # use outputData to output file
         OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[i])
     end

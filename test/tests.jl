@@ -9,7 +9,9 @@ using .InputParser
 
 export testFile1, testFile2, testFile3, testFile4, testFile5
 
-function testFile1(inputData)
+function testFile1(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -36,7 +38,9 @@ function testFile1(inputData)
     @test inputData.heaveActiveZoneDepth == 8.00
 end
 
-function testFile2(inputData)
+function testFile2(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - LEONARD AND FROST"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -62,7 +66,9 @@ function testFile2(inputData)
     @test inputData.conePenetrationResistance[2] == 100.00
 end
 
-function testFile3(inputData)
+function testFile3(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -88,7 +94,9 @@ function testFile3(inputData)
     @test inputData.conePenetrationResistance[3] == 10.00
 end
 
-function testFile4(inputData)
+function testFile4(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -120,7 +128,9 @@ function testFile4(inputData)
     @test inputData.strainAtPoints[2,4] == 8.00
 end
 
-function testFile5(inputData)
+function testFile5(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -145,6 +155,11 @@ function testFile5(inputData)
     @test inputData.swellIndex[2] == 0.10
     @test inputData.compressionIndex[1] == 0.25
     @test inputData.heaveActiveZoneDepth == 8.00
+    P, PP, x = OutputFormat.performGetCalculationValue(outputData)
+    @test P[1] != PP[1]
+    @test P[2] != PP[2]
+    @test P[3] != PP[3]
+    @test P[4] != PP[4]
 end
 
 

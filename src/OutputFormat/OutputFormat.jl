@@ -152,7 +152,7 @@ performGetForcePointValue(outputData::OutputData) = ForcePointBehaviour.getForce
 # CalculationOutputBehaviour
 performWriteCalculationOutput(outputData::OutputData, path::String) = CalculationBehaviour.writeCalculationOutput(getCalculationOutputBehaviour(outputData), path)
 performGetCalculationOutput(outputData::OutputData) = CalculationBehaviour.getCalculationOutput(getCalculationOutputBehaviour(outputData))
-performGetCalculationValue(outputData::OutputData) = CalculationBehaviour.getCalculationValue(getCalculationOutputBehaviour(outputData))
+performGetCalculationValue(outputData) = CalculationBehaviour.getCalculationValue(getCalculationOutputBehaviour(outputData))
 ####################################
 
 
@@ -215,7 +215,7 @@ function getForcePointOutputBehaviour(outputData::OutputData)
     return EdgeForceBehaviour(foundation)
 end
 # Get CalculationOutputBehaviour instance
-function getCalculationOutputBehaviour(outputData::OutputData)
+function getCalculationOutputBehaviour(outputData)
     inputData = outputData.inputData
     if string(inputData.model) == string(InputParser.ConsolidationSwell)
         return ConsolidationSwellCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
