@@ -3,6 +3,9 @@ LATEX_AUX_EXTENSIONS ?= aux fdb_latexmk fls log out synctex.gz toc
 
 all: run
 
+precompile:
+	julia -e "using Pkg; Pkg.activate(\".\"); Pkg.instantiate()"
+
 run:
 	julia --project=@. src/vdisp.jl "./src/.data/input_data.dat" "./src/.data/output_data.dat"
 
