@@ -5,6 +5,10 @@ using .InputParser
 
 export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue
 
+# For now this will be hardcoded into here, later it will
+# rely on our choice of units
+GAMMA_W = 0.03125
+
 ### CalculationOutputBehaviour interface ##############
 abstract type CalculationOutputBehaviour end
 function writeCalculationOutput(calcBehaviour::CalculationOutputBehaviour, path::String)
@@ -23,96 +27,277 @@ end
 ### ConsolidationSwellCalculationBehaviour "class" ####
 struct ConsolidationSwellCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
-    ConsolidationSwellCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
+    model::String
+    dx::Float64
+    soilLayerNumber::Array{Int}
+    specificGravity::Array{Float64}
+    waterContent::Array{Float64}
+    voidRatio::Array{Float64}
+    depthGroundWaterTable::Float64
+    equilibriumMoistureProfile::Bool
 end
 function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     # getValue does the calculations
-    t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
+    P, PP, x = getValue(behaviour)
+    
+    out = ""
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(P[i])\n"
+    end
+    out *= "\n"
+
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(PP[i])\n"
+    end
+    out *= "\n"
+
+    out *= "Random value: $(x)\n"
+
+    return out
 end
 function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
     x = behaviour.nodalPoints
+
+    # Get effective stress
+    P, PP = getEffectiveStress(behaviour)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
-    return (x^2 - 1, 2, 3)
+    return (P, PP, 3)
 end
 ######################################################
 
 ### LeonardFrostCalculationBehaviour "class" ####
 struct LeonardFrostCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
-    LeonardFrostCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
+    model::String
+    dx::Float64
+    soilLayerNumber::Array{Int}
+    specificGravity::Array{Float64}
+    waterContent::Array{Float64}
+    voidRatio::Array{Float64}
+    depthGroundWaterTable::Float64
+    equilibriumMoistureProfile::Bool
 end
 function getOutput(behaviour::LeonardFrostCalculationBehaviour)
     # getValue does the calculations
-    t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
+    P, PP, x = getValue(behaviour)
+    
+    out = ""
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(P[i])\n"
+    end
+    out *= "\n"
+
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(PP[i])\n"
+    end
+    out *= "\n"
+
+    out *= "Random value: $(x)\n"
+
+    return out
 end
 function getValue(behaviour::LeonardFrostCalculationBehaviour)
-     x = behaviour.nodalPoints
+    x = behaviour.nodalPoints
+
+    # Get effective stress
+    P, PP = getEffectiveStress(behaviour)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
-    return (x^3 - x^2 + 1, 2.34, 3*x)
+    return (P, PP, 3*x)
 end
 ######################################################
 
 ### SchmertmannCalculationBehaviour "class" ####
 struct SchmertmannCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
-    SchmertmannCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
+    model::String
+    dx::Float64
+    soilLayerNumber::Array{Int}
+    specificGravity::Array{Float64}
+    waterContent::Array{Float64}
+    voidRatio::Array{Float64}
+    depthGroundWaterTable::Float64
+    equilibriumMoistureProfile::Bool
 end
 function getOutput(behaviour::SchmertmannCalculationBehaviour)
     # getValue does the calculations
-    t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
+    P, PP, x = getValue(behaviour)
+    
+    out = ""
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(P[i])\n"
+    end
+    out *= "\n"
+
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(PP[i])\n"
+    end
+    out *= "\n"
+
+    out *= "Random value: $(x)\n"
+
+    return out
 end
 function getValue(behaviour::SchmertmannCalculationBehaviour)
-     x = behaviour.nodalPoints
+    x = behaviour.nodalPoints
+
+    # Get effective stress
+    P, PP = getEffectiveStress(behaviour)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
-    return (x^5 - 4*x^2 + 3, 2/x, 3*x-30)
+    return (P, PP, 3*x-30)
 end
 ######################################################
 
 ### CollapsibleSoilCalculationBehaviour "class" ####
 struct CollapsibleSoilCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
-    CollapsibleSoilCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
+    model::String
+    dx::Float64
+    soilLayerNumber::Array{Int}
+    specificGravity::Array{Float64}
+    waterContent::Array{Float64}
+    voidRatio::Array{Float64}
+    depthGroundWaterTable::Float64
+    equilibriumMoistureProfile::Bool
 end
 function getOutput(behaviour::CollapsibleSoilCalculationBehaviour)
     # getValue does the calculations
-    t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
+    P, PP, x = getValue(behaviour)
+    
+    out = ""
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(P[i])\n"
+    end
+    out *= "\n"
+
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(PP[i])\n"
+    end
+    out *= "\n"
+
+    out *= "Random value: $(x)\n"
+
+    return out
 end
 function getValue(behaviour::CollapsibleSoilCalculationBehaviour)
-     x = behaviour.nodalPoints
+    x = behaviour.nodalPoints
+
+    # Get effective stress
+    P, PP = getEffectiveStress(behaviour)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
-    return (4*x^2 - 3*x, 2.2, 3.1415)
+    return (P, PP, 3.1415)
 end
 ######################################################
 
 ### SchmertmannElasticCalculationBehaviour "class" ####
 struct SchmertmannElasticCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
-    SchmertmannElasticCalculationBehaviour(nodalPoints::Int) = new(nodalPoints)
+    model::String
+    dx::Float64
+    soilLayerNumber::Array{Int}
+    specificGravity::Array{Float64}
+    waterContent::Array{Float64}
+    voidRatio::Array{Float64}
+    depthGroundWaterTable::Float64
+    equilibriumMoistureProfile::Bool
 end
 function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     # getValue does the calculations
-    t = getValue(behaviour)
-    return "Random value 1: $(t[1])\nRandom value 2: $(t[2])\nRandom value 3: $(t[3])"
+    P, PP, x = getValue(behaviour)
+    
+    out = ""
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(P[i])\n"
+    end
+    out *= "\n"
+
+    for i=1:behaviour.nodalPoints
+        z = (i-1)*behaviour.dx 
+        out *= "$(z), $(PP[i])\n"
+    end
+    out *= "\n"
+
+    out *= "Random value: $(x)\n"
+
+    return out
 end
 function getValue(behaviour::SchmertmannElasticCalculationBehaviour)
-     x = behaviour.nodalPoints
+    x = behaviour.nodalPoints
+
+    # Get effective stress
+    P, PP = getEffectiveStress(behaviour)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
-    return (3.45*x^7 - 45*x^3 + 13.45*x, 2*x, 333*x-3)
+    return (P, PP, 333*x-3)
 end
 ######################################################
+
+# Each calculation begins with an effective stress calculation
+function getEffectiveStress(behaviour::CalculationOutputBehaviour)
+    # Initialize arrays (TODO: Think of better names)
+    P = Array{Float64}(undef,behaviour.nodalPoints)
+    PP = Array{Float64}(undef,behaviour.nodalPoints)
+    
+    # Initial values
+    P[1] = 0.0
+    PP[1] = 0.0 
+    dxx = behaviour.dx
+
+    for i = 2:behaviour.nodalPoints
+        # Get material of current soil layer
+        material = behaviour.soilLayerNumber[i-1]
+        # Get material properties
+        waterContent = behaviour.waterContent[material]/100 # WC is given as percentage, we need the decimal value
+        specificGravity = behaviour.specificGravity[material]
+        voidRatio = behaviour.voidRatio[material]
+
+        # Calculate gamma_sat (Saturated unit weight - i.e when voids are filled with water)
+        gamma_sat = specificGravity * GAMMA_W * (1 + waterContent)/(1 + voidRatio)
+
+        # If we are deeper than ground water table, subtract unit weight of water
+        gamma_sat = (dxx > behaviour.depthGroundWaterTable) ? (gamma_sat - GAMMA_W) : gamma_sat
+        
+        # Effective stress of layer i is stress of previous layer plus gamma_sat*dx
+        P[i] = P[i-1] + gamma_sat * behaviour.dx
+        PP[i] = P[i]
+
+        dxx += behaviour.dx
+    end
+
+    # Not sure why we have to do this, or theory behind it
+    if behaviour.model == "ConsolidationSwell" && behaviour.equilibriumMoistureProfile
+        # MO = DGWT/DX, but cannot be bigger than NNP
+        MO = min(Int(floor(behaviour.depthGroundWaterTable/behaviour.dx)), behaviour.nodalPoints)
+        for i=1:MO 
+            BN = behaviour.depthGroundWaterTable/behaviour.dx - float(i-1)
+            P[i] = P[i] + BN * GAMMA_W * behaviour.dx
+        end
+    end
+
+    # Return arrays P and PP
+    return (P, PP)
+end
 
 end # module

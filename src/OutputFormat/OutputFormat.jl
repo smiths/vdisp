@@ -218,15 +218,15 @@ end
 function getCalculationOutputBehaviour(outputData::OutputData)
     inputData = outputData.inputData
     if string(inputData.model) == string(InputParser.ConsolidationSwell)
-        return ConsolidationSwellCalculationBehaviour(inputData.nodalPoints)
+        return ConsolidationSwellCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
     elseif string(inputData.model) == string(InputParser.LeonardFrost)
-        return LeonardFrostCalculationBehaviour(inputData.nodalPoints)
+        return LeonardFrostCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
     elseif string(inputData.model) == string(InputParser.Schmertmann)
-        return SchmertmannCalculationBehaviour(inputData.nodalPoints)
+        return SchmertmannCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
     elseif string(inputData.model) == string(InputParser.CollapsibleSoil)
-        return CollapsibleSoilCalculationBehaviour(inputData.nodalPoints)
+        return CollapsibleSoilCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
     else
-        return SchmertmannElasticCalculationBehaviour(inputData.nodalPoints)
+        return SchmertmannElasticCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
     end
 end
 ####################################
