@@ -35,6 +35,14 @@ struct ConsolidationSwellCalculationBehaviour <: CalculationOutputBehaviour
     voidRatio::Array{Float64}
     depthGroundWaterTable::Float64
     equilibriumMoistureProfile::Bool
+    bottomPointIndex::Int
+    appliedPressure::Float64
+    foundation::String
+    foundationLength::Float64
+    foundationWidth::Float64
+    center::Bool
+
+    ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
 end
 function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     # getValue does the calculations
@@ -63,6 +71,9 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
 
+    # Get surcharge pressure 
+    P = getSurchargePressure(behaviour, P, PP)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -81,6 +92,14 @@ struct LeonardFrostCalculationBehaviour <: CalculationOutputBehaviour
     voidRatio::Array{Float64}
     depthGroundWaterTable::Float64
     equilibriumMoistureProfile::Bool
+    bottomPointIndex::Int
+    appliedPressure::Float64
+    foundation::String
+    foundationLength::Float64
+    foundationWidth::Float64
+    center::Bool
+
+    LeonardFrostCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
 end
 function getOutput(behaviour::LeonardFrostCalculationBehaviour)
     # getValue does the calculations
@@ -109,6 +128,9 @@ function getValue(behaviour::LeonardFrostCalculationBehaviour)
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
 
+    # Get surcharge pressure 
+    P = getSurchargePressure(behaviour, P, PP)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -127,6 +149,14 @@ struct SchmertmannCalculationBehaviour <: CalculationOutputBehaviour
     voidRatio::Array{Float64}
     depthGroundWaterTable::Float64
     equilibriumMoistureProfile::Bool
+    bottomPointIndex::Int
+    appliedPressure::Float64
+    foundation::String
+    foundationLength::Float64
+    foundationWidth::Float64
+    center::Bool
+
+    SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
 end
 function getOutput(behaviour::SchmertmannCalculationBehaviour)
     # getValue does the calculations
@@ -155,6 +185,9 @@ function getValue(behaviour::SchmertmannCalculationBehaviour)
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
 
+    # Get surcharge pressure 
+    P = getSurchargePressure(behaviour, P, PP)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -173,6 +206,14 @@ struct CollapsibleSoilCalculationBehaviour <: CalculationOutputBehaviour
     voidRatio::Array{Float64}
     depthGroundWaterTable::Float64
     equilibriumMoistureProfile::Bool
+    bottomPointIndex::Int
+    appliedPressure::Float64
+    foundation::String
+    foundationLength::Float64
+    foundationWidth::Float64
+    center::Bool
+
+    CollapsibleSoilCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
 end
 function getOutput(behaviour::CollapsibleSoilCalculationBehaviour)
     # getValue does the calculations
@@ -201,6 +242,9 @@ function getValue(behaviour::CollapsibleSoilCalculationBehaviour)
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
 
+    # Get surcharge pressure 
+    P = getSurchargePressure(behaviour, P, PP)
+
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
     # to make sure things are working
@@ -219,6 +263,14 @@ struct SchmertmannElasticCalculationBehaviour <: CalculationOutputBehaviour
     voidRatio::Array{Float64}
     depthGroundWaterTable::Float64
     equilibriumMoistureProfile::Bool
+    bottomPointIndex::Int
+    appliedPressure::Float64
+    foundation::String
+    foundationLength::Float64
+    foundationWidth::Float64
+    center::Bool
+
+    SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
 end
 function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     # getValue does the calculations
@@ -246,6 +298,9 @@ function getValue(behaviour::SchmertmannElasticCalculationBehaviour)
 
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
+
+    # Get surcharge pressure 
+    P = getSurchargePressure(behaviour, P, PP)
 
     # Just return some arbitrary calcultion for now
     # I will make each model return a different value 
@@ -298,6 +353,45 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
 
     # Return arrays P and PP
     return (P, PP)
+end
+
+function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
+    # foundationDepth = behaviour.bottomPointIndex * behaviour.dx
+    dxx = 0.0
+    wt = PP[behaviour.bottomPointIndex]
+    pressure1 = behaviour.appliedPressure - wt
+    pressure = pressure1
+    for i=behaviour.bottomPointIndex:behaviour.nodalPoints
+        if dxx < 0.01
+            P[i] += pressure
+            dxx += behaviour.dx
+            continue
+        end
+        # material = behaviour.soilLayerNumber[i-1]
+        if behaviour.foundation == "LongStripFooting"
+            db = dxx / behaviour.foundationWidth
+            ps = (db < 2.5 && behaviour.center) ? -0.28*db : -0.157 - 0.22*db
+            ps *= 10
+            P[i] += pressure*ps
+        else
+            basePressure = (behaviour.center) ? pressure : pressure/4
+            length = (behaviour.center) ? behaviour.foundationLength/2 : behaviour.foundationLength
+            width = (behaviour.center) ? behaviour.foundationWidth/2 : behaviour.foundationWidth
+            
+            ve2 = (length^2 + width^2 + dxx^2)/(dxx^2)
+            ve = sqrt(ve2)
+            an = length*width/(dxx^2)
+
+            enm = (2 * an * ve / (ve2 + an^2)) * (ve2+1)/ve2
+            fnm = (2 * an * ve / (ve2 - an^2))
+
+            ab = (fnm < 0) ? atan(fnm) + pi : atan(fnm)
+
+            P[i] += basePressure * (enm+ab)/pi
+        end
+        dxx += behaviour.dx
+    end
+    return P
 end
 
 end # module
