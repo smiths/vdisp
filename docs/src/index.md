@@ -1,7 +1,7 @@
 # vdisp.jl
 
 ```@docs
-readInputFile(inputPath, outputPath)
+vdisp.readInputFile(inputPath, outputPath)
 ```
 
 Documentation for vdisp.jl
