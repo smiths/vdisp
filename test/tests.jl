@@ -157,15 +157,15 @@ function testFile5(outputData)
     @test inputData.heaveActiveZoneDepth == 8.00
     P, PP, x = OutputFormat.performGetCalculationValue(outputData)
     @test P[1] == 0.25
-    @test round(P[2], digits=7) == 0.2543061
-    @test round(P[3], digits=7) == 0.2586122
-    @test round(P[4], digits=7) == 0.2629183
-    @test round(P[5], digits=7) == 0.2672244
+    @test P[2] ≈ 0.2543061 rtol=1e-6
+    @test P[3] ≈ 0.2586122 rtol=1e-6
+    @test P[4] ≈ 0.2629183 rtol=1e-6
+    @test P[5] ≈ 0.2672244 rtol=1e-6
     @test PP[1] == 0.0
-    @test round(PP[2], digits=7) == 0.0199311
-    @test round(PP[3], digits=7) == 0.0398622
-    @test round(PP[4], digits=7) == 0.0597933
-    @test round(PP[5], digits=7) == 0.0797244
+    @test PP[2] ≈ 0.0199311 rtol=1e-6
+    @test PP[3] ≈ 0.0398622 rtol=1e-6
+    @test PP[4] ≈ 0.0597933 rtol=1e-6
+    @test PP[5] ≈ 0.0797244 rtol=1e-6
 end
 
 
