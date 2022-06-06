@@ -7,6 +7,11 @@ using .InputParser
 
 export readInputFile
 
+"""
+    readInputFile(inputPath, outputPath)
+
+Reads and parses input file at inputPath and outputs calculations to file at outputPath
+"""
 function readInputFile(inputPath::String, outputPath::String)
     # Instantiate OutputData object
     outputData = OutputData(inputPath)
