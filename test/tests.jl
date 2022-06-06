@@ -156,6 +156,7 @@ function testFile5(outputData)
     @test inputData.compressionIndex[1] == 0.25
     @test inputData.heaveActiveZoneDepth == 8.00
     P, PP, x = OutputFormat.performGetCalculationValue(outputData)
+    # Values calculated in document: https://github.com/smiths/vdisp/files/8845557/Test.case.Calculations.pdf
     @test P[1] == 0.25
     @test P[2] ≈ 0.2543061 rtol=1e-6
     @test P[3] ≈ 0.2586122 rtol=1e-6
