@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - update-documenter
     tags: '*'
   pull_request:
     branches:
