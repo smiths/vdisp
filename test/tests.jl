@@ -7,9 +7,11 @@ using .OutputFormat
 include("../src/InputParser.jl")
 using .InputParser
 
-export testFile1, testFile2, testFile3, testFile4
+export testFile1, testFile2, testFile3, testFile4, testFile5
 
-function testFile1(inputData)
+function testFile1(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -36,7 +38,9 @@ function testFile1(inputData)
     @test inputData.heaveActiveZoneDepth == 8.00
 end
 
-function testFile2(inputData)
+function testFile2(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - LEONARD AND FROST"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -62,7 +66,9 @@ function testFile2(inputData)
     @test inputData.conePenetrationResistance[2] == 100.00
 end
 
-function testFile3(inputData)
+function testFile3(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -88,7 +94,9 @@ function testFile3(inputData)
     @test inputData.conePenetrationResistance[3] == 10.00
 end
 
-function testFile4(inputData)
+function testFile4(outputData)
+    inputData = outputData.inputData
+
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
@@ -119,5 +127,47 @@ function testFile4(inputData)
     @test inputData.strainAtPoints[2,2] == 0.80
     @test inputData.strainAtPoints[2,4] == 8.00
 end
+
+function testFile5(outputData)
+    inputData = outputData.inputData
+
+    @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
+    @test inputData.nodalPoints == 17
+    @test inputData.bottomPointIndex == 7
+    @test inputData.soilLayers == 2
+    @test inputData.dx == 0.5
+    @test string(inputData.model) == string(InputParser.ConsolidationSwell)
+    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
+    @test inputData.soilLayerNumber[1] == 1
+    @test inputData.soilLayerNumber[7] == 1
+    @test inputData.soilLayerNumber[12] == 2
+    @test inputData.soilLayerNumber[14] == 2
+    @test inputData.soilLayerNumber[16] == 2
+    @test inputData.specificGravity[1] == 2.700
+    @test inputData.voidRatio[1] == 1.540
+    @test inputData.waterContent[2] == 19.300
+    @test inputData.depthGroundWaterTable == 8.00
+    @test inputData.equilibriumMoistureProfile == true
+    @test inputData.appliedPressure == 1.00
+    @test inputData.foundationLength == 3.00
+    @test inputData.center == true
+    @test inputData.swellPressure[1] == 2.00
+    @test inputData.swellIndex[2] == 0.10
+    @test inputData.compressionIndex[1] == 0.25
+    @test inputData.heaveActiveZoneDepth == 8.00
+    P, PP, x = OutputFormat.performGetCalculationValue(outputData)
+    # Values calculated in document: https://github.com/smiths/vdisp/files/8845557/Test.case.Calculations.pdf
+    @test P[1] == 0.25
+    @test P[2] ≈ 0.2543061 rtol=1e-6
+    @test P[3] ≈ 0.2586122 rtol=1e-6
+    @test P[4] ≈ 0.2629183 rtol=1e-6
+    @test P[5] ≈ 0.2672244 rtol=1e-6
+    @test PP[1] == 0.0
+    @test PP[2] ≈ 0.0199311 rtol=1e-6
+    @test PP[3] ≈ 0.0398622 rtol=1e-6
+    @test PP[4] ≈ 0.0597933 rtol=1e-6
+    @test PP[5] ≈ 0.0797244 rtol=1e-6
+end
+
 
 end # module 

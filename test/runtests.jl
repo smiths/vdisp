@@ -10,12 +10,17 @@ using .InputParser
 include("./tests.jl")
 using .Tests
 
-# Paths to test input files from runtests.jl
-INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:6]
-OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:4]
+TEST_FILES = 5
 
-testFunctions = [testFile1, testFile2, testFile3, testFile4]
-for i=1:4
+# Paths to test input files from runtests.jl
+INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:TEST_FILES]
+OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:TEST_FILES]
+
+# Paths to test input files with errors
+INPUT_ERROR_PATHS = ["../test/testdata/test_error_$x.dat" for x in 1:2]
+
+testFunctions = [testFile1, testFile2, testFile3, testFile4, testFile5]
+for i=1:TEST_FILES
     println("\nTesting input file $(i):")
     @testset "Test input file $(i)" begin
         outputData = 0
@@ -25,8 +30,9 @@ for i=1:4
         catch e 
             return
         end
-        testFunctions[i](inputData)
+        testFunctions[i](outputData)
         # use outputData to output file
+        OutputFormat.writeDefaultOutput(outputData, OUTPUT_TEST_PATHS[i])
     end
 end
 
@@ -40,8 +46,8 @@ end
     #       Expected: ParsingError
     #       Thrown: Main.OutputFormat.InputParser.ParsingError
     # Thus, I copied the exact type from above to the line below
-    println("\nTesting file 5, error expected on line 6:")
-    @test_throws Main.OutputFormat.InputParser.ParsingError OutputData(INPUT_TEST_PATHS[5])
-    println("\nTesting file 6, error expected:")
-    @test_throws Main.OutputFormat.InputParser.SoilNumberError OutputData(INPUT_TEST_PATHS[6])
+    println("\nTesting error file 1, error expected on line 6:")
+    @test_throws Main.OutputFormat.InputParser.ParsingError OutputData(INPUT_ERROR_PATHS[1])
+    println("\nTesting error file 2, error expected:")
+    @test_throws Main.OutputFormat.InputParser.SoilNumberError OutputData(INPUT_ERROR_PATHS[2])
 end
