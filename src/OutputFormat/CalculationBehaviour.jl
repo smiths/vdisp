@@ -3,7 +3,7 @@ module CalculationBehaviour
 include("../InputParser.jl")
 using .InputParser
 
-export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue
+export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress
 
 # For now this will be hardcoded into here, later it will
 # rely on our choice of units
@@ -254,7 +254,33 @@ function getValue(behaviour::SchmertmannElasticCalculationBehaviour)
 end
 ######################################################
 
-# Each calculation begins with an effective stress calculation
+@doc raw"""
+    getEffectiveStress(behaviour)
+
+Calculates the effective stress at each nodal point given values in the
+`InputData` instance contained in `behaviour`. Returns two identical 
+Float64 arrays (unless model is ConsolidationSwell and equilibrium moisture 
+profile is saturated above water table). `VDisp` never alters the second array
+so the original effective stress values are always available for each nodal point, 
+and alters the first array adding all other stress values to each corresponding
+nodal point.
+
+# Calculations
+
+The effective stress at depth `z`, ``\sigma'_z``, is calculated using the following formulas:
+
+``\sigma'_z = (\gamma_{sat}-\gamma_w)z``
+
+Which can be derived from the following equations:
+
+``\sigma_z = \sigma'_z + u_w``
+
+``u_w = \gamma_w z``
+
+``\sigma_z = \gamma_{sat} z``
+
+This calculation is repeated at each depth increment.
+"""
 function getEffectiveStress(behaviour::CalculationOutputBehaviour)
     # Initialize arrays (TODO: Think of better names)
     P = Array{Float64}(undef,behaviour.nodalPoints)
