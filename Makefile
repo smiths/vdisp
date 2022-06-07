@@ -7,6 +7,7 @@ buildDocs:
 	julia --project=@. docs/make.jl
 
 precompile:
+	julia -e "using Pkg; Pkg.activate(\"docs\"); Pkg.instantiate()"
 	julia -e "using Pkg; Pkg.activate(\".\"); Pkg.instantiate()"
 
 run:
