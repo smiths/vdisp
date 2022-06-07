@@ -217,16 +217,20 @@ end
 # Get CalculationOutputBehaviour instance
 function getCalculationOutputBehaviour(outputData)
     inputData = outputData.inputData
+    
+    effectiveStressValues = [inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile]
+    surchargePressureValues = [inputData.bottomPointIndex, inputData.appliedPressure, string(inputData.foundation), inputData.foundationLength, inputData.foundationWidth, inputData.center]
+    
     if string(inputData.model) == string(InputParser.ConsolidationSwell)
-        return ConsolidationSwellCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
+        return ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     elseif string(inputData.model) == string(InputParser.LeonardFrost)
-        return LeonardFrostCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
+        return LeonardFrostCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     elseif string(inputData.model) == string(InputParser.Schmertmann)
-        return SchmertmannCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
+        return SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     elseif string(inputData.model) == string(InputParser.CollapsibleSoil)
-        return CollapsibleSoilCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
+        return CollapsibleSoilCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     else
-        return SchmertmannElasticCalculationBehaviour(inputData.nodalPoints, string(inputData.model), inputData.dx, inputData.soilLayerNumber, inputData.specificGravity, inputData.waterContent, inputData.voidRatio, inputData.depthGroundWaterTable, inputData.equilibriumMoistureProfile)
+        return SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     end
 end
 ####################################
