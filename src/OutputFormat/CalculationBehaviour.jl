@@ -1,5 +1,7 @@
 module CalculationBehaviour
 
+using PrettyTables
+
 include("../InputParser.jl")
 using .InputParser
 
@@ -41,12 +43,20 @@ struct ConsolidationSwellCalculationBehaviour <: CalculationOutputBehaviour
     foundationLength::Float64
     foundationWidth::Float64
     center::Bool
+    heaveActiveZoneDepth::Float64
+    groundToHeaveDepth::Float64
+    swellPressure::Array{Float64}
+    swellIndex::Array{Float64}
+    compressionIndex::Array{Float64}
+    maxPastPressure::Array{Float64}
+    outputIncrements::Bool
+    elements::Int
 
-    ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
+    ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6],calcValues[1],calcValues[2],calcValues[3],calcValues[4],calcValues[5],calcValues[6],calcValues[7], calcValues[8])
 end
 function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     # getValue does the calculations
-    P, PP, x = getValue(behaviour)
+    P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = getValue(behaviour)
     
     out = ""
     for i=1:behaviour.nodalPoints
@@ -61,7 +71,16 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     end
     out *= "\n"
 
-    out *= "Random value: $(x)\n"
+    if behaviour.outputIncrements
+        out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+        out *= "\n"
+        out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+        out *= "\n"
+    end
+
+    out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * string(Δh1) * "ft\n"
+    out *= "Subsoil Movement: " * string(Δh2) * "ft\n"
+    out *= "Total Heave: " * string(Δh) * "ft\n"
 
     return out
 end
@@ -74,10 +93,86 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
 
-    # Just return some arbitrary calcultion for now
-    # I will make each model return a different value 
-    # to make sure things are working
-    return (P, PP, 3)
+    # Begin main calculations
+    Δh1 = 0.0
+    heaveBeginIndex = Int(floor(behaviour.groundToHeaveDepth / behaviour.dx))+1
+    heaveActiveIndex = Int(floor(behaviour.heaveActiveZoneDepth / behaviour.dx))
+    Δx = behaviour.groundToHeaveDepth + (behaviour.dx / 2)
+    foundationBottomIndex = behaviour.bottomPointIndex - 1
+    if heaveActiveIndex > foundationBottomIndex
+        heaveActiveIndex = foundationBottomIndex
+    end
+
+    # init table
+    heaveAboveFoundationTable = []
+    if heaveBeginIndex < heaveActiveIndex || behaviour.outputIncrements 
+        for i=heaveBeginIndex:heaveActiveIndex
+            material = behaviour.soilLayerNumber[i]
+            pressure = (P[i]+ P[i+1])/2
+
+            initialVoidRatio = behaviour.voidRatio[material]
+            swellPressure = behaviour.swellPressure[material]
+            swellIndex = behaviour.swellIndex[material]
+            compressionIndex = behaviour.compressionIndex[material]
+            maxPastPressure = behaviour.maxPastPressure[material]
+            
+            term1 = swellPressure / pressure
+            term2 = swellPressure / maxPastPressure
+            term3 = maxPastPressure / pressure
+
+            finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
+            Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
+
+            if behaviour.outputIncrements
+                Δp = swellPressure - pressure
+                # TODO: Round values to a fixed number of decimal places
+                if size(heaveAboveFoundationTable, 1) == 0
+                    heaveAboveFoundationTable = [i Δx Δe Δp]
+                else
+                    heaveAboveFoundationTable = vcat(heaveAboveFoundationTable, [i Δx Δe Δp]) 
+                end
+            end
+            Δh1 += behaviour.dx * Δe
+            Δx += behaviour.dx
+        end
+    end
+    
+    Δh2 = 0.0
+    Δx = float(behaviour.bottomPointIndex)*behaviour.dx - (behaviour.dx/2)
+    heaveBelowFoundationTable = []
+    for i=behaviour.bottomPointIndex:behaviour.elements
+        material = behaviour.soilLayerNumber[i]
+        pressure = (P[i]+ P[i+1])/2
+
+        initialVoidRatio = behaviour.voidRatio[material]
+        swellPressure = behaviour.swellPressure[material]
+        swellIndex = behaviour.swellIndex[material]
+        compressionIndex = behaviour.compressionIndex[material]
+        maxPastPressure = behaviour.maxPastPressure[material]
+        
+        term1 = swellPressure / pressure
+        term2 = swellPressure / maxPastPressure
+        term3 = maxPastPressure / pressure
+
+        finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
+        Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
+        
+        if behaviour.outputIncrements
+            Δp = swellPressure - pressure
+            # TODO: Round values to a fixed number of decimal places
+            if size(heaveBelowFoundationTable, 1) == 0
+                heaveBelowFoundationTable = [i Δx Δe Δp]
+            else
+                heaveBelowFoundationTable = vcat(heaveBelowFoundationTable, [i Δx Δe Δp]) 
+            end
+        end
+        Δh2 += behaviour.dx * Δe
+        Δx += behaviour.dx
+    end
+
+    Δh = Δh1 + Δh2 
+
+    return (P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh)
 end
 ######################################################
 

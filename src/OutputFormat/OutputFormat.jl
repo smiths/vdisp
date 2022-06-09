@@ -222,7 +222,8 @@ function getCalculationOutputBehaviour(outputData)
     surchargePressureValues = [inputData.bottomPointIndex, inputData.appliedPressure, string(inputData.foundation), inputData.foundationLength, inputData.foundationWidth, inputData.center]
     
     if string(inputData.model) == string(InputParser.ConsolidationSwell)
-        return ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues)
+        calcValues = [inputData.heaveActiveZoneDepth, inputData.groundToHeaveDepth, inputData.swellPressure, inputData.swellIndex, inputData.compressionIndex, inputData.maxPastPressure, inputData.outputIncrements, inputData.elements]
+        return ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues)
     elseif string(inputData.model) == string(InputParser.LeonardFrost)
         return LeonardFrostCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     elseif string(inputData.model) == string(InputParser.Schmertmann)
