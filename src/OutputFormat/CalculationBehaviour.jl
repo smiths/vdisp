@@ -72,8 +72,10 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     out *= "\n"
 
     if behaviour.outputIncrements
+        out *= "Heave Distribution Above Foundation: \n"
         out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
         out *= "\n"
+        out *= "Heave Distribution Below Foundation: \n"
         out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
         out *= "\n"
     end
