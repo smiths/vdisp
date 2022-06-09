@@ -37,7 +37,7 @@ function testFile1(outputData)
     @test inputData.compressionIndex[1] == 0.25
     @test inputData.heaveActiveZoneDepth == 8.00
     P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = OutputFormat.performGetCalculationValue(outputData)
-    # Values calculated in document: https://github.com/smiths/vdisp/files/8855479/Test.Case.Surcharge.Pressure.pdf
+    # Values calculated in document: https://github.com/smiths/vdisp/files/8871489/Test.Case.Surcharge.Pressure.1.pdf
     @test P[7] == 1.00
     @test P[8] ≈ 0.9985885 rtol=1e-6
     @test P[9] ≈ 0.9189579 rtol=1e-6
