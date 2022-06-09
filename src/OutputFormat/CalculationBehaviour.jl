@@ -3,7 +3,7 @@ module CalculationBehaviour
 include("../InputParser.jl")
 using .InputParser
 
-export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress
+export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure
 
 # For now this will be hardcoded into here, later it will
 # rely on our choice of units
@@ -381,8 +381,45 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
     return (P, PP)
 end
 
+@doc raw"""
+    getSurchargePressure(behaviour, P, PP)
+
+Calculates the stress after adding foundation at each nodal point below the foundation.
+The values are added to array `P`, while array `PP` remains unchanged. `VDisp` software 
+calls this function using `P` and `PP` returned from the `getEffectiveStress()` function.
+
+# Calculations
+
+Using the Boussinesq equation for stress at a point under the corner of a rectangular 
+area, the stress from adding the foundation is calculated at each depth increment. If
+the calculation must be done from the center (i.e. `behaviour.center == true`), the 2:1
+method is used: length, `a`, and width, `b`, are halved, while the whole equation is 
+multiplied by a factor of 4 (the leading factor becomes ``\frac{2q}{\pi}`` rather than 
+``\frac{q}{2\pi}``. This is because the calculation in the center can be seen as splitting
+the rectangular area into 4 quadrants, where the original *center* is a *corner* for each 
+rectangle. Now the Boussinesq equation for stress at a point under the *corner* of a
+rectangular area can be used, however there are 4 of these rectangles contributing to the
+load, hence the multiplication by a factor of 4). The stress increase at depth `z` is denoted 
+as ``\sigma_z``, and is calculated using the following equation:
+
+``\sigma_z = \frac{q}{2 \pi} (\text{tan}^{-1}(\frac{ab}{zC})+\frac{abz}{C}(\frac{1}{A^2}+\frac{1}{B^2}))``
+
+where,
+
+``\sigma_z`` is the stress increase at depth `z`
+
+``a`` is the length of the foundation
+
+``b`` is the width of the foundation
+
+``A^2 = a^2 + z^2``
+
+``B^2 = b^2 + z^2``
+
+``C = \sqrt{a^2+b^2+z^2}``
+
+"""
 function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
-    # foundationDepth = behaviour.bottomPointIndex * behaviour.dx
     dxx = 0.0
     wt = PP[behaviour.bottomPointIndex]
     pressure1 = behaviour.appliedPressure - wt
@@ -393,7 +430,6 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
             dxx += behaviour.dx
             continue
         end
-        # material = behaviour.soilLayerNumber[i-1]
         if behaviour.foundation == "LongStripFooting"
             db = dxx / behaviour.foundationWidth
             ps = (db < 2.5 && behaviour.center) ? -0.28*db : -0.157 - 0.22*db
