@@ -111,7 +111,7 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         for i=heaveBeginIndex:heaveActiveIndex
             material = behaviour.soilLayerNumber[i]
             pressure = (P[i]+ P[i+1])/2
-
+            
             initialVoidRatio = behaviour.voidRatio[material]
             swellPressure = behaviour.swellPressure[material]
             swellIndex = behaviour.swellIndex[material]
