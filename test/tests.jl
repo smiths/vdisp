@@ -36,13 +36,18 @@ function testFile1(outputData)
     @test inputData.swellIndex[2] == 0.10
     @test inputData.compressionIndex[1] == 0.25
     @test inputData.heaveActiveZoneDepth == 8.00
-    P, PP, x = OutputFormat.performGetCalculationValue(outputData)
+    P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = OutputFormat.performGetCalculationValue(outputData)
     # Values calculated in document: https://github.com/smiths/vdisp/files/8871489/Test.Case.Surcharge.Pressure.1.pdf
     @test P[7] == 1.00
     @test P[8] ≈ 0.9985885 rtol=1e-6
     @test P[9] ≈ 0.9189579 rtol=1e-6
     @test P[10] ≈ 0.7964492 rtol=1e-6
     @test P[11] ≈ 0.6825551 rtol=1e-6
+    # Values calculated in document: https://github.com/smiths/vdisp/files/8873290/Test.Cases.MECH.pdf
+    @test heaveAboveFoundationTable[1,3] ≈ 0.1359761 rtol=1e-6
+    @test heaveAboveFoundationTable[1,4] ≈ 1.9900344 rtol=1e-6
+    @test heaveAboveFoundationTable[2,3] ≈ 0.1077996 rtol=1e-6
+    @test heaveAboveFoundationTable[2,4] ≈ 1.9701033 rtol=1e-6
 end
 
 function testFile2(outputData)
