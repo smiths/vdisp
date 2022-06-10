@@ -252,12 +252,16 @@ struct SchmertmannCalculationBehaviour <: CalculationOutputBehaviour
     foundationLength::Float64
     foundationWidth::Float64
     center::Bool
+    elements::Int
+    timeAfterConstruction::Int
+    conePenetrationResistance::Array{Float64}
+    outputIncrements::Bool
 
-    SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
+    SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4])
 end
 function getOutput(behaviour::SchmertmannCalculationBehaviour)
     # getValue does the calculations
-    P, PP, x = getValue(behaviour)
+    P, PP, settlementTable, Δh = getValue(behaviour)
     
     out = ""
     for i=1:behaviour.nodalPoints
@@ -272,7 +276,15 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
     end
     out *= "\n"
 
-    out *= "Random value: $(x)\n"
+    out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n"
+
+    if behaviour.outputIncrements
+        out *= "Heave Distribution Above Foundation: \n"
+        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlment (ft)"],tf = tf_markdown)
+        out *= "\n"
+    end
+
+    out *= "Settlement Beneath Foundation: " * string(Δh) * "ft\n"
 
     return out
 end
@@ -285,10 +297,55 @@ function getValue(behaviour::SchmertmannCalculationBehaviour)
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
 
-    # Just return some arbitrary calcultion for now
-    # I will make each model return a different value 
-    # to make sure things are working
-    return (P, PP, 3*x-30)
+    # Begin calculations
+    Δh = 0.0
+    Δh1 = 0.0
+    Qnet = behaviour.appliedPressure - PP[behaviour.bottomPointIndex]
+    Δx = behaviour.dx * float(behaviour.bottomPointIndex) - behaviour.dx/2
+
+    time = behaviour.timeAfterConstruction/ 0.1
+    C1 = max(0.5, 1 - 0.5*PP[behaviour.bottomPointIndex]/Qnet)
+    Ct = 1 + 0.2*log10(time)
+
+    settlementTable = []
+    for i=behaviour.bottomPointIndex:behaviour.elements
+        material = behaviour.soilLayerNumber[i]
+        Δσ = (PP[i+1]+PP[i])/2
+        conePenetrationRes = behaviour.conePenetrationResistance[material]
+
+        Esi = (behaviour.foundation == "RectangularSlab") ? 2.5*conePenetrationRes : 3.5*conePenetrationRes
+
+        Iz = 0.0
+        if behaviour.foundation == "RectangularSlab"
+            node = Int(floor(0.5 * behaviour.foundationWidth / behaviour.dx + behaviour.dx * float(behaviour.bottomPointIndex-1)))
+            
+            halfWidth = 0.5 * behaviour.foundationWidth
+            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
+            Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ) 
+            Iz = (depth > halfWidth) ?  Izp + Izp/3 - Izp*depth/(3*halfWidth) : (depth > 4*halfWidth) ?  0.0 : 0.1 + (Izp-0.1) * depth/(halfWidth)
+        else
+            node = Int(floor(behaviour.foundationWidth / behaviour.dx + behaviour.dx * float(behaviour.bottomPointIndex-1)))
+
+            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
+            Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ) 
+            Iz = (depth > behaviour.foundationWidth) ?  Izp + Izp/3 - Izp*depth/(3*behaviour.foundationWidth) : (depth > 4*behaviour.foundationWidth) ?  0.0 : 0.2 + (Izp-0.2) * depth/(behaviour.foundationWidth)
+        end
+        Δh1 = -C1 * Ct * Qnet * Iz * behaviour.dx / Esi
+        Δh += Δh1
+
+        if behaviour.outputIncrements
+            # Append i Δx Δh1 to table
+            if size(settlementTable,1) == 0
+                settlementTable = [i Δx Δh1]
+            else
+                settlementTable = vcat(settlementTable, [i Δx Δh1])
+            end
+        end
+
+        Δx += behaviour.dx
+    end
+
+    return (P, PP, settlementTable, Δh)
 end
 ######################################################
 

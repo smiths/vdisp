@@ -3,7 +3,7 @@
       DIMENSION PP(NQ),G(NL),WC(NL)
       CHARACTER *64 TITLE
 
-      OPEN(5,FILE='VDIN1.DAT')
+      OPEN(5,FILE='VDIN3.DAT')
       OPEN(6,FILE='VDOU.DAT') 
       READ(5,'(A)')     TITLE
       WRITE(6,'(1X,A)') TITLE
