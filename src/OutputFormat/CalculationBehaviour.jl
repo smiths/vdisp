@@ -5,7 +5,7 @@ using PrettyTables
 include("../InputParser.jl")
 using .InputParser
 
-export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure
+export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure, getValue
 
 # For now this will be hardcoded into here, later it will
 # rely on our choice of units
@@ -86,6 +86,52 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
 
     return out
 end
+@doc raw"""
+    getValue(behaviour::ConsolidationSwellCalculationBehaviour)
+
+This functions first calls `getEffectiveStress()` and `getSurchargePressure()` with `behaviour` as the argument to
+establish the two arrays `P` and `PP`. It then calculates total heave (`Δh`), subsoil movement (`Δh2`), and heave 
+above foundation (`Δh1`). It also calculates values at each depth increment and places them in two tables, 
+`heaveAboveFoundationTable` and `heaveBelowFoundationTable`. Returns tuple (`P`, `PP`, `heaveAboveFoundationTable`, 
+`heaveBelowFoundationTable`, `Δh1`, `Δh2`, `Δh`)
+
+# Calculations
+
+``\Delta e_j = C_c \log_{10}{\frac{\sigma_{fj}'}{\sigma_{oj}'}} \text{, if } \sigma_{fj}' < \sigma_{pj}'``
+
+``\Delta e_j = C_r \log_{10}{\frac{\sigma_{pj}'}{\sigma_{oj}'}} + C_c \log_{10}{\frac{\sigma_{fj}'}{\sigma_{pj}'}} \text{, if } \sigma_{fj}' \ge \sigma_{pj}'``
+
+``\sigma_{oj}' = \frac{\sigma_{oj1}' + \sigma_{oj2}'}{2}``
+
+``\rho_{cj} = \frac{\Delta e_j}{1 + e_{0j}}H_j``
+
+``\rho_c = \sum_{j=1}^{n} \rho_{cj}``
+
+``\Delta e_j``: change in void ratio of soil layer *j*
+
+``e_{0j}``: initial void ratio of soil layer *j*
+
+``\sigma_{oj}'``: effectuve stress of layer *j*
+
+``\sigma_{oj1}'``: effective stress at top of layer *j*
+
+``\sigma_{oj2}'``: effective stress at bottom of layer *j*
+
+``\sigma_{fj}'``: final applied effective stress of layer *j*
+
+``C_c``: compression index
+
+``C_r``: recompression index
+
+``\rho_{cj}``: one-dimensional consolidation of layer *j*
+
+``H_j``: thickness of layer *j*
+
+``n``: number of layers
+
+> Note: Tables `heaveAboveFoundationTable` and `heaveBelowFoundationTable` contain the following values in each row: ``j``, ``\frac{dx}{2} + j \times dx``, ``\frac{\rho_{cj}}{H_j}``, ``\sigma_{fj}-\sigma_{oj}``
+
+"""
 function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
     x = behaviour.nodalPoints
 
