@@ -497,7 +497,7 @@ struct InputData
         if model == Schmertmann
             # Reinitialize to larger array if schemrtmann method
             conePenetrationResistance = zeros(Float64, soilLayers+1)
-            for i in 1:soilLayers+1
+            for i in 1:soilLayers
                 currentLineData = []
                 try
                     currentLineData = parseCurrentLine(input, 2, lastLineIndex+i)
@@ -518,7 +518,7 @@ struct InputData
                     conePenetrationResistance[m] = qc
                 catch e
                     if isa(e, ArgumentError)
-                        println("Error, invalid value on line $(lastLineIndex+1)!")
+                        println(" Error, invalid value on line $(lastLineIndex+1)!")
                     elseif isa(e, BoundsError)
                         # File ran out of lines
                         println("Error, encountered end of file unexpectedly!")
@@ -671,7 +671,7 @@ struct InputData
             end
             # Parse data
             try
-                timeAfterConstruction = parse(Int, currentLineData[1])
+                timeAfterConstruction = Int(floor(parse(Float64, currentLineData[1])))
             catch e
                 if isa(e, ArgumentError)
                     println("Error, invalid value on line $(lastLineIndex+1)!")

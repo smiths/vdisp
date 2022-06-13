@@ -10,7 +10,7 @@ using .InputParser
 include("./tests.jl")
 using .Tests
 
-TEST_FILES = 5
+TEST_FILES = 6
 
 # Paths to test input files from runtests.jl
 INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:TEST_FILES]
@@ -19,7 +19,7 @@ OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:TEST_FILES
 # Paths to test input files with errors
 INPUT_ERROR_PATHS = ["../test/testdata/test_error_$x.dat" for x in 1:2]
 
-testFunctions = [testFile1, testFile2, testFile3, testFile4, testFile5]
+testFunctions = [testFile1, testFile2, testFile3, testFile4, testFile5, testFile6]
 for i=1:TEST_FILES
     println("\nTesting input file $(i):")
     @testset "Test input file $(i)" begin

@@ -227,11 +227,13 @@ function getCalculationOutputBehaviour(outputData)
     elseif string(inputData.model) == string(InputParser.LeonardFrost)
         return LeonardFrostCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     elseif string(inputData.model) == string(InputParser.Schmertmann)
-        return SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues)
+        calcValues = [inputData.elements, inputData.timeAfterConstruction, inputData.conePenetrationResistance, inputData.outputIncrements]
+        return SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues)
     elseif string(inputData.model) == string(InputParser.CollapsibleSoil)
         return CollapsibleSoilCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     else
-        return SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues)
+        calcValues = [inputData.elements, inputData.timeAfterConstruction, inputData.conePenetrationResistance, inputData.outputIncrements, inputData.elasticModulus]
+        return SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues)
     end
 end
 ####################################

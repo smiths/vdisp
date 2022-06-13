@@ -11,7 +11,7 @@
     %% Title Page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       
       \title{Inconsistencies in Settlement Analysis Textbook and FORTRAN Code}
-      \date{May 9th, 2022}
+      \date{\today}
       \author{Emil Soleymani, Dr.~Spencer Smith\\ McMaster University}
       \maketitle
 
@@ -108,8 +108,18 @@
         \end{tabular}
         \\
         \medskip
-        \textit{Note}: $f \equiv$ IOPTION$\Rightarrow$NOPT  
+        \textit{Note}: $f \equiv$ IOPTION$\Rightarrow$NOPT.
     \end{center}
+
+    \subsection*{Input File Examples:}
+    \indentpar In Appendix F of the Settlements Analysis Textbook, there are multiple example 
+    input files, and their corresponding output. Table F-6 on p.176, titled \emph{Settlment of 
+    Granular Soil, Schmertmann Model}, has a typo. In the last line of Table F-6a, there are 
+    two entries: “3 10.00”. This line should only have one entry which represents \emph{time in 
+    years after construction}. By examining the output file, Table F-6b, it is clear that the value
+    of \emph{time in years after construction} should be 10, thus the \emph{3} at the beginning of 
+    the line should be removed. Upon removal the output of the \emph{vdisp.for} program matches
+    Table F-6b.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
      
 \end{document}
