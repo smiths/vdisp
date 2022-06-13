@@ -523,7 +523,7 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
     # Initial values
     P[1] = 0.0
     PP[1] = 0.0 
-    dxx = behaviour.dx
+    Δx = behaviour.dx
 
     for i = 2:behaviour.nodalPoints
         # Get material of current soil layer
@@ -537,13 +537,13 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
         gamma_sat = specificGravity * GAMMA_W * (1 + waterContent)/(1 + voidRatio)
 
         # If we are deeper than ground water table, subtract unit weight of water
-        gamma_sat = (dxx > behaviour.depthGroundWaterTable) ? (gamma_sat - GAMMA_W) : gamma_sat
+        gamma_sat = (Δx > behaviour.depthGroundWaterTable) ? (gamma_sat - GAMMA_W) : gamma_sat
         
         # Effective stress of layer i is stress of previous layer plus gamma_sat*dx
         P[i] = P[i-1] + gamma_sat * behaviour.dx
         PP[i] = P[i]
 
-        dxx += behaviour.dx
+        Δx += behaviour.dx
     end
 
     # Not sure why we have to do this, or theory behind it
@@ -599,29 +599,36 @@ where,
 
 """
 function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
-    dxx = 0.0
-    wt = PP[behaviour.bottomPointIndex]
-    pressure1 = behaviour.appliedPressure - wt
-    pressure = pressure1
+    # Depth
+    Δx = 0.0
+    # Effective stress at bottom of foundation
+    σ_bottom = PP[behaviour.bottomPointIndex]
+    # Net applied footing pressure
+    Qnet = behaviour.appliedPressure - σ_bottom
+
+    # Loop through each nodal point below foundation
     for i=behaviour.bottomPointIndex:behaviour.nodalPoints
-        if dxx < 0.01
-            P[i] += pressure
-            dxx += behaviour.dx
+        if Δx < 0.01 # TODO: Why was this hardcoded to 0.01? Make this a constant. Maybe named MIN_DX?
+            # This ensures pressure at bottom of foundation is equal to behaviour.appliedPressure
+            P[i] += Qnet
+            Δx += behaviour.dx
             continue
         end
+
+        # Make calculations, add to effective stress at nodal point i
         if behaviour.foundation == "LongStripFooting"
-            db = dxx / behaviour.foundationWidth
+            db = Δx / behaviour.foundationWidth
             ps = (db < 2.5 && behaviour.center) ? -0.28*db : -0.157 - 0.22*db
             ps *= 10
-            P[i] += pressure*ps
+            P[i] += Qnet*ps
         else
-            basePressure = (behaviour.center) ? pressure : pressure/4
+            basePressure = (behaviour.center) ? Qnet : Qnet/4
             length = (behaviour.center) ? behaviour.foundationLength/2 : behaviour.foundationLength
             width = (behaviour.center) ? behaviour.foundationWidth/2 : behaviour.foundationWidth
             
-            ve2 = (length^2 + width^2 + dxx^2)/(dxx^2)
+            ve2 = (length^2 + width^2 + Δx^2)/(Δx^2)
             ve = sqrt(ve2)
-            an = length*width/(dxx^2)
+            an = length*width/(Δx^2)
 
             enm = (2 * an * ve / (ve2 + an^2)) * (ve2+1)/ve2
             fnm = (2 * an * ve / (ve2 - an^2))
@@ -630,7 +637,9 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
 
             P[i] += basePressure * (enm+ab)/pi
         end
-        dxx += behaviour.dx
+
+        # Increment depth
+        Δx += behaviour.dx
     end
     return P
 end
