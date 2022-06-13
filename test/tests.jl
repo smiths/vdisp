@@ -103,7 +103,12 @@ function testFile3(outputData)
     @test inputData.center == true
     @test inputData.conePenetrationResistance[1] == 70.00
     @test inputData.conePenetrationResistance[2] == 100.00
-    @test inputData.conePenetrationResistance[3] == 10.00
+    @test inputData.timeAfterConstruction == 10
+    P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outputData)
+    # Values calculated in document: 
+    @test settlementTable[1,3] ≈ -0.000689697 rtol=1e-6
+    @test settlementTable[2,3] ≈ -0.001383052 rtol=1e-6
+    @test settlementTable[3,3] ≈ -0.002045984 rtol=1e-6
 end
 
 function testFile4(outputData)

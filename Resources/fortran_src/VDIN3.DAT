@@ -1,4 +1,3 @@
-# Input Data taken from p.176 of https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf    
     FOOTING IN GRANULAR SOIL - SCHMERTMANN
 1   2   1   17  7   2   0.50
 1   1
@@ -10,5 +9,4 @@
   1.00  3.00    3.00    0
 1   70.00
 2   100.00
-
 10.00
