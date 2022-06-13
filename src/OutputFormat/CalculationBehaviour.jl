@@ -523,14 +523,17 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
     σ_bottom = PP[behaviour.bottomPointIndex]
     # Net applied footing pressure
     Qnet = behaviour.appliedPressure - σ_bottom
+
+    # Loop through each nodal point below foundation
     for i=behaviour.bottomPointIndex:behaviour.nodalPoints
         if Δx < 0.01 # TODO: Why was this hardcoded to 0.01? Make this a constant. Maybe named MIN_DX?
-            # This ensures pressure at bottom of foundation is 
-            # equal to behaviour.appliedPressure
+            # This ensures pressure at bottom of foundation is equal to behaviour.appliedPressure
             P[i] += Qnet
             Δx += behaviour.dx
             continue
         end
+
+        # Make calculations, add to effective stress at nodal point i
         if behaviour.foundation == "LongStripFooting"
             db = Δx / behaviour.foundationWidth
             ps = (db < 2.5 && behaviour.center) ? -0.28*db : -0.157 - 0.22*db
@@ -552,6 +555,8 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
 
             P[i] += basePressure * (enm+ab)/pi
         end
+
+        # Increment depth
         Δx += behaviour.dx
     end
     return P
