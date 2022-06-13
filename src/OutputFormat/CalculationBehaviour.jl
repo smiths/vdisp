@@ -7,9 +7,10 @@ using .InputParser
 
 export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure
 
-# For now this will be hardcoded into here, later it will
-# rely on our choice of units
+# For now these will be hardcoded into here, later they will
+# be part of a module of constants
 GAMMA_W = 0.03125
+OUTPUT_EFFECTIVE_STRESS = false
 
 ### CalculationOutputBehaviour interface ##############
 abstract type CalculationOutputBehaviour end
@@ -59,17 +60,19 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = getValue(behaviour)
     
     out = ""
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(P[i])\n"
-    end
-    out *= "\n"
 
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(PP[i])\n"
+    if OUTPUT_EFFECTIVE_STRESS
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(P[i])\n"
+        end
+        out *= "\n"
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(PP[i])\n"
+        end
+        out *= "\n"
     end
-    out *= "\n"
 
     if behaviour.outputIncrements
         out *= "Heave Distribution Above Foundation: \n"
@@ -203,17 +206,19 @@ function getOutput(behaviour::LeonardFrostCalculationBehaviour)
     P, PP, x = getValue(behaviour)
     
     out = ""
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(P[i])\n"
-    end
-    out *= "\n"
 
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(PP[i])\n"
+    if OUTPUT_EFFECTIVE_STRESS
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(P[i])\n"
+        end
+        out *= "\n"
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(PP[i])\n"
+        end
+        out *= "\n"
     end
-    out *= "\n"
 
     out *= "Random value: $(x)\n"
 
@@ -264,17 +269,19 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
     P, PP, settlementTable, Δh = getValue(behaviour)
     
     out = ""
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(P[i])\n"
-    end
-    out *= "\n"
 
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(PP[i])\n"
+    if OUTPUT_EFFECTIVE_STRESS
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(P[i])\n"
+        end
+        out *= "\n"
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(PP[i])\n"
+        end
+        out *= "\n"
     end
-    out *= "\n"
 
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
@@ -297,67 +304,9 @@ function getValue(behaviour::SchmertmannCalculationBehaviour)
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
 
-    # Begin calculations
-    Δh = 0.0
-    Δh1 = 0.0
-    # Net Applied Footing Pressure
-    Qnet = behaviour.appliedPressure - PP[behaviour.bottomPointIndex]
-    Δx = behaviour.dx * float(behaviour.bottomPointIndex) - behaviour.dx/2
-
-    # Correction to account for strain relief from embedment
-    C1 = max(0.5, 1 - 0.5*PP[behaviour.bottomPointIndex]/Qnet)
-    # Correction for time dependant increase in settlement
-    time = behaviour.timeAfterConstruction/ 0.1
-    Ct = 1 + 0.2*log10(time)
-
-    settlementTable = []
-    for i=behaviour.bottomPointIndex:behaviour.elements
-        # Material properties of soil layer i
-        material = behaviour.soilLayerNumber[i]
-        conePenetrationRes = behaviour.conePenetrationResistance[material]
-        
-        # Average effective stress of soil layer i
-        Δσ = (PP[i+1]+PP[i])/2
-
-        # Elastic modulus of soil layer i
-        Esi = (behaviour.foundation == "RectangularSlab") ? 2.5*conePenetrationRes : 3.5*conePenetrationRes
-
-        Iz = 0.0
-        if behaviour.foundation == "RectangularSlab"            
-            halfWidth = 0.5 * behaviour.foundationWidth
-            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
-            Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ) 
-            # Influence factor of soil layer i
-            Iz = (depth > halfWidth) ?  Izp + Izp/3 - Izp*depth/(3*halfWidth) : (depth > 4*halfWidth) ?  0.0 : 0.1 + (Izp-0.1) * depth/(halfWidth)
-        else
-            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
-            Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ)
-            # Influence factor of soil layer i 
-            Iz = (depth > behaviour.foundationWidth) ?  Izp + Izp/3 - Izp*depth/(3*behaviour.foundationWidth) : (depth > 4*behaviour.foundationWidth) ?  0.0 : 0.2 + (Izp-0.2) * depth/(behaviour.foundationWidth)
-        end
-
-        # Give names closer to original formula
-        Δz = behaviour.dx
-        Δp = Qnet
-
-        # Settlment of layer i 
-        Δh_i = -C1 * Ct * Δp * Δz * Iz  / Esi
-        # Add settlemnt of layer i to total settlment, Δh
-        Δh += Δh_i
-
-        if behaviour.outputIncrements
-            # Append i Δx Δh_i to table
-            if size(settlementTable,1) == 0
-                settlementTable = [i Δx Δh_i]
-            else
-                settlementTable = vcat(settlementTable, [i Δx Δh_i])
-            end
-        end
-
-        # Increment current depth
-        Δx += behaviour.dx
-    end
-
+    # Perform calculations
+    settlementTable, Δh = schmertmannApproximation(behaviour, false, PP)
+    
     return (P, PP, settlementTable, Δh)
 end
 ######################################################
@@ -387,17 +336,19 @@ function getOutput(behaviour::CollapsibleSoilCalculationBehaviour)
     P, PP, x = getValue(behaviour)
     
     out = ""
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(P[i])\n"
-    end
-    out *= "\n"
 
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(PP[i])\n"
+    if OUTPUT_EFFECTIVE_STRESS
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(P[i])\n"
+        end
+        out *= "\n"
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(PP[i])\n"
+        end
+        out *= "\n"
     end
-    out *= "\n"
 
     out *= "Random value: $(x)\n"
 
@@ -436,27 +387,42 @@ struct SchmertmannElasticCalculationBehaviour <: CalculationOutputBehaviour
     foundationLength::Float64
     foundationWidth::Float64
     center::Bool
+    elements::Int
+    timeAfterConstruction::Int
+    conePenetrationResistance::Array{Float64}
+    outputIncrements::Bool
+    elasticModulus::Array{Float64}
 
-    SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6])
+    SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5])
 end
 function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     # getValue does the calculations
-    P, PP, x = getValue(behaviour)
+    P, PP, settlementTable, Δh = getValue(behaviour)
     
     out = ""
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(P[i])\n"
-    end
-    out *= "\n"
 
-    for i=1:behaviour.nodalPoints
-        z = (i-1)*behaviour.dx 
-        out *= "$(z), $(PP[i])\n"
+    if OUTPUT_EFFECTIVE_STRESS
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(P[i])\n"
+        end
+        out *= "\n"
+        for i=1:behaviour.nodalPoints
+            z = (i-1)*behaviour.dx 
+            out *= "$(z), $(PP[i])\n"
+        end
+        out *= "\n"
     end
-    out *= "\n"
 
-    out *= "Random value: $(x)\n"
+    out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
+
+    if behaviour.outputIncrements
+        out *= "Settlment Beneath Foundation at Each Depth Increment: \n"
+        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlment (ft)"],tf = tf_markdown)
+        out *= "\n"
+    end
+
+    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "ft\n"
 
     return out
 end
@@ -469,10 +435,10 @@ function getValue(behaviour::SchmertmannElasticCalculationBehaviour)
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
 
-    # Just return some arbitrary calcultion for now
-    # I will make each model return a different value 
-    # to make sure things are working
-    return (P, PP, 333*x-3)
+    # Perform calculations
+    settlementTable, Δh = schmertmannApproximation(behaviour, true, PP)
+    
+    return (P, PP, settlementTable, Δh)
 end
 ######################################################
 
@@ -622,5 +588,72 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
     end
     return P
 end
+
+### SCHMERTMANN FUNCTION #############
+function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Array{Float64})
+    # Begin calculations
+    Δh = 0.0
+    Δh1 = 0.0
+    # Net Applied Footing Pressure
+    Qnet = behaviour.appliedPressure - PP[behaviour.bottomPointIndex]
+    Δx = behaviour.dx * float(behaviour.bottomPointIndex) - behaviour.dx/2
+
+    # Correction to account for strain relief from embedment
+    C1 = max(0.5, 1 - 0.5*PP[behaviour.bottomPointIndex]/Qnet)
+    # Correction for time dependant increase in settlement
+    time = behaviour.timeAfterConstruction/ 0.1
+    Ct = 1 + 0.2*log10(time)
+
+    settlementTable = []
+    for i=behaviour.bottomPointIndex:behaviour.elements
+        # Material properties of soil layer i
+        material = behaviour.soilLayerNumber[i]
+        conePenetrationRes = behaviour.conePenetrationResistance[material]
+        
+        # Average effective stress of soil layer i
+        Δσ = (PP[i+1]+PP[i])/2
+
+        # Elastic modulus of soil layer i
+        Esi = (elasticModulusGiven) ? behaviour.elasticModulus[material] : (behaviour.foundation == "RectangularSlab") ? 2.5*conePenetrationRes : 3.5*conePenetrationRes
+
+        Iz = 0.0
+        if behaviour.foundation == "RectangularSlab"            
+            halfWidth = 0.5 * behaviour.foundationWidth
+            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
+            Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ) 
+            # Influence factor of soil layer i
+            Iz = (depth > halfWidth) ?  Izp + Izp/3 - Izp*depth/(3*halfWidth) : (depth > 4*halfWidth) ?  0.0 : 0.1 + (Izp-0.1) * depth/(halfWidth)
+        else
+            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
+            Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ)
+            # Influence factor of soil layer i 
+            Iz = (depth > behaviour.foundationWidth) ?  Izp + Izp/3 - Izp*depth/(3*behaviour.foundationWidth) : (depth > 4*behaviour.foundationWidth) ?  0.0 : 0.2 + (Izp-0.2) * depth/(behaviour.foundationWidth)
+        end
+
+        # Give names closer to original formula
+        Δz = behaviour.dx
+        Δp = Qnet
+
+        # Settlment of layer i 
+        Δh_i = -C1 * Ct * Δp * Δz * Iz  / Esi
+        # Add settlemnt of layer i to total settlment, Δh
+        Δh += Δh_i
+
+        if behaviour.outputIncrements
+            # Append i Δx Δh_i to table
+            if size(settlementTable,1) == 0
+                settlementTable = [i Δx Δh_i]
+            else
+                settlementTable = vcat(settlementTable, [i Δx Δh_i])
+            end
+        end
+
+        # Increment current depth
+        Δx += behaviour.dx
+    end
+
+    return (settlementTable, Δh)
+end
+
 
 end # module
