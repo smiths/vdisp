@@ -7,9 +7,9 @@ using .OutputFormat
 include("../src/InputParser.jl")
 using .InputParser
 
-export testFile1, testFile2, testFile3, testFile4, testFile5, testFile6
+export consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest
 
-function testFile1(outputData)
+function consolidationSwellTest(outputData)
     inputData = outputData.inputData
 
     @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
@@ -50,102 +50,7 @@ function testFile1(outputData)
     @test heaveAboveFoundationTable[2,4] ≈ 1.9701033 rtol=1e-6
 end
 
-function testFile2(outputData)
-    inputData = outputData.inputData
-
-    @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - LEONARD AND FROST"
-    @test inputData.nodalPoints == 17
-    @test inputData.bottomPointIndex == 7
-    @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.LeonardFrost)
-    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
-    @test inputData.soilLayerNumber[1] == 1
-    @test inputData.soilLayerNumber[7] == 1
-    @test inputData.soilLayerNumber[12] == 2
-    @test inputData.soilLayerNumber[14] == 2
-    @test inputData.soilLayerNumber[16] == 2
-    @test inputData.specificGravity[1] == 2.700
-    @test inputData.voidRatio[1] == 1.540
-    @test inputData.waterContent[2] == 19.300
-    @test inputData.depthGroundWaterTable == 8.00
-    @test inputData.equilibriumMoistureProfile == false
-    @test inputData.appliedPressure == 1.00
-    @test inputData.foundationLength == 3.00
-    @test inputData.center == true
-    @test inputData.pressureDilatometerA[1] == 3.00
-    @test inputData.pressureDilatometerB[1] == 15.00
-    @test inputData.conePenetrationResistance[2] == 100.00
-end
-
-function testFile3(outputData)
-    inputData = outputData.inputData
-
-    @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
-    @test inputData.nodalPoints == 17
-    @test inputData.bottomPointIndex == 7
-    @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.Schmertmann)
-    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
-    @test inputData.soilLayerNumber[1] == 1
-    @test inputData.soilLayerNumber[7] == 1
-    @test inputData.soilLayerNumber[12] == 2
-    @test inputData.soilLayerNumber[14] == 2
-    @test inputData.soilLayerNumber[16] == 2
-    @test inputData.specificGravity[1] == 2.700
-    @test inputData.voidRatio[1] == 1.540
-    @test inputData.waterContent[2] == 19.300
-    @test inputData.depthGroundWaterTable == 8.00
-    @test inputData.equilibriumMoistureProfile == false
-    @test inputData.appliedPressure == 1.00
-    @test inputData.foundationLength == 3.00
-    @test inputData.center == true
-    @test inputData.conePenetrationResistance[1] == 70.00
-    @test inputData.conePenetrationResistance[2] == 100.00
-    @test inputData.timeAfterConstruction == 10
-    P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outputData)
-    # Values calculated in document: 
-    @test settlementTable[1,3] ≈ -0.000689697 rtol=1e-6
-    @test settlementTable[2,3] ≈ -0.001383052 rtol=1e-6
-    @test settlementTable[3,3] ≈ -0.002045984 rtol=1e-6
-end
-
-function testFile4(outputData)
-    inputData = outputData.inputData
-
-    @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
-    @test inputData.nodalPoints == 17
-    @test inputData.bottomPointIndex == 7
-    @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
-    @test string(inputData.model) == string(InputParser.CollapsibleSoil)
-    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
-    @test inputData.soilLayerNumber[1] == 1
-    @test inputData.soilLayerNumber[7] == 1
-    @test inputData.soilLayerNumber[12] == 2
-    @test inputData.soilLayerNumber[14] == 2
-    @test inputData.soilLayerNumber[16] == 2
-    @test inputData.specificGravity[1] == 2.700
-    @test inputData.voidRatio[1] == 1.540
-    @test inputData.waterContent[2] == 19.300
-    @test inputData.depthGroundWaterTable == 8.00
-    @test inputData.equilibriumMoistureProfile == false
-    @test inputData.appliedPressure == 1.00
-    @test inputData.foundationLength == 3.00
-    @test inputData.center == true
-    @test inputData.appliedPressureAtPoints[1,1] == 0.01
-    @test inputData.appliedPressureAtPoints[1,3] == 1.00
-    @test inputData.appliedPressureAtPoints[2,2] == 0.40
-    @test inputData.appliedPressureAtPoints[2,4] == 1.00
-    @test inputData.strainAtPoints[1,1] == 0.00
-    @test inputData.strainAtPoints[1,3] == 2.00
-    @test inputData.strainAtPoints[1,5] == 15.00
-    @test inputData.strainAtPoints[2,2] == 0.80
-    @test inputData.strainAtPoints[2,4] == 8.00
-end
-
-function testFile5(outputData)
+function consolidationSwellTest2(outputData)
     inputData = outputData.inputData
 
     @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
@@ -186,8 +91,40 @@ function testFile5(outputData)
     @test PP[5] ≈ 0.0797244 rtol=1e-6
 end
 
+function schmertTest(outputData)
+    inputData = outputData.inputData
 
-function testFile6(outputData)
+    @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
+    @test inputData.nodalPoints == 17
+    @test inputData.bottomPointIndex == 7
+    @test inputData.soilLayers == 2
+    @test inputData.dx == 0.5
+    @test string(inputData.model) == string(InputParser.Schmertmann)
+    @test string(inputData.foundation) == string(InputParser.RectangularSlab)
+    @test inputData.soilLayerNumber[1] == 1
+    @test inputData.soilLayerNumber[7] == 1
+    @test inputData.soilLayerNumber[12] == 2
+    @test inputData.soilLayerNumber[14] == 2
+    @test inputData.soilLayerNumber[16] == 2
+    @test inputData.specificGravity[1] == 2.700
+    @test inputData.voidRatio[1] == 1.540
+    @test inputData.waterContent[2] == 19.300
+    @test inputData.depthGroundWaterTable == 8.00
+    @test inputData.equilibriumMoistureProfile == false
+    @test inputData.appliedPressure == 1.00
+    @test inputData.foundationLength == 3.00
+    @test inputData.center == true
+    @test inputData.conePenetrationResistance[1] == 70.00
+    @test inputData.conePenetrationResistance[2] == 100.00
+    @test inputData.timeAfterConstruction == 10
+    P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outputData)
+    # Values calculated in document: 
+    @test settlementTable[1,3] ≈ -0.000689697 rtol=1e-6
+    @test settlementTable[2,3] ≈ -0.001383052 rtol=1e-6
+    @test settlementTable[3,3] ≈ -0.002045984 rtol=1e-6
+end
+
+function schmertElasticTest(outputData)
     inputData = outputData.inputData
 
     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
@@ -219,5 +156,68 @@ function testFile6(outputData)
     @test settlementTable[2,3] ≈ -0.001383052 rtol=1e-6
     @test settlementTable[3,3] ≈ -0.002045984 rtol=1e-6
 end
+
+# function testFile2(outputData)
+#     inputData = outputData.inputData
+# 
+#     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - LEONARD AND FROST"
+#     @test inputData.nodalPoints == 17
+#     @test inputData.bottomPointIndex == 7
+#     @test inputData.soilLayers == 2
+#     @test inputData.dx == 0.5
+#     @test string(inputData.model) == string(InputParser.LeonardFrost)
+#     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
+#     @test inputData.soilLayerNumber[1] == 1
+#     @test inputData.soilLayerNumber[7] == 1
+#     @test inputData.soilLayerNumber[12] == 2
+#     @test inputData.soilLayerNumber[14] == 2
+#     @test inputData.soilLayerNumber[16] == 2
+#     @test inputData.specificGravity[1] == 2.700
+#     @test inputData.voidRatio[1] == 1.540
+#     @test inputData.waterContent[2] == 19.300
+#     @test inputData.depthGroundWaterTable == 8.00
+#     @test inputData.equilibriumMoistureProfile == false
+#     @test inputData.appliedPressure == 1.00
+#     @test inputData.foundationLength == 3.00
+#     @test inputData.center == true
+#     @test inputData.pressureDilatometerA[1] == 3.00
+#     @test inputData.pressureDilatometerB[1] == 15.00
+#     @test inputData.conePenetrationResistance[2] == 100.00
+# end
+
+# function testFile4(outputData)
+#     inputData = outputData.inputData
+# 
+#     @test inputData.problemName == "    FOOTING IN GRANULAR SOIL - SCHMERTMANN"
+#     @test inputData.nodalPoints == 17
+#     @test inputData.bottomPointIndex == 7
+#     @test inputData.soilLayers == 2
+#     @test inputData.dx == 0.5
+#     @test string(inputData.model) == string(InputParser.CollapsibleSoil)
+#     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
+#     @test inputData.soilLayerNumber[1] == 1
+#     @test inputData.soilLayerNumber[7] == 1
+#     @test inputData.soilLayerNumber[12] == 2
+#     @test inputData.soilLayerNumber[14] == 2
+#     @test inputData.soilLayerNumber[16] == 2
+#     @test inputData.specificGravity[1] == 2.700
+#     @test inputData.voidRatio[1] == 1.540
+#     @test inputData.waterContent[2] == 19.300
+#     @test inputData.depthGroundWaterTable == 8.00
+#     @test inputData.equilibriumMoistureProfile == false
+#     @test inputData.appliedPressure == 1.00
+#     @test inputData.foundationLength == 3.00
+#     @test inputData.center == true
+#     @test inputData.appliedPressureAtPoints[1,1] == 0.01
+#     @test inputData.appliedPressureAtPoints[1,3] == 1.00
+#     @test inputData.appliedPressureAtPoints[2,2] == 0.40
+#     @test inputData.appliedPressureAtPoints[2,4] == 1.00
+#     @test inputData.strainAtPoints[1,1] == 0.00
+#     @test inputData.strainAtPoints[1,3] == 2.00
+#     @test inputData.strainAtPoints[1,5] == 15.00
+#     @test inputData.strainAtPoints[2,2] == 0.80
+#     @test inputData.strainAtPoints[2,4] == 8.00
+# end
+
 
 end # module 
