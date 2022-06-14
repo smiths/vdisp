@@ -519,9 +519,9 @@ This calculation is repeated at each depth increment.
 
 # Variables
 
-``\sigma_z``: stress at depth z
+``\sigma_z``: stress at depth `z``
 
-``\sigma_z'``: effective stress at depth z
+``\sigma_z'``: effective stress at depth `z`
 
 ``\gamma_w``: unit weight of water
 
@@ -666,7 +666,7 @@ end
 
 Calculates settlement at each depth increment, ``\rho_i``, and sums it up to calculate total settlment, ``\rho``.
 If `elasticModulus == true`, input file must have elastic moduli, ``E_{si}``, for each soil layer. Else, input file must 
-have cone penetration resistance data, ``q_{ci}``,for each soil layer. Returns a 2D array of settlment values with each row 
+have cone penetration resistance data, ``q_{ci}``, for each soil layer. Returns a 2D array of settlment values with each row 
 containing the element number, the depth of the layer, and it's settlement.
 
 # Calculations
