@@ -5,7 +5,7 @@ using PrettyTables
 include("../InputParser.jl")
 using .InputParser
 
-export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure, getValue
+export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure, getValue, schmertmannApproximation
 
 # For now these will be hardcoded into here, later they will
 # be part of a module of constants
@@ -109,6 +109,8 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 ``\rho_{cj} = \frac{\Delta e_j}{1 + e_{0j}}H_j``
 
 ``\rho_c = \sum_{j=1}^{n} \rho_{cj}``
+
+# Variables
 
 ``\Delta e_j``: change in void ratio of soil layer *j*
 
@@ -493,7 +495,7 @@ end
 
 Calculates the effective stress at each nodal point given values in the
 `InputData` instance contained in `behaviour`. Returns two identical 
-Float64 arrays (unless model is ConsolidationSwell and equilibrium moisture 
+`Float64` arrays (unless model is ConsolidationSwell and equilibrium moisture 
 profile is saturated above water table). `VDisp` never alters the second array
 so the original effective stress values are always available for each nodal point, 
 and alters the first array adding all other stress values to each corresponding
@@ -514,6 +516,16 @@ Which can be derived from the following equations:
 ``\sigma_z = \gamma_{sat} z``
 
 This calculation is repeated at each depth increment.
+
+# Variables
+
+``\sigma_z``: stress at depth z
+
+``\sigma_z'``: effective stress at depth z
+
+``\gamma_w``: unit weight of water
+
+``\gamma_{sat}``: unit weight of saturated soil
 """
 function getEffectiveStress(behaviour::CalculationOutputBehaviour)
     # Initialize arrays (TODO: Think of better names)
@@ -581,21 +593,25 @@ rectangular area can be used, however there are 4 of these rectangles contributi
 load, hence the multiplication by a factor of 4). The stress increase at depth `z` is denoted 
 as ``\sigma_z``, and is calculated using the following equation:
 
-``\sigma_z = \frac{q}{2 \pi} (\text{tan}^{-1}(\frac{ab}{zC})+\frac{abz}{C}(\frac{1}{A^2}+\frac{1}{B^2}))``
-
-where,
-
-``\sigma_z`` is the stress increase at depth `z`
-
-``a`` is the length of the foundation
-
-``b`` is the width of the foundation
+``\sigma_z = \frac{q}{2 \pi} (\text{tan}^{-1}(\frac{ab}{zC})+\frac{abz}{C}(\frac{1}{A^2}+\frac{1}{B^2})) \text{ where,}``
 
 ``A^2 = a^2 + z^2``
 
 ``B^2 = b^2 + z^2``
 
 ``C = \sqrt{a^2+b^2+z^2}``
+
+# Variables
+
+``q``: net applied footing pressure
+
+``\sigma_z``: stress increase at depth `z`
+
+``a``: length of the foundation
+
+``b``: width of the foundation
+
+``z``: depth
 
 """
 function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
@@ -645,6 +661,73 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
 end
 
 ### SCHMERTMANN FUNCTION #############
+@doc raw"""
+    schmertmannApproximation(behaviour, elasticModulusGiven, PP)
+
+Calculates settlement at each depth increment, ``\rho_i``, and sums it up to calculate total settlment, ``\rho``.
+If `elasticModulus == true`, input file must have elastic moduli, ``E_{si}``, for each soil layer. Else, input file must 
+have cone penetration resistance data, ``q_{ci}``,for each soil layer. Returns a 2D array of settlment values with each row 
+containing the element number, the depth of the layer, and it's settlement.
+
+# Calculations
+
+This subroutine calculates total settlement using the **Schmertmann Approximation**:
+
+``\rho = C_1 C_t \Delta p \Delta z \sum_{i=1}^{n} \frac{I_{iz}}{E_{si}} \text{ where, }``
+
+``C_1 = 1 - \frac{0.5 \sigma_{od}'}{\Delta p}, C_1 \ge 0.5``
+
+``C_t = 1 + 0.2 \log_{10} \frac{t}{0.1}``
+
+``E_{si} = 2.5 q_{ci} \text{ if rectangular footing, } 3.5 q_{ci} \text{ if long strip footing}``
+
+``I_{zp} = 0.5 + 0.1 \sqrt{\frac{\Delta p}{\sigma_{izp}'}}``
+
+``I_{iz} = 0 \text{ if } z > 2w \text{,} \frac{4}{3}I_{zp} - \frac{I_{zp} z}{1.5w} \text{ if } z > 0.5w \text{ , else } 0.1 + \frac{(I_{zp}-0.1)z}{0.5w}``
+
+``\sigma_{izp}' = \frac{\sigma_{topi}' + \sigma_{boti}'}{2}``
+
+``\Delta p =  Q - \sigma_{od}'``
+
+# Variables
+
+``C_1``: correction to account for strain relief from embedment
+
+``C_t``: correction for time dependant inrease in settlment 
+
+``\sigma_{od}'``: effective stress at bottom of foundation
+
+``\Delta p``: net applied footing pressure
+
+``Q``: applied pressure 
+
+``t``: time in years since construction
+
+``\Delta z``: depth increment
+
+``I_{iz}``: influence factor of soil layer `i`
+
+``E_{si}``: elastic modulus of soil layer `i` 
+
+``q_{ci}``: cone penetration resistance of soil layer `i` 
+
+``\sigma_{topi}'``: effective stress at top of soil layer `i`
+
+``\sigma_{boti}'``: effective stress at bottom of soil layer `i`
+
+``\rho_i``: settlement of soil layer `i`
+
+``\rho``: total settlement
+
+# Code
+
+The code first calculates the settlement of each soil layer, ``\rho_i``, then sums up settlements at each depth increment. The following two formulas are used to achieve this:
+
+``\rho_i = C_1 C_t \Delta p \Delta z \frac{I_{iz}}{E_{si}}``
+
+``\rho = \sum_{i=1}^{n} \rho_i``
+
+"""
 function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Array{Float64})
     # Begin calculations
     Δh = 0.0
