@@ -1,0 +1,73 @@
+Title:     FOOTING IN EXPANSIVE SOIL
+Nodal Points: 17, Base Nodal Point Index: 7
+Number of different soil layers: 2
+Increment depth(dx): 0.5
+
+Model: Consolidation Swell
+
+Foundation Type: Rectangular Slab
+
+Depth of Foundation: 3.0
+Total Depth of Soil Profile: 8.0
+
+| Element | Soil Layer Number |
+|---------|-------------------|
+|       1 |                 1 |
+|       2 |                 1 |
+|       3 |                 1 |
+|       4 |                 1 |
+|       5 |                 1 |
+|       6 |                 1 |
+|       7 |                 1 |
+|       8 |                 1 |
+|       9 |                 1 |
+|      10 |                 1 |
+|      11 |                 1 |
+|      12 |                 2 |
+|      13 |                 2 |
+|      14 |                 2 |
+|      15 |                 2 |
+|      16 |                 2 |
+
+| Material | Specific Gravity | Water Content(%) | Void Ratio |
+|----------|------------------|------------------|------------|
+|      1.0 |              2.7 |             20.0 |       1.54 |
+|      2.0 |             2.65 |             19.3 |        0.9 |
+
+Depth to Ground Water Table: 8.0
+
+Displacements at Each Depth Output
+
+Equilibrium Hydrostatic Profile Above Water Table
+
+	Center of Foundation
+
+Heave Distribution Above Foundation: 
+| Element | Depth (ft) | Delta Heave (ft) | Excess Pore Pressure (tsf) |
+|---------|------------|------------------|----------------------------|
+|     1.0 |       0.25 |        0.0531122 |                    1.74785 |
+|     2.0 |       0.75 |        0.0526779 |                    1.74354 |
+|     3.0 |       1.25 |        0.0522508 |                    1.73923 |
+|     4.0 |       1.75 |        0.0518307 |                    1.73493 |
+|     5.0 |       2.25 |        0.0514174 |                    1.73062 |
+|     6.0 |       2.75 |        0.0264212 |                    1.28611 |
+
+Heave Distribution Below Foundation: 
+| Element | Depth (ft) | Delta Heave (ft) | Excess Pore Pressure (tsf) |
+|---------|------------|------------------|----------------------------|
+|     7.0 |       3.25 |        0.0142435 |                   0.852268 |
+|     8.0 |       3.75 |        0.0155299 |                   0.908414 |
+|     9.0 |       4.25 |        0.0184296 |                    1.02511 |
+|    10.0 |       4.75 |        0.0222166 |                    1.15894 |
+|    11.0 |       5.25 |        0.0260237 |                    1.27496 |
+|    12.0 |       5.75 |        0.0353586 |                    2.36129 |
+|    13.0 |       6.25 |        0.0376052 |                    2.42108 |
+|    14.0 |       6.75 |        0.0393223 |                    2.46297 |
+|    15.0 |       7.25 |        0.0405866 |                    2.49187 |
+|    16.0 |       7.75 |        0.0414831 |                    2.51141 |
+
+Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: 0.1438550877024622ft
+Subsoil Movement: 0.14539951553603547ft
+Total Heave: 0.28925460323849767ft
+
+

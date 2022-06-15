@@ -10,19 +10,19 @@ using .InputParser
 include("./tests.jl")
 using .Tests
 
-TEST_FILES = 6
-
 # Paths to test input files from runtests.jl
-INPUT_TEST_PATHS = ["../test/testdata/test_input_$x.dat" for x in 1:TEST_FILES]
-OUTPUT_TEST_PATHS = ["../test/testdata/test_output_$x.dat" for x in 1:TEST_FILES]
+FILE_NAMES = ["consolidationSwellTest", "consolidationSwellTest2", "schmertTest", "schmertElasticTest"]
+INPUT_TEST_PATHS = ["../test/testdata/input_$f.dat" for f in FILE_NAMES]
+OUTPUT_TEST_PATHS = ["../test/testdata/output_$f.dat" for f in FILE_NAMES]
 
 # Paths to test input files with errors
 INPUT_ERROR_PATHS = ["../test/testdata/test_error_$x.dat" for x in 1:2]
 
-testFunctions = [testFile1, testFile2, testFile3, testFile4, testFile5, testFile6]
+TEST_FILES = 4
+testFunctions = [consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest]
 for i=1:TEST_FILES
-    println("\nTesting input file $(i):")
-    @testset "Test input file $(i)" begin
+    println("\nTesting input file \"input_$(FILE_NAMES[i]).dat\":")
+    @testset "Test input file \"input_$(FILE_NAMES[i]).dat\"" begin
         outputData = 0
         inputData = 0
         try
@@ -37,15 +37,6 @@ for i=1:TEST_FILES
 end
 
 @testset "Testing Error Files" begin
-    # @test_throws ParsingError OutputData(INPUT_TEST_PATHS[5])
-    # I wish the above code would work, however it appears 
-    # that by "exporting" ParsingError in InputParser Julia 
-    # makes a COPY of this error in this class at runtime, thus 
-    # the two error objects are not actually "equal" 
-    # Output in console:
-    #       Expected: ParsingError
-    #       Thrown: Main.OutputFormat.InputParser.ParsingError
-    # Thus, I copied the exact type from above to the line below
     println("\nTesting error file 1, error expected on line 6:")
     @test_throws Main.OutputFormat.InputParser.ParsingError OutputData(INPUT_ERROR_PATHS[1])
     println("\nTesting error file 2, error expected:")
