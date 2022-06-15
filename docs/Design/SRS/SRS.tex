@@ -20,17 +20,17 @@
 
 \usepackage[round]{natbib}
 
+\usepackage{fullpage}
+
 \newcommand{\indentpar}{\phantom{=}}
 
 %\usepackage{refcheck}
-
+\usepackage{xcolor}
 \hypersetup{
-    bookmarks=true,         % show bookmarks bar?
-      colorlinks=true,       % false: boxed links; true: colored links
-    linkcolor=red,          % color of internal links (change box color with linkbordercolor)
-    citecolor=green,        % color of links to bibliography
-    filecolor=magenta,      % color of file links
-    urlcolor=cyan           % color of external links
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
 }
 
 % For easy change of table widths
@@ -45,6 +45,7 @@
 \newcommand{\colHwidth}{0.28\textwidth}
 
 % Used so that cross-references have a meaningful prefix
+% TODO - remove these in favour of hyperrefs with labels and phantomsections
 \newcounter{defnum} %Definition Number
 \newcommand{\dthedefnum}{GD\thedefnum}
 \newcommand{\dref}[1]{GD\ref{#1}}
@@ -76,7 +77,56 @@
 \newcommand{\lthelcnum}{LC\thelcnum}
 \newcommand{\lcref}[1]{LC\ref{#1}}
 
-\usepackage{fullpage}
+\newlist{symbDescription}{description}{1}
+\setlist[symbDescription]{noitemsep, topsep=0pt, parsep=0pt, partopsep=0pt}
+
+\newcommand{\deftheory}[9][Not Applicable]
+{
+\newpage
+\noindent \rule{\textwidth}{0.5mm}
+
+\paragraph{RefName: } \textbf{#2} \phantomsection 
+\label{#2}
+
+\paragraph{Label:} #3
+
+\noindent \rule{\textwidth}{0.5mm}
+
+\paragraph{Equation:}
+
+#4
+
+\paragraph{Description:}
+
+#5
+
+\paragraph{Notes:}
+
+#6
+
+\paragraph{Source:}
+
+#7
+
+\paragraph{Ref.\ By:}
+
+#8
+
+\paragraph{Preconditions for \hyperref[#2]{#2}:}
+\label{#2_precond}
+
+#9
+
+\paragraph{Derivation for \hyperref[#2]{#2}:}
+\label{#2_deriv}
+
+#1
+
+\noindent \rule{\textwidth}{0.5mm}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
@@ -115,7 +165,6 @@ Throughout this document SI (Syst\`{e}me International d'Unit\'{e}s) is employed
 as the unit system.  In addition to the basic units, several derived units are
 used as described below.  For each unit, the symbol is given followed by a
 description of the unit and the SI name.
-~\newline
 
 \renewcommand{\arraystretch}{1.2}
 %\begin{table}[ht]
@@ -515,9 +564,9 @@ non-domain experts.
 
 \begin{itemize}
 
-\item[GS\refstepcounter{goalnum}\thegoalnum \label{G_meaningfulLabel}:] One
-    sentence description of the goal.  There may be more than one.  Each Goal
-    should have a meaningful label.
+\item[GS:FindDisp:\phantomsection\label{GS:FindDisp}]: Given the soil
+properties, load, and type of footing, find the vertical displacement of the
+footing.
 
 \end{itemize}
 
@@ -592,23 +641,28 @@ system. The numbers given in the square brackets refer to the theoretical model
 [T], general definition [GD], data definition [DD], instance model [IM], or
 likely change [LC], in which the respective assumption is used.
 
-\begin{enumerate}[label=A\arabic*:,ref={\arabic*}]
+\begin{itemize}
   
-  \item [A\refstepcounter{assumpnum}\theassumpnum: \label{A_Homo}] Each layer of
-  the soil mass is homogeneous, with consistent soil properties throughout.
-  []
+  \item[A:SLH:\phantomsection\label{A:SLH}]{The soil mass is homogeneous,
+  with consistent soil properties throughout. (RefBy:
+  \hyperref[LC_inhomogeneous]{LC:Calculate-Inhomogeneous-Soil-Layers}.)}
 
-  \item [A\refstepcounter{assumpnum}\theassumpnum: \label{A_Isotropic}] The material properties are independent of direction.
-  []
+  \item[A:Isotropic:\phantomsection\label{A:Isotropic}]{The material properties are independent of direction. (RefBy: ?.)}
 
-  \item [A\refstepcounter{assumpnum}\theassumpnum: \label{A_Saturated}] The soil 
-  properties are independent of dry or saturated conditions, with the exception 
-  of unit weight. [\dref{GD_P}]
+  \item [A:Saturated:\phantomsection\label{A:Saturated}]{The soil properties are
+  independent of dry or saturated conditions, with the exception of unit weight.
+  (RefBy: ?.)}
           
-  \item [A\refstepcounter{assumpnum}\theassumpnum: \label{A_HalfPlane}] The
-    domain is half of a 2D Euclidean plane, as divided by a straight line. []
-    
-\end{enumerate}
+  \item [A:HalfPlane:\phantomsection\label{A:HalfPlane}]{The domain is half of a
+  2D Euclidean plane, as divided by a straight line. (RefBy: ?.)}
+
+  \item [A:Terzaghi:\phantomsection\label{A:Terzaghi}]{When we apply stress to a
+  porous material, the stress is opposed by the pressure in the fluid that fills
+  the pores of the material \citep{WikipediaTerzaghi2022}. (RefBy: ?.)}
+
+  \item [A:Continuum:\phantomsection\label{A:Continuum}]{The underlying molecular structure of matter is not considered and gaps and empty spaces within a material particle are ignored. The material is assumed to be continuous. \citep[p.\ 33--34]{Long1961}, \citep[p.\ 1-2]{Malvern1969} (RefBy: ?.)}
+  
+\end{itemize}
   
 \subsubsection{Theoretical Models}\label{sec_theoretical}
 
@@ -623,170 +677,125 @@ This section focuses on the general equations and laws that \emph{VDisp}{} is
 based on.  Modify the examples below for your problem, and add additional models
 as appropriate.
 
-~\newline
-
-\noindent
-\begin{minipage}{\textwidth}
-\renewcommand*{\arraystretch}{1.5}
-\begin{tabular}{| p{\colAwidth} | p{\colBwidth}|}
-  \hline
-  \rowcolor[gray]{0.9}
-  Number& T\refstepcounter{theorynum}\thetheorynum \label{T_EffStress}\\
-  \hline
-  Label &\bf Effective Stress\\
-  \hline
-  Equation &  equation here\\
-  \hline
-  Description & description here - just list the variables, their meaning and
-  their units\\
-
-  Notes & Notes about the derivation, connection to assumptions. \\
-
-  Source & Reference or url\\
-  \hline
-  Ref.\ By & \dref{?}\\
-  \hline
-\end{tabular}
-\end{minipage}\\
+\bigskip
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Preconditions for \hyperref[T_EffStress]{T\_EffStress}:}
-\label{BT:EffStress_precond}
-
+\deftheory
+% #2 refname of theory
+{BT:NormStress}
+% #3 label
+{Total Normal Stress}
+% #4 equation
+{
+\( \sigma = \frac{F_n}{A}\)
+}
+% #5 description
+{
+\begin{symbDescription}
+  \item{$\sigma$ is the total normal stress (\si{\pascal})}
+  \item{${F_{\text{n}}}$ is the total normal force (\si{\newton})}
+  \item{$A$ is the cross-sectional area (\si{\metre\squared})}
+\end{symbDescription}
+}
+% #6 Notes
+{
+None.
+}
+% #7 Source
+{
+\citet{FredlundKrahn}
+}
+% #8 Referenced by
+{
+\hyperref[BT:EffStress]{BT:EffStress}
+}
+% #9 Preconditions
+{
 \begin{itemize}
 \item list preconditions here
 \end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-``Ref.\ By'' is used repeatedly with the different types of information.
-  This stands for Referenced By.  It means that the models, definitions and
-  assumptions listed reference the current model, definition or assumption.
-  This information is given for traceability.  Ref. By provides a pointer in the
-  opposite direction to what we commonly do.  You still need to have a reference
-  in the other direction pointing to the current model, definition or
-  assumption.  As an example, if T1 is referenced by G2, that means that G2 will
-  explicitly include a reference to T1.
+\deftheory
+% #2 refname of theory
+{BT:EffStress}
+% #3 label
+{Effective Stress}
+% #4 equation
+{
+\( \sigma' =\sigma - u \)
+}
+% #5 description
+{
+\begin{symbDescription}
+\item $\sigma$ is the total normal stress on the soil mass (\si{\pascal}).
+\item $\sigma'$ is the effective normal stress provided by the soil skeleton
+(\si{\pascal}). 
+\item $u$ is the pore pressure from the water within the soil (\si{\pascal}).
+\end{symbDescription}
+}
+% #6 Notes
+{ According to Terzaghi's principle (\hyperref[A:Terzaghi]{A:Terzaghi}) the
+changes caused by stress in a porous medium are a result of changes to the
+effective stress. The total stress $\sigma$ is defined in
+\hyperref[BT:NormStress]{BT:NormStress}. }
+% #7 Source
+{
+\citet{FredlundKrahn}
+}
+% #8 Referenced by
+{
+\hyperref[label]{text}
+}
+% #9 Preconditions
+{
+\begin{itemize}
+\item \hyperref[A:Terzaghi]{A:Terzaghi}
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bigskip
+
+``Ref.\ By'' is used repeatedly with the different types of information. This
+stands for Referenced By.  It means that the models, definitions and assumptions
+listed reference the current model, definition or assumption. This information
+is given for traceability.  Ref. By provides a pointer in the opposite direction
+to what we commonly do.  You still need to have a reference in the other
+direction pointing to the current model, definition or assumption.  As an
+example, if T1 is referenced by G2, that means that G2 will explicitly include a
+reference to T1.
 
 ~\newline
 
-\subsubsection{General Definitions}\label{sec_gendef}
+\subsubsection{Refined Theories (RT)}\label{sec_gendef}
 
 \emph{TODO}
 
-General Definitions (GDs) are a refinement of one or more TMs, and/or of other
-GDs.  The GDs are less abstract than the TMs.  Generally the reduction in
+Refined theories are a refinement of one or more other theories. The refined theories are less abstract than the background theories.  Generally the reduction in
 abstraction is possible through invoking (using/referencing) Assumptions. For
-instance, the TM could be Newton's Law of Cooling stated abstracting.  The GD
-could take the general law and apply it to get a 1D equation.
+instance, the RT could be Newton's Law of Cooling stated abstracting.
 
 This section collects the laws and equations that will be used in building the
-instance models.
-
-Some projects may not have any content for this section, but the section heading
-should be kept.  Modify the examples below for your problem, and add additional
-definitions as appropriate.
-
-~\newline
-
-\noindent
-\begin{minipage}{\textwidth}
-\renewcommand*{\arraystretch}{1.5}
-\begin{tabular}{| p{\colAwidth} | p{\colBwidth}|}
-\hline
-\rowcolor[gray]{0.9}
-Number& GD\refstepcounter{defnum}\thedefnum \label{NL}\\
-\hline
-Label &\bf Newton's law of cooling \\
-\hline
-% Units&$MLt^{-3}T^0$\\
-% \hline
-SI Units&\si{\watt\per\square\metre}\\
-\hline
-Equation&$ q(t) = h \Delta T(t)$  \\
-\hline
-Description &
-Newton's law of cooling describes convective cooling from a surface.  The law is
-stated as: the rate of heat loss from a body is proportional to the difference
-in temperatures between the body and its surroundings.
-\\
-& $q(t)$ is the thermal flux (\si{\watt\per\square\metre}).\\
-& $h$ is the heat transfer coefficient, assumed independent of $T$ (\aref{A_hcoeff})
-	(\si{\watt\per\square\metre\per\celsius}).\\
-&$\Delta T(t)$= $T(t) - T_{\text{env}}(t)$ is the time-dependent thermal gradient
-between the environment and the object (\si{\celsius}).
-\\
-\hline
-  Source & Citation here \\
-  \hline
-  Ref.\ By & \ddref{FluxCoil}, \ddref{FluxPCM}\\
-  \hline
-\end{tabular}
-\end{minipage}\\
-
-\subsubsection*{Detailed derivation of simplified rate of change of temperature}
-
-\emph{TODO}
-
-This may be necessary when the necessary information does not fit in the
-description field. Derivations are important for justifying a given GD.  You
-want it to be clear where the equation came from.
+final theories.
 
 \subsubsection{Data Definitions}\label{sec_datadef}
 
 \emph{TODO}
 
 The Data Definitions are definitions of symbols and equations that are given for
-the problem.  They are not derived; they are simply used by other models.  For
-instance, if a problem depends on density, there may be a data definition for
-the equation defining density.  The DDs are given information that you can use
-in your other modules.
+the problem.  They are not derived; they are simply used by other models.
 
 All Data Definitions should be used (referenced) by at least one other model.
 
-This section collects and defines all the data needed to build the instance
-models. The dimension of each quantity is also given.  Modify the examples below
-for your problem, and add additional definitions as appropriate.
-
-~\newline
-
-\noindent
-\begin{minipage}{\textwidth}
-\renewcommand*{\arraystretch}{1.5}
-\begin{tabular}{| p{\colAwidth} | p{\colBwidth}|}
-\hline
-\rowcolor[gray]{0.9}
-Number& DD\refstepcounter{datadefnum}\thedatadefnum \label{FluxCoil}\\
-\hline
-Label& \bf Heat flux out of coil\\
-\hline
-Symbol &$q_C$\\
-\hline
-% Units& $Mt^{-3}$\\
-% \hline
-  SI Units & \si{\watt\per\square\metre}\\
-  \hline
-  Equation&$q_C(t) = h_C (T_C - T_W(t))$, over area $A_C$\\
-  \hline
-  Description & 
-                $T_C$ is the temperature of the coil (\si{\celsius}).  $T_W$ is the temperature of the water (\si{\celsius}).  
-                The heat flux out of the coil, $q_C$ (\si{\watt\per\square\metre}), is found by
-                assuming that Newton's Law 
-                of Cooling applies (\aref{A_Newt_coil}).  This law (\dref{NL}) is used on the surface of
-                the coil, which has area $A_C$ (\si{\square\metre}) and heat 
-                transfer coefficient $h_C$
-                (\si{\watt\per\square\metre\per\celsius}).  This equation
-                assumes that the temperature of the coil is constant over time (\aref{A_tcoil}) and that it does not vary along the length
-                of the coil (\aref{A_tlcoil}).
-  \\
-  \hline
-  Sources& Citation here \\
-  \hline
-  Ref.\ By & \iref{ewat}\\
-  \hline
-\end{tabular}
-\end{minipage}\\
 
 \subsubsection{Data Types}\label{sec_datatypes}
 
@@ -828,11 +837,11 @@ definitions as appropriate.
 \end{tabular}
 \end{minipage}\\
 
-\subsubsection{Instance Models} \label{sec_instance}    
+\subsubsection{Final Theories} \label{sec_instance}    
 
 The motivation for this section is to reduce the problem defined in ``Physical
 System Description'' (Section~\ref{sec_phySystDescrip}) to one expressed in
-mathematical terms. The IMs are built by refining the TMs and/or GDs.  This
+mathematical terms. The FTs are built by refining the RTs and BTs.  This
 section should remain abstract.  The SRS should specify the requirements without
 considering the implementation.
 
@@ -841,56 +850,7 @@ one which is expressed in mathematical terms. It uses concrete symbols defined
 in Section~\ref{sec_datadef} to replace the abstract symbols in the models 
 identified in Sections~\ref{sec_theoretical} and~\ref{sec_gendef}.
 
-The goals reference your goals are solved by reference your instance models.
-other details, with cross-references where appropriate. Modify the examples
-below for your problem, and add additional models as appropriate.
-
-~\newline
-
-%Instance Model 1
-
-\noindent
-\begin{minipage}{\textwidth}
-\renewcommand*{\arraystretch}{1.5}
-\begin{tabular}{| p{\colAwidth} | p{\colBwidth}|}
-  \hline
-  \rowcolor[gray]{0.9}
-  Number& IM\refstepcounter{instnum}\theinstnum \label{ewat}\\
-  \hline
-  Label& \bf Energy balance on water to find $T_W$\\
-  \hline
-  Input&$m_W$, $C_W$, $h_C$, $A_C$, $h_P$, $A_P$, $t_\text{final}$, $T_C$, 
-  $T_\text{init}$, $T_P(t)$ from \iref{epcm}\\
-  & The input is constrained so that $T_\text{init} \leq T_C$ (\aref{A_charge})\\
-  \hline
-  Output&$T_W(t)$, $0\leq t \leq t_\text{final}$, such that\\
-  &$\frac{dT_W}{dt} = \frac{1}{\tau_W}[(T_C - T_W(t)) + {\eta}(T_P(t) - T_W(t))]$,\\
-  &$T_W(0) = T_P(0) = T_\text{init}$ (\aref{A_InitTemp}) and $T_P(t)$ from \iref{epcm} \\
-  \hline
-  Description&$T_W$ is the water temperature (\si{\celsius}).\\
-  &$T_P$ is the PCM temperature (\si{\celsius}).\\
-  &$T_C$ is the coil temperature (\si{\celsius}).\\
-  &$\tau_W = \frac{m_W C_W}{h_C A_C}$ is a constant (\si{\second}).\\
-  &$\eta = \frac{h_P A_P}{h_C A_C}$ is a constant (dimensionless).\\
-  & The above equation applies as long as the water is in liquid form,
-  $0<T_W<100^o\text{C}$, where $0^o\text{C}$ and $100^o\text{C}$ are the melting
-  and boiling points of water, respectively (\aref{A_OpRange}, \aref{A_Pressure}).
-  \\
-  \hline
-  Sources& Citation here \\
-  \hline
-  Ref.\ By & \iref{epcm}\\
-  \hline
-\end{tabular}
-\end{minipage}\\
-
-%~\newline
-
-\subsubsection*{Derivation of ...}
-
-The derivation shows how the IM is derived from the TMs/GDs.  In cases where the
-derivation cannot be described under the Description field, it will be necessary
-to include this subsection.
+The goals are solved by referencing your final theories.
 
 \subsubsection{Input Data Constraints} \label{sec_DataConstraints}    
 
@@ -1236,11 +1196,6 @@ The value of FRACTION, for the Maintainability NFR would be given here.
 
 \newpage
 
-\bibliographystyle {plainnat}
-\bibliography {../../refs/References}
-
-\newpage
-
 \noindent The following is not part of the template, just some things to consider
   when filing in the template.
 
@@ -1279,5 +1234,10 @@ The value of FRACTION, for the Maintainability NFR would be given here.
 \item If you say the format of the output (plot, table etc), then your
   requirement could be more abstract
 \end{itemize}
+
+\newpage
+
+\bibliographystyle {plainnat}
+\bibliography {References}
 
 \end{document}
