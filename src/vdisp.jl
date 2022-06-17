@@ -5,7 +5,24 @@ using .OutputFormat
 include("./InputParser.jl")
 using .InputParser
 
-export readInputFile
+using Test
+using QML
+using Qt5QuickControls_jll
+using Qt5QuickControls2_jll
+using Observables
+
+export readInputFile, State
+
+# Load file main.qml
+loadqml("./src/UI/main.qml")
+
+# Run the app
+exec()
+
+
+#if size(ARGS)[1] == 2
+#    readInputFile(ARGS[1], ARGS[2])
+#end
 
 """
     readInputFile(inputPath, outputPath)
@@ -17,10 +34,6 @@ function readInputFile(inputPath::String, outputPath::String)
     outputData = OutputData(inputPath)
 
     writeDefaultOutput(outputData, outputPath)
-end
-
-if size(ARGS)[1] == 2
-    readInputFile(ARGS[1], ARGS[2])
 end
 
 end # module
