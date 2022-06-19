@@ -1,9 +1,9 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
+import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
 
 Item {
-    
     Rectangle {
         id: enterDataFormBackground
 
@@ -17,14 +17,19 @@ Item {
             verticalCenter: parent.verticalCenter
         }
         
-        property int formTopMargin: 40
-        property int formMiddleMargin: 30
-        property int diagramMargin: 30
+        property int formTopMargin: (vdispWindow.height > 800) ? 120 : (vdispWindow.height > 700) ? 100 : (vdispWindow.height > 600) ? 60 : 40
+        property int formMiddleMargin: (vdispWindow.height > 800) ? 60 : (vdispWindow.height > 700) ? 50 : (vdispWindow.height > 600) ? 40 : 30
+        property int diagramMargin: (vdispWindow.height > 800) ? 45 : (vdispWindow.height > 700) ? 40 : (vdispWindow.height > 600) ? 35 : 30
+        property int checkboxMargin: (vdispWindow.height > 800) ? 35 : (vdispWindow.height > 700) ? 30 : (vdispWindow.height > 600) ? 25 : 20
 
         property double lengthValue: -1.0
         property double widthValue: -1.0
         property double min_ratio: 0.2
         property double max_ratio: 5.0
+
+        property int checkboxSize: 18
+        property int checkboxLabelGap: 6
+        property int checkboxGap: 20
 
         // Title
         Text {
@@ -333,6 +338,7 @@ Item {
         Item {
             id: formMiddle
             implicitWidth: parent.width
+            implicitHeight: 2*itemHeight + itemGap + enterDataFormBackground.diagramMargin + diagramRect.height
             anchors {
                 top: formTop.bottom
                 topMargin: enterDataFormBackground.formMiddleMargin
@@ -618,13 +624,11 @@ Item {
                     rightMargin: 10
                 }
             }
-            /////////////////////
-
             // Diagram //////////
             Shape {
                 id: diagramRect
-                property int max_width: 130
-                property int max_length: 100
+                property int max_width: (vdispWindow.height > 800) ? 200 : (vdispWindow.height > 700) ? 150 : 130
+                property int max_length: (vdispWindow.height > 800) ? 170 : (vdispWindow.height > 700) ? 120 : 100
                 width: (enterDataFormBackground.widthValue < 0 || enterDataFormBackground.lengthValue < 0) ? max_width : Math.min((enterDataFormBackground.widthValue/enterDataFormBackground.lengthValue)*max_width, max_width);
                 height: (enterDataFormBackground.lengthValue < 0 || enterDataFormBackground.widthValue < 0) ? max_length : Math.min((enterDataFormBackground.lengthValue/enterDataFormBackground.widthValue)*max_length, max_length);
                 anchors {
@@ -644,7 +648,6 @@ Item {
                     PathLine { x: 20; y: 0 }
                 }
                 //////////////
-
                 // Force Point
                 Shape {
                     id: diagramArrow
@@ -688,9 +691,88 @@ Item {
                         x: 5 + diagramArrow.xOffset - diagramForcePoint.width/2; y: diagramArrow.height - diagramForcePoint.height/2
                     }
                 }
-                /////////////////////
+            }
+            /////////////////////
+        }
+        /////////////////////
+
+        // Output Increments
+        Rectangle {
+            id: outputIncrementsCheckbox
+            property bool checked: false
+            width: parent.checkboxSize
+            height: parent.checkboxSize
+            radius: 5
+            color: "#fff3e4"
+            anchors {
+                top: formMiddle.bottom
+                topMargin: enterDataFormBackground.checkboxMargin
+                right: parent.horizontalCenter
+                rightMargin: parent.checkboxGap / 2
+            }
+            Rectangle {
+                visible: parent.checked
+                color: "#483434"
+                radius: 3
+                anchors.fill: parent
+                anchors.margins: 3
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: parent.checked = !parent.checked
             }
         }
+        Text {
+            id: outputIncrementsLabel
+            text: "Output Increments: "
+            color: "#fff3e4"
+            font.pixelSize: 18
+            anchors {
+                right: outputIncrementsCheckbox.left
+                rightMargin: parent.checkboxLabelGap
+                verticalCenter: outputIncrementsCheckbox.verticalCenter
+            }
+        }
+        /////////////////////
+
+        // Saturated Above Water Table
+        Rectangle {
+            id: saturationCheckbox
+            property bool checked: false
+            width: parent.checkboxSize
+            height: parent.checkboxSize
+            radius: 5
+            color: "#fff3e4"
+            anchors {
+                top: formMiddle.bottom
+                topMargin: enterDataFormBackground.checkboxMargin
+                left: saturationLabel.right
+                leftMargin: parent.checkboxLabelGap
+            }
+            Rectangle {
+                visible: parent.checked
+                color: "#483434"
+                radius: 3
+                anchors.fill: parent
+                anchors.margins: 3
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: parent.checked = !parent.checked
+            }
+        }
+        Text {
+            id: saturationLabel
+            text: "Saturated Above Water Table: "
+            color: "#fff3e4"
+            font.pixelSize: 18
+            anchors {
+                left: parent.horizontalCenter
+                leftMargin: parent.checkboxGap / 2
+                verticalCenter: saturationCheckbox.verticalCenter
+            }
+        }
+        //////////////////////
     }
 
 }

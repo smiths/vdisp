@@ -3,6 +3,7 @@ import QtQuick.Window 2.12
 import org.julialang 1.0
 
 Window {
+    id: vdispWindow
     width: 800
     height: 600
     minimumWidth: 800
