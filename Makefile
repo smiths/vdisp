@@ -8,6 +8,7 @@ buildDocs:
 
 precompile:
 	rm -f Manifest.toml
+	rm -f docs/Manifest.toml
 	julia -e "using Pkg; Pkg.activate(\"docs\"); Pkg.instantiate()"
 	julia -e "using Pkg; Pkg.activate(\".\"); Pkg.instantiate()"
 
