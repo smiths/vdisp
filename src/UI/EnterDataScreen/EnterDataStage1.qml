@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
+import QtQuick.Shapes 1.3
 
 Item {
     
@@ -18,6 +19,12 @@ Item {
         
         property int formTopMargin: 40
         property int formMiddleMargin: 30
+        property int diagramMargin: 30
+
+        property double lengthValue: -1.0
+        property double widthValue: -1.0
+        property double min_ratio: 0.2
+        property double max_ratio: 5.0
 
         // Title
         Text {
@@ -365,7 +372,7 @@ Item {
                         bottom: 0
                     }
                     // Change for input handling
-                    // onTextChanged: acceptableInput ? print("Input acceptable") : print("Input not acceptable")
+                    onTextChanged: acceptableInput ? enterDataFormBackground.widthValue = parseFloat(text) : print("Width input not acceptable")
 
                     // Placeholder Text
                     property string placeholderText: "Enter Width..."
@@ -476,7 +483,7 @@ Item {
                         bottom: 0
                     }
                     // Change for input handling
-                    // onTextChanged: acceptableInput ? print("Input acceptable") : print("Input not acceptable")
+                    onTextChanged: acceptableInput ? enterDataFormBackground.lengthValue = parseFloat(text) : print("Length input not acceptable")
 
                     // Placeholder Text
                     property string placeholderText: "Enter Length..."
@@ -612,6 +619,77 @@ Item {
                 }
             }
             /////////////////////
+
+            // Diagram //////////
+            Shape {
+                id: diagramRect
+                property int max_width: 130
+                property int max_length: 100
+                width: (enterDataFormBackground.widthValue < 0 || enterDataFormBackground.lengthValue < 0) ? max_width : Math.min((enterDataFormBackground.widthValue/enterDataFormBackground.lengthValue)*max_width, max_width);
+                height: (enterDataFormBackground.lengthValue < 0 || enterDataFormBackground.widthValue < 0) ? max_length : Math.min((enterDataFormBackground.lengthValue/enterDataFormBackground.widthValue)*max_length, max_length);
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: appliedDropdown.bottom
+                    topMargin: enterDataFormBackground.diagramMargin
+                }
+                ShapePath {
+                    strokeWidth: 2
+                    strokeColor: "#fff3e4"
+                    startX: 20
+                    startY: 0
+                    fillColor: "transparent"
+                    PathLine { x: diagramRect.width; y: 0 }
+                    PathLine { x: diagramRect.width-20; y: diagramRect.height }
+                    PathLine { x: 0; y: diagramRect.height }
+                    PathLine { x: 20; y: 0 }
+                }
+                //////////////
+
+                // Force Point
+                Shape {
+                    id: diagramArrow
+                    width: 10
+                    height: diagramRect.height / 3
+                    property int xOffset: (appliedDropdown.currentIndex === 2) ? -10 : 0
+                    anchors {
+                        horizontalCenter: (appliedDropdown.currentIndex === 1) ? diagramRect.left : diagramRect.horizontalCenter
+                        bottom: (appliedDropdown.currentIndex === 0) ? diagramRect.verticalCenter : diagramRect.bottom
+                    }
+                    ShapePath {
+                        strokeWidth: 2
+                        strokeColor: "#EED6C4"
+                        startX: 5 + diagramArrow.xOffset
+                        startY: 0
+                        fillColor: "transparent"
+                        PathLine { x: 5 + diagramArrow.xOffset; y: diagramArrow.height }
+                    }
+                    ShapePath {
+                        strokeWidth: 2
+                        strokeColor: "#EED6C4"
+                        startX: 0 + diagramArrow.xOffset
+                        startY: diagramArrow.height - 6
+                        fillColor: "transparent"
+                        PathLine { x: 5 + diagramArrow.xOffset; y: diagramArrow.height }
+                    }
+                    ShapePath {
+                        strokeWidth: 2
+                        strokeColor: "#EED6C4"
+                        startX: diagramArrow.width + diagramArrow.xOffset
+                        startY: diagramArrow.height - 6
+                        fillColor: "transparent"
+                        PathLine { x: 5 + diagramArrow.xOffset; y: diagramArrow.height }
+                    }
+                    Rectangle {
+                        id: diagramForcePoint
+                        width: 5
+                        height: width
+                        radius: width * 0.5
+                        color: "red"
+                        x: 5 + diagramArrow.xOffset - diagramForcePoint.width/2; y: diagramArrow.height - diagramForcePoint.height/2
+                    }
+                }
+                /////////////////////
+            }
         }
     }
 
