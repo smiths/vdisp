@@ -662,6 +662,8 @@ likely change [LC], in which the respective assumption is used.
 
   \item [A:Continuum:\phantomsection\label{A:Continuum}]{The underlying molecular structure of matter is not considered and gaps and empty spaces within a material particle are ignored. The material is assumed to be continuous. \citep[p.\ 33--34]{Long1961}, \citep[p.\ 1-2]{Malvern1969} (RefBy: ?.)}
   
+  \item [A:Effective-Norm-Stress-Large:\phantomsection\label{A:Effective-Norm-Stress-Large}]{The effective normal stress is large enough that the shear strength to effective normal stress relationship can be approximated as a linear relationship. (RefBy: \hyperref[TM:Equilibrium]{TM:Equilibrium}))}
+
 \end{itemize}
   
 \subsubsection{Theoretical Models}\label{sec_theoretical}
@@ -756,6 +758,50 @@ effective stress. The total stress $\sigma$ is defined in
 {
 \begin{itemize}
 \item \hyperref[A:Terzaghi]{A:Terzaghi}
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\deftheory
+% #2 refname of theory
+{TM:Equilibrium}
+% #3 label
+{Equilibrium}
+% #4 equation
+{
+\( \sum{F_x} = 0, \sum{F_y} = 0, \sum{M}=0 \)
+}
+% #5 description
+{
+\begin{symbDescription}
+  \item{$F_x$ is the x-component of the force (\si{\newton})}
+  \item{$F_y$ is the y-component of the force (\si{\newton})}
+  \item{$M$ is the moment (\si{\newton\metre})}
+\end{symbDescription}
+}
+% #6 Notes
+{
+  For a body in static equilibrium, the net forces and moments acting on the body will cancel out. 
+  Assuming a 2D problem (\hyperref[A:Effective-Norm-Stress-Large]{A:Effective-Norm-Stress-Large}), the x-coordinate of the force $F_x$ and y-coordinate 
+  of the force $F_y$ will be equal to 0. All forces and their distance from the chosen point of rotation will 
+  create a net moment equal to 0.
+  % Add this assumption>
+}
+% #7 Source
+{
+\citet{FredlundKrahn}
+}
+% #8 Referenced by
+{
+?.
+}
+% #9 Preconditions
+{
+\begin{itemize}
+\item \hyperref[A:Effective-Norm-Stress-Large]{A:Effective-Norm-Stress-Large}
 \end{itemize}
 }
 % #1 derivation - not applicable by default

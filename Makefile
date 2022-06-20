@@ -1,5 +1,5 @@
 DOC_DIRS ?= docs/Design/MIS docs/Design/MG docs/Design/SRS Miscellaneous
-LATEX_AUX_EXTENSIONS ?= aux fdb_latexmk fls log out synctex.gz toc
+LATEX_AUX_EXTENSIONS ?= aux fdb_latexmk fls log out synctex.gz toc blg bbl
 
 all: run
 
