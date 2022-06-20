@@ -788,7 +788,6 @@ effective stress. The total stress $\sigma$ is defined in
   Assuming a 2D problem (\hyperref[A:Effective-Norm-Stress-Large]{A:Effective-Norm-Stress-Large}), the x-coordinate of the force $F_x$ and y-coordinate 
   of the force $F_y$ will be equal to 0. All forces and their distance from the chosen point of rotation will 
   create a net moment equal to 0.
-  % Add this assumption>
 }
 % #7 Source
 {
@@ -802,6 +801,86 @@ effective stress. The total stress $\sigma$ is defined in
 {
 \begin{itemize}
 \item \hyperref[A:Effective-Norm-Stress-Large]{A:Effective-Norm-Stress-Large}
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\deftheory
+% #2 refname of theory
+{GD:Weight}
+% #3 label
+{Weight}
+% #4 equation
+{
+\( W = V\gamma \)
+}
+% #5 description
+{
+\begin{symbDescription}
+  \item{$W$ is the weight (\si{\newton})}
+  \item{$V$ is the volume (\si{\metre\cubed})}
+  \item{$\gamma$ is the specific weight (\si{\frac{\newton}{\metre\cubed}})}
+\end{symbDescription}
+}
+% #6 Notes
+{
+  None.
+}
+% #7 Source
+{
+\citet{WikipediaWeight}
+}
+% #8 Referenced by
+{
+?.
+}
+% #9 Preconditions
+{
+\begin{itemize}
+\item add preconditions
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\deftheory
+% #2 refname of theory
+{GD:hsPressure}
+% #3 label
+{Hydrostatic Pressure}
+% #4 equation
+{
+\( p = \gamma h \)
+}
+% #5 description
+{
+\begin{symbDescription}
+  \item{$p$ is the pressure (\si{\pascal})}
+  \item{$\gamma$ is the specific weight (\si{\frac{\newton}{\metre\cubed}})}
+  \item{$h$ is the height (\si{\metre})}
+\end{symbDescription}
+}
+% #6 Notes
+{
+  This equation is derived from Bernoulli's equation for a slow moving fluid through a porous material.
+}
+% #7 Source
+{
+\citet{WikipediaPressure}
+}
+% #8 Referenced by
+{
+?.
+}
+% #9 Preconditions
+{
+\begin{itemize}
+\item add preconditions
 \end{itemize}
 }
 % #1 derivation - not applicable by default
