@@ -17,10 +17,16 @@ Item {
             verticalCenter: parent.verticalCenter
         }
         
-        property int formTopMargin: (vdispWindow.height > 800) ? 120 : (vdispWindow.height > 700) ? 100 : (vdispWindow.height > 600) ? 60 : 40
-        property int formMiddleMargin: (vdispWindow.height > 800) ? 60 : (vdispWindow.height > 700) ? 50 : (vdispWindow.height > 600) ? 40 : 30
-        property int diagramMargin: (vdispWindow.height > 800) ? 45 : (vdispWindow.height > 700) ? 40 : (vdispWindow.height > 600) ? 35 : 30
-        property int checkboxMargin: (vdispWindow.height > 800) ? 35 : (vdispWindow.height > 700) ? 30 : (vdispWindow.height > 600) ? 25 : 20
+        // property int formTopMargin: (vdispWindow.height > 800) ? 120 : (vdispWindow.height > 700) ? 100 : (vdispWindow.height > 600) ? 60 : 40
+        // property int formMiddleMargin: (vdispWindow.height > 800) ? 60 : (vdispWindow.height > 700) ? 50 : (vdispWindow.height > 600) ? 40 : 30
+        // property int diagramMargin: (vdispWindow.height > 800) ? 45 : (vdispWindow.height > 700) ? 40 : (vdispWindow.height > 600) ? 35 : 30
+        // property int checkboxMargin: (vdispWindow.height > 800) ? 35 : (vdispWindow.height > 700) ? 30 : (vdispWindow.height > 600) ? 25 : 20
+
+        // 40 - min margin, 120 - max margin
+        property int formTopMargin: 40 + (120-40) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        property int formMiddleMargin: 30 + (60-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        property int diagramMargin: 30 + (45-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        property int checkboxMargin: 20 + (35-20) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
 
         property double lengthValue: -1.0
         property double widthValue: -1.0
