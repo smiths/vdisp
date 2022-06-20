@@ -778,4 +778,47 @@ Rectangle {
         }
     }
     //////////////////////
+
+    // Continue Button ///
+    Rectangle {
+        id: continueButton
+        width: parent.width/6
+        height: 25
+        radius: 12
+        color: (parent.formFilled) ? "#fff3e4" : "#9d8f84"
+        anchors {
+            bottom: parent.bottom
+            bottomMargin: 20
+            horizontalCenter: parent.horizontalCenter
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if(enterDataFormBackground.formFilled)
+                    enterDataStackView.push(enterDataFormBackground.nextScreen)
+            }
+        }
+        Text {
+            id: continueButtonText
+            text: "Continue"
+            font.pixelSize: 13
+            anchors {
+                verticalCenter: continueButtonIcon.verticalCenter
+                right: continueButtonIcon.left
+                rightMargin: 5
+            }
+        }
+        Image {
+            id: continueButtonIcon
+            source: "../Assets/continue.png"
+            width: 19
+            height: 19
+            anchors {
+                left: parent.horizontalCenter
+                leftMargin: 20
+                verticalCenter: parent.verticalCenter
+            }
+        }
+    }
+    //////////////////////
 }

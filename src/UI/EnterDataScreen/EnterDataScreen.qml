@@ -56,14 +56,6 @@ Item {
                     enterDataStackView.push(enterDataStackView.currentItem.nextScreen)
             }
         }
-
-        // Just testing formFilled
-        Rectangle {
-            anchors.centerIn: parent
-            width: 10
-            height: 10
-            color: (enterDataStackView.currentItem.formFilled) ? "green" : "red"
-        }
     }
 
     // Add "progress bar" at bottom of screen
