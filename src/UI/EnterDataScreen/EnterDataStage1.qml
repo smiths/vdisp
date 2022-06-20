@@ -2,8 +2,14 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
+import org.julialang 1.0
 
 Item {
+
+    // Add arrow forward and back
+
+    // Add "progress bar" at bottom of screen
+
     Rectangle {
         id: enterDataFormBackground
 
@@ -17,12 +23,6 @@ Item {
             verticalCenter: parent.verticalCenter
         }
         
-        // property int formTopMargin: (vdispWindow.height > 800) ? 120 : (vdispWindow.height > 700) ? 100 : (vdispWindow.height > 600) ? 60 : 40
-        // property int formMiddleMargin: (vdispWindow.height > 800) ? 60 : (vdispWindow.height > 700) ? 50 : (vdispWindow.height > 600) ? 40 : 30
-        // property int diagramMargin: (vdispWindow.height > 800) ? 45 : (vdispWindow.height > 700) ? 40 : (vdispWindow.height > 600) ? 35 : 30
-        // property int checkboxMargin: (vdispWindow.height > 800) ? 35 : (vdispWindow.height > 700) ? 30 : (vdispWindow.height > 600) ? 25 : 20
-
-        // 40 - min margin, 120 - max margin
         property int formTopMargin: 40 + (120-40) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         property int formMiddleMargin: 30 + (60-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         property int diagramMargin: 30 + (45-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
@@ -36,6 +36,8 @@ Item {
         property int checkboxSize: 18
         property int checkboxLabelGap: 6
         property int checkboxGap: 20
+
+        // Add "Input From File"
 
         // Title
         Text {
@@ -91,6 +93,7 @@ Item {
                     
                     selectByMouse: true
                     clip: true
+                    onTextChanged: props.problemName = text
                     
                     // Placeholder Text
                     property string placeholderText: "Enter Problem Name Here..."
@@ -130,6 +133,16 @@ Item {
 
                 width: formTop.itemWidth
                 font.pixelSize: 18
+                
+                property bool loaded: false
+                onCurrentIndexChanged: {
+                    if(!loaded){
+                        // The ComboBox loading also emits current index change signal
+                        loaded = true
+                    }else{
+                        props.model = currentIndex
+                    }
+                }
 
                 // Text of dropdown list
                 delegate: ItemDelegate {
@@ -242,6 +255,16 @@ Item {
 
                 width: formTop.itemWidth
                 font.pixelSize: 18
+
+                property bool loaded: false
+                onCurrentIndexChanged: {
+                    if(!loaded){
+                        // The ComboBox loading also emits current index change signal
+                        loaded = true
+                    }else{
+                        props.foundation = currentIndex
+                    }
+                }
 
                 // Text of dropdown list
                 delegate: ItemDelegate {
@@ -384,7 +407,12 @@ Item {
                         bottom: 0
                     }
                     // Change for input handling
-                    onTextChanged: acceptableInput ? enterDataFormBackground.widthValue = parseFloat(text) : print("Width input not acceptable")
+                    onTextChanged: {
+                        // Update property (so diagram can update)
+                        enterDataFormBackground.widthValue = parseFloat(text)
+                        // Update Julia value
+                        props.foundationWidth = parseFloat(text)
+                    }
 
                     // Placeholder Text
                     property string placeholderText: "Enter Width..."
@@ -439,7 +467,7 @@ Item {
                         bottom: 0
                     }
                     // Change for input handling
-                    // onTextChanged: acceptableInput ? print("Input acceptable") : print("Input not acceptable")
+                    onTextChanged: props.appliedPressure = parseFloat(text)
 
                     // Placeholder Text
                     property string placeholderText: "Enter Pressure..."
@@ -495,7 +523,12 @@ Item {
                         bottom: 0
                     }
                     // Change for input handling
-                    onTextChanged: acceptableInput ? enterDataFormBackground.lengthValue = parseFloat(text) : print("Length input not acceptable")
+                    onTextChanged: {
+                        // Update property (so diagram can update)
+                        enterDataFormBackground.lengthValue = parseFloat(text)
+                        // Update Julia value
+                        props.foundationLength = parseFloat(text)
+                    }
 
                     // Placeholder Text
                     property string placeholderText: "Enter Length..."
@@ -535,6 +568,17 @@ Item {
 
                 width: formMiddle.itemWidth
                 font.pixelSize: 18
+
+                property bool loaded: false
+                onCurrentIndexChanged: {
+                    if(!loaded){
+                        // The ComboBox loading also emits current index change signal
+                        loaded = true
+                    }else{
+                        // Only index 0 means center
+                        props.center = (currentIndex === 0) ? true : false
+                    }
+                }
 
                 // Text of dropdown list
                 delegate: ItemDelegate {
@@ -725,7 +769,12 @@ Item {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: parent.checked = !parent.checked
+                onClicked: {
+                    // Toggle checkbox
+                    parent.checked = !parent.checked
+                    // Update Julia value
+                    props.outputIncrements = parent.checked
+                }
             }
         }
         Text {
@@ -764,7 +813,12 @@ Item {
             }
             MouseArea {
                 anchors.fill: parent
-                onClicked: parent.checked = !parent.checked
+                onClicked: {
+                    // Toggle checkbox
+                    parent.checked = !parent.checked
+                    // Update Julia value
+                    props.saturatedAboveWaterTable = parent.checked
+                }
             }
         }
         Text {
