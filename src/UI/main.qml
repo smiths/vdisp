@@ -13,6 +13,16 @@ Window {
     visible: true
     title: qsTr("VDisp")
 
+    function isMinHeight(){
+        return height === minimumHeight
+    }
+    function isMinWidth(){
+        return width === minimumWidth
+    }
+    function isMinSize(){
+        return isMinHeight() && isMinWidth()
+    }
+
     Loader {
         id: mainLoader
         anchors.fill: parent

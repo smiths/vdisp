@@ -298,10 +298,9 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    if(topForm.ready){
-                        // print("SG: " + sgTextInput.text + " VR: " + vrTextInput.text + " WC: " + wcSlider.value)
+                    //if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
+                    if(topForm.ready) {
                         materialsModel.append({"materialName": "Material " + (materialsModel.count + 1), "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseInt(wcSlider.value)})
-                        materialsModel.sync()
                         sgTextInput.text = ""
                         vrTextInput.text = ""
                     }
@@ -309,64 +308,171 @@ Rectangle {
             }
         }
         //////////////////////////
+    }
 
-        // Material List ////////
-        ListModel {
-            id: materialsModel
-            ListElement { materialName: "Material 1"; specificGravity: 1.35; voidRatio: 0.9; waterContent: 35}
+    // Material List ////////
+    ListModel {
+        id: materialsModel
+    }
+
+    ListView {
+        id: materialsList
+        model: materialsModel
+        
+        property int maxMaterials: 7
+        property bool overcrowded: vdispWindow.isMinHeight() && model.count > 7
+        property int maximumHeight: materialPropertiesFormBackground.materialListEntryHeight * maxMaterials
+        
+        interactive: (model.count <= maxMaterials) ? false : true  // Allow scrolling when list becomes too large
+        implicitWidth: parent.width
+        implicitHeight: Math.min(materialPropertiesFormBackground.materialListEntryHeight * materialsList.count, maximumHeight)
+        clip: true
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: parent.verticalCenter
+            topMargin: (overcrowded) ? 20 : 0 
         }
 
-        ListView {
-            id: materialsList
-            model: materialsModel
-            interactive: false   // Prevents "flicking"
-            implicitWidth: parent.width
-            implicitHeight: materialPropertiesFormBackground.materialListEntryHeight * materialsList.count
-            clip: true
-            anchors {
-                horizontalCenter: parent.horizontalCenter
-                top: topForm.bottom
-                topMargin: materialListMargin
-            }
-            // Just for viewing bounds during development
-            Rectangle {
-                anchors.fill: parent
-                color: "transparent"
-                border.color: "red"
-                border.width: 1
-            }
-            delegate: Item {
-                id: materialEntry
-                width: parent.width
-                height: materialPropertiesFormBackground.materialListEntryHeight
+        // Just for viewing bounds during development
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+        }
 
-                property int inputWidth: 100 + (130-100) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
-                property int inputGap: 10 + (30-10) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
-                property int labelGap: 3 + (8-3) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
-                property int sideGap: 8 + (20-8) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
-                property int textSize: 15 + (18-15) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+        delegate: Item {
+            id: materialEntry
+            width: parent.width
+            height: materialPropertiesFormBackground.materialListEntryHeight
 
+            property int inputWidth: 50 + (90-50) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+            property int inputGap: 10 + (30-10) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+            property int labelGap: 3 + (8-3) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+            property int sideGap: 8 + (20-8) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+            property int textSize: 18 + (21-18) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+            
+            Item {
+                implicitWidth: 2*materialEntry.sideGap + 3*materialEntry.inputGap + 3*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryName.width
+                height: parent.height
+                anchors.horizontalCenter: parent.horizontalCenter
+                // Just for viewing bounds during development
+                Rectangle {
+                    anchors.fill: parent
+                    color: "transparent"
+                    border.color: "green"
+                    border.width: 1
+                }
                 TextInput {
                     id: entryName
                     text: materialName
                     font.pixelSize: materialEntry.textSize
                     color: "#fff3e4"
+                    maximumLength: 13
                     anchors {
                         verticalCenter: parent.verticalCenter
                         left: parent.left
                         leftMargin: materialEntry.sideGap
                     }
-
                     selectByMouse: true
                     clip: true
                     onTextChanged: {
                         // update name of material
-                        
+                    }
+                }
+
+                Text {
+                    id: sgLabelEntry
+                    text: "Specific Gravity: "
+                    color: "#fff3e4"
+                    font.pixelSize: materialEntry.textSize
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: entryName.right
+                        leftMargin: materialEntry.inputGap
+                    }
+                }
+                Rectangle {
+                    id: sgEntryTextbox
+                    color: "#fff3e4"
+                    width: materialEntry.inputWidth
+                    height: 20
+                    radius: 4
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: sgLabelEntry.right
+                        leftMargin: materialEntry.labelGap
+                    }
+                    Text {
+                        text: specificGravity
+                        color: "#483434"
+                        font.pixelSize: materialEntry.textSize
+                        anchors.centerIn: parent
+                    }
+                }
+
+                Text {
+                    id: vrLabelEntry
+                    text: "Void Ratio: "
+                    color: "#fff3e4"
+                    font.pixelSize: materialEntry.textSize
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: sgEntryTextbox.right
+                        leftMargin: materialEntry.inputGap
+                    }
+                }
+                Rectangle {
+                    id: vrEntryTextbox
+                    color: "#fff3e4"
+                    width: materialEntry.inputWidth
+                    height: 20
+                    radius: 4
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: vrLabelEntry.right
+                        leftMargin: materialEntry.labelGap
+                    }
+                    Text {
+                        text: voidRatio
+                        color: "#483434"
+                        font.pixelSize: materialEntry.textSize
+                        anchors.centerIn: parent
+                    }
+                }
+
+                Text {
+                    id: wcLabelEntry
+                    text: "Water Content: "
+                    color: "#fff3e4"
+                    font.pixelSize: materialEntry.textSize
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: vrEntryTextbox.right
+                        leftMargin: materialEntry.inputGap
+                    }
+                }
+                Rectangle {
+                    id: wcEntryTextbox
+                    color: "#fff3e4"
+                    width: materialEntry.inputWidth
+                    height: 20
+                    radius: 4
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: wcLabelEntry.right
+                        leftMargin: materialEntry.labelGap
+                    }
+                    Text {
+                        text: waterContent
+                        color: "#483434"
+                        font.pixelSize: materialEntry.textSize
+                        anchors.centerIn: parent
                     }
                 }
             }
         }
-        /////////////////////////
     }
-    //////////////////////
+    /////////////////////////
+    ////////////////////////
 }
