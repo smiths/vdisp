@@ -14,6 +14,7 @@ using Observables
 export readInputFile, State
 
 # System variables
+# Enter Data Stage 1
 problemName = Observable("")
 model = Observable(0)
 foundation = Observable(0)
@@ -23,6 +24,12 @@ foundationLength = Observable(0.0)
 foundationWidth = Observable(0.0)
 outputIncrements = Observable(false)
 saturatedAboveWaterTable = Observable(false)
+# Enter Data Stage 2
+materials = Observable(0)
+materialNames = Observable([])
+specificGravity = Observable([])
+voidRatio = Observable([])
+waterContent = Observable([])
 
 # Update system variables
 # Remove annoying println statements later
@@ -53,9 +60,24 @@ end
 setSaturatedAboveWaterTable = on(saturatedAboveWaterTable) do val 
     println("Got an update: ", val)
 end
+setMaterials = on(materials) do val
+    println("Got an update: ", val)
+end
+setMaterialNames = on(materialNames) do val
+    println("Got an update: ", val)
+end
+setSpecificGravity = on(specificGravity) do val
+    println("Got an update: ", val)
+end
+setVoidRatio = on(voidRatio) do val
+    println("Got an update: ", val)
+end
+setWaterContent = on(waterContent) do val
+    println("Got an update: ", val)
+end
 
 # Load file main.qml
-loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable))
+loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent))
 
 # Run the app
 exec()

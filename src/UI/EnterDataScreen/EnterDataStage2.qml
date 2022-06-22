@@ -8,6 +8,13 @@ Rectangle {
     id: materialPropertiesFormBackground
 
     function isFilled(){
+        // Check if each material name is nonempty
+        for(var i = 0; i < props.materials; i++){
+            if(props.materialNames[i].length <= 0){
+                return false
+            }
+            // TODO: check if material name is unique?
+        }
         // As long as we have one material, the page is ready
         return materialsModel.count > 0
     }
@@ -57,8 +64,8 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                if(enterDataFormBackground.formFilled)
-                    enterDataStackView.push(enterDataFormBackground.nextScreen)
+                if(materialPropertiesFormBackground.formFilled)
+                    enterDataStackView.push(materialPropertiesFormBackground.nextScreen)
             }
         }
         Text {
@@ -300,9 +307,19 @@ Rectangle {
                 onClicked: {
                     //if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
                     if(topForm.ready) {
-                        materialsModel.append({"materialName": "Material " + (materialsModel.count + 1), "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseInt(wcSlider.value)})
+                        var name = qsTr("Material " + (materialsModel.count + 1))
+                        // Update UI
+                        materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseInt(wcSlider.value)})
+                        // Update Julia lists
+                        props.materials = props.materials+1
+                        props.materialNames = [...props.materialNames,name]
+                        props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
+                        props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
+                        props.waterContent = [...props.waterContent, parseFloat(wcSlider.value)]
+                        // Clear fields
                         sgTextInput.text = ""
                         vrTextInput.text = ""
+                        wcSlider.value = 50.0
                     }
                 }
             }
@@ -343,9 +360,10 @@ Rectangle {
 
         delegate: Item {
             id: materialEntry
-            width: parent.width
+            width: (!deleted) ? parent.width : undefined
             height: materialPropertiesFormBackground.materialListEntryHeight
 
+            property bool deleted: false
             property int inputWidth: 50 + (90-50) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
             property int inputGap: 10 + (30-10) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
             property int labelGap: 3 + (8-3) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
@@ -378,7 +396,13 @@ Rectangle {
                     selectByMouse: true
                     clip: true
                     onTextChanged: {
-                        // update name of material
+                        // update Julia lists
+                        materialsModel.get(index).materialName = text
+                        var nameList = []
+                        for(var i = 0; i < materialsModel.count; i++){
+                            nameList.push(materialsModel.get(i).materialName)
+                        }
+                        props.materialNames = [...nameList]
                     }
                 }
 
@@ -486,6 +510,34 @@ Rectangle {
                         onClicked: {
                             // Delete from list
                             materialsModel.remove(index)
+                            // Update Julia variables
+                            props.materials = props.materials - 1
+                            
+                            var nameList = []
+                            for(var i = 0; i < materialsModel.count; i++){
+                                nameList.push(materialsModel.get(i).materialName)
+                            }
+                            props.materialNames = [...nameList]
+
+                            var sgList = []
+                            for(var i = 0; i < materialsModel.count; i++){
+                                sgList.push(materialsModel.get(i).specificGravity)
+                            }
+                            props.specificGravity = [...sgList]
+
+                            var vrList = []
+                            for(var i = 0; i < materialsModel.count; i++){
+                                vrList.push(materialsModel.get(i).voidRatio)
+                            }
+                            props.voidRatio = [...vrList]
+
+                            var wcList = []
+                            for(var i = 0; i < materialsModel.count; i++){
+                                wcList.push(materialsModel.get(i).waterContent)
+                            }
+                            props.waterContent = [...wcList]
+
+                            materialEntry.deleted = true
                         }
                     }
                 }
