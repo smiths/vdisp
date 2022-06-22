@@ -8,8 +8,8 @@ Rectangle {
     id: materialPropertiesFormBackground
 
     function isFilled(){
-        // Replace when page is ready
-        return false
+        // As long as we have one material, the page is ready
+        return materialsModel.count > 0
     }
 
     // Is this form filled correctly (allowed to go next)
@@ -352,8 +352,9 @@ Rectangle {
             property int sideGap: 8 + (20-8) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
             property int textSize: 18 + (21-18) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
             
+            // Entry ////////////////
             Item {
-                implicitWidth: 2*materialEntry.sideGap + 3*materialEntry.inputGap + 3*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryName.width
+                implicitWidth: 2*materialEntry.sideGap + 4*materialEntry.inputGap + 3*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryName.width + deleteEntryBtn.width
                 height: parent.height
                 anchors.horizontalCenter: parent.horizontalCenter
                 // Just for viewing bounds during development
@@ -470,7 +471,26 @@ Rectangle {
                         anchors.centerIn: parent
                     }
                 }
+                Image {
+                    id: deleteEntryBtn
+                    width: 15
+                    height: width
+                    source: "../Assets/exit.png"
+                    anchors {
+                        verticalCenter: parent.verticalCenter
+                        left: wcEntryTextbox.right
+                        leftMargin: materialEntry.inputGap
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            // Delete from list
+                            materialsModel.remove(index)
+                        }
+                    }
+                }
             }
+            ///////////////////////
         }
     }
     /////////////////////////
