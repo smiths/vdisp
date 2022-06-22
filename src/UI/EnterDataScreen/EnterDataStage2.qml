@@ -10,8 +10,10 @@ Rectangle {
     function isFilled(){
         // Check if each material name is nonempty
         for(var i = 0; i < props.materials; i++){
-            if(props.materialNames[i].length <= 0){
-                return false
+            if(props.materialNames[i]){
+                if(props.materialNames[i].length <= 0){
+                    return false
+                }
             }
             // TODO: check if material name is unique?
         }
@@ -31,8 +33,8 @@ Rectangle {
     color: "#6B4F4F"
     anchors {
         fill: parent
-        horizontalCenter: parent.horizontalCenter
-        verticalCenter: parent.verticalCenter
+        horizontalCenter: (parent) ? parent.horizontalCenter : undefined
+        verticalCenter: (parent) ? parent.verticalCenter : undefined
     }
 
     // Title /////////////
@@ -356,6 +358,13 @@ Rectangle {
             color: "transparent"
             border.color: "red"
             border.width: 1
+        }
+
+        // If we went to a different screen and came back, reload previous entries
+        Component.onCompleted: {
+            for(var i = 0; i < props.materials; i++){
+                materialsModel.append({"materialName": props.materialNames[i], "specificGravity": props.specificGravity[i], "voidRatio": props.voidRatio[i], "waterContent": props.waterContent[i]})
+            }
         }
 
         delegate: Item {

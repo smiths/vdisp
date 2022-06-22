@@ -13,6 +13,8 @@ using Observables
 
 export readInputFile, State
 
+PRINT_DEBUG = false
+
 # System variables
 # Enter Data Stage 1
 problemName = Observable("")
@@ -32,48 +34,75 @@ voidRatio = Observable([])
 waterContent = Observable([])
 
 # Update system variables
-# Remove annoying println statements later
 setProblemName = on(problemName) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setModel = on(model) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setFoundation = on(foundation) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setAppliedPressure = on(appliedPressure) do val 
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setPressurePoint = on(center) do val 
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setLength = on(foundationLength) do val 
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setWidth = on(foundationWidth) do val 
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setOutputIncrements = on(outputIncrements) do val 
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setSaturatedAboveWaterTable = on(saturatedAboveWaterTable) do val 
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setMaterials = on(materials) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setMaterialNames = on(materialNames) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setSpecificGravity = on(specificGravity) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setVoidRatio = on(voidRatio) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 setWaterContent = on(waterContent) do val
-    println("Got an update: ", val)
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
 end
 
 # Load file main.qml
