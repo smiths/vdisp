@@ -6,8 +6,20 @@ import org.julialang 1.0
 
 Rectangle {
     id: soilLayerFormBackground
+
+    function isProperBounds(){
+        bounds.sort(function(a, b){return a - b});
+        print(bounds)
+        for(var i = 1; i < bounds.length; i++){
+            print((bounds[i] - bounds[i-1]))
+            // Check if layer is larger than min allowed size
+            if((bounds[i] - bounds[i-1]) < minLayerSize) return false
+        }
+        return true
+    }
+
     function isFilled(){
-        return false
+        return (calculatedBounds) ? isProperBounds() : false
     }
 
     // Is this form filled correctly (allowed to go next)
@@ -22,6 +34,9 @@ Rectangle {
 
     property variant values: []
     property double totalDepth: 10.0
+    property variant bounds: []
+    property double minLayerSize: 0.1 * totalDepth
+    property bool calculatedBounds: false
 
     radius: 20
     color: "#6B4F4F"
@@ -32,12 +47,16 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        bounds.push(totalDepth)
         for(var i = 0; i < props.materials - 1; i++){
             var val = 1 - ((i+1) / props.materials)
             values.push(val)
+            bounds.push(val*totalDepth)
             var slider = Qt.createComponent("LayerHandle.qml");
             var obj = slider.createObject(mainSliderBackground, {index: i, value: val})
         }
+        bounds.push(0.0)
+        calculatedBounds = true
     }
 
     // Title //////////////
@@ -111,7 +130,17 @@ Rectangle {
             }
             // Change for input handling
             onTextChanged: {
-                if(acceptableInput) soilLayerFormBackground.totalDepth = parseFloat(text)
+                if(acceptableInput) {
+                    var depth = parseFloat(text)
+                    // Update Total Depth Value
+                    soilLayerFormBackground.totalDepth = depth
+                    // Update Bounds
+                    soilLayerFormBackground.bounds = [depth]
+                    for(var i = 0; i < props.materials - 1; i++){
+                        soilLayerFormBackground.bounds.push(soilLayerFormBackground.values[i] * depth)
+                    }
+                    soilLayerFormBackground.bounds.push(0.0)
+                }
             }
             // Placeholder Text
             property string placeholderText: "Enter Depth..."

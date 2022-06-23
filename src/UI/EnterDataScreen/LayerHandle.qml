@@ -57,9 +57,25 @@ Item {
     }
    
     function setPixels(pixels) {
+        // Calculate value
         var value = (maximum - minimum) / (root.height - pill.height) * (pixels - pill.height / 2) + minimum // value from pixels
+        
+        // Update handle value
         root.value = Math.min(Math.max(minimum, value))
+       
+        // Update property in soilLayerFormBackground
         soilLayerFormBackground.values[index] = Math.min(Math.max(minimum, value))
+
+        // Update Bounds
+        soilLayerFormBackground.calculatedBounds = false
+        soilLayerFormBackground.bounds = [soilLayerFormBackground.totalDepth]
+        for(var i = 0; i < props.materials - 1; i++){
+            soilLayerFormBackground.bounds.push(soilLayerFormBackground.values[i] * soilLayerFormBackground.totalDepth)
+        }
+        soilLayerFormBackground.bounds.push(0.0)
+        soilLayerFormBackground.calculatedBounds = true
+
+        // Broadcast clicked signal
         clicked(Math.min(Math.max(minimum, value), maximum), index) 
     }
 }
