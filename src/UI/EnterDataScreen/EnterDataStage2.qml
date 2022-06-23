@@ -252,10 +252,6 @@ Rectangle {
             from: 0
             to: 100
             stepSize: 0.5
-
-            onValueChanged: {
-                // DO SMTHN
-            }
             
             width: topForm.inputWidth
 
