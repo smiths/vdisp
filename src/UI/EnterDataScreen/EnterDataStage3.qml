@@ -9,9 +9,7 @@ Rectangle {
 
     function isProperBounds(){
         bounds.sort(function(a, b){return a - b});
-        print(bounds)
         for(var i = 1; i < bounds.length; i++){
-            print((bounds[i] - bounds[i-1]))
             // Check if layer is larger than min allowed size
             if((bounds[i] - bounds[i-1]) < minLayerSize) return false
         }
@@ -53,7 +51,7 @@ Rectangle {
             values.push(val)
             bounds.push(val*totalDepth)
             var slider = Qt.createComponent("LayerHandle.qml");
-            var obj = slider.createObject(mainSliderBackground, {index: i, value: val})
+            var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
         }
         bounds.push(0.0)
         calculatedBounds = true
@@ -87,6 +85,129 @@ Rectangle {
             topMargin: soilLayerFormBackground.titleMargin
             bottom: continueButton.top
             bottomMargin: soilLayerFormBackground.continueMargin
+        }
+
+        Repeater {
+            id: labelsRepeater
+            model: props.materials
+
+            width: parent.width
+            height: parent.height
+
+            delegate: Item {
+                property double layerHeight: (soilLayerFormBackground.calculatedBounds) ? (soilLayerFormBackground.bounds[index+1]-soilLayerFormBackground.bounds[index]) / soilLayerFormBackground.totalDepth * mainSliderBackground.height  : 0
+                property double boxHeight: 0.7*layerHeight
+              
+                width: 0.9 * mainSliderBackground.width
+                height: boxHeight
+                x: mainSliderBackground.width/2 - width/2
+                y: (soilLayerFormBackground.calculatedBounds) ? (soilLayerFormBackground.bounds[index]/soilLayerFormBackground.totalDepth)*mainSliderBackground.height + layerHeight/2 - boxHeight/2: 0
+
+                // Just for testing
+                Rectangle{
+                    anchors.fill: parent 
+                    color: "red"
+                    radius: 3
+                    opacity: 0
+                }
+
+                // Layer type selection
+                ComboBox {
+                    id: materialDropdown
+                    model: props.materialNames
+                    anchors {
+                        top: parent.top
+                        topMargin: 10
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    width: 0.6 * parent.width
+                    font.pixelSize: 18
+                    property bool loaded: false
+                    onCurrentIndexChanged: {
+                        if(!loaded){
+                            // The ComboBox loading also emits current index change signal
+                            loaded = true
+                        }else{
+                            // Update value
+                            // props.center = (currentIndex === 0) ? true : false
+                        }
+                    }
+                    // Text of dropdown list
+                    delegate: ItemDelegate {
+                        width: materialDropdown.width
+                        contentItem: Text {
+                            text: modelData
+                            color: "#483434"
+                            font: materialDropdown.font
+                            elide: Text.ElideRight
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        highlighted: materialDropdown.highlightedIndex === index
+                        required property int index
+                        required property var modelData
+                    }
+                    indicator: Canvas {
+                        id: materialCanvas
+                        x: materialDropdown.width - width - 10
+                        y: materialDropdown.height / 2 - 3
+                        width: 12
+                        height: 8
+                        contextType: "2d"
+                        Connections {
+                            target: materialDropdown
+                            function onPressedChanged() { materialCanvas.requestPaint(); }
+                        }
+                        onPaint: {
+                            context.reset();
+                            context.moveTo(0, 0);
+                            context.lineTo(width, 0);
+                            context.lineTo(width / 2, height);
+                            context.closePath();
+                            // Color of arrow
+                            context.fillStyle = materialDropdown.pressed ? "#e8e4e4" : "#483434";
+                            context.fill();
+                        }
+                    }
+                    // Text in main box
+                    contentItem: Text {
+                        text: materialDropdown.displayText
+                        font: materialDropdown.font
+                        color: materialDropdown.pressed ? "#989494" : "#483434"
+                        verticalAlignment: Text.AlignVCenter
+                        // elide: Text.ElideRight
+                        anchors {
+                            left: parent.left
+                            leftMargin: 10
+                        }
+                    }
+                    // Background of main box
+                    background: Rectangle {
+                        height: formMiddle.itemHeight
+                        color: "#fff3e4"
+                        border.color: "#483434"
+                        border.width: 1
+                        radius: 5
+                    }
+                    popup: Popup {
+                        y: materialDropdown.height - 1
+                        width: materialDropdown.width
+                        implicitHeight: contentItem.implicitHeight
+                        padding: 1
+                        contentItem: ListView {
+                            clip: true
+                            implicitHeight: contentHeight
+                            model: materialDropdown.popup.visible ? materialDropdown.delegateModel : null
+                            currentIndex: materialDropdown.highlightedIndex
+                            ScrollIndicator.vertical: ScrollIndicator { }
+                        }
+                        background: Rectangle {
+                            color: "#fff3e4"
+                            radius: 2
+                        }
+                    }
+                }
+                ////////////////////////
+            }
         }
     }
     /////////////////////////
@@ -131,6 +252,7 @@ Rectangle {
             // Change for input handling
             onTextChanged: {
                 if(acceptableInput) {
+                    soilLayerFormBackground.calculatedBounds = false
                     var depth = parseFloat(text)
                     // Update Total Depth Value
                     soilLayerFormBackground.totalDepth = depth
@@ -140,6 +262,7 @@ Rectangle {
                         soilLayerFormBackground.bounds.push(soilLayerFormBackground.values[i] * depth)
                     }
                     soilLayerFormBackground.bounds.push(0.0)
+                    soilLayerFormBackground.calculatedBounds = true
                 }
             }
             // Placeholder Text

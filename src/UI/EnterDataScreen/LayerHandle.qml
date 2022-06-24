@@ -11,6 +11,7 @@ Item {
     property double maximum: 1
     property double value: 0
     property double minimum: 0
+    property double stepSize: 1.0
    
     signal clicked(double value, int index);  
    
@@ -28,14 +29,14 @@ Item {
        
         y: (value - minimum) / (maximum - minimum) * (root.height - pill.height) // pixels from value
         implicitWidth: parent.width
-        implicitHeight: 12
+        implicitHeight: 15
         radius: 5
         color: "#483434"
 
         Text {
             anchors.centerIn: parent
             color: "#fff3e4"
-            font.pixelSize: 12
+            font.pixelSize: 13
             text: "Depth: " + (root.value*soilLayerFormBackground.totalDepth).toFixed(3)
         }
     }
@@ -60,6 +61,12 @@ Item {
         // Calculate value
         var value = (maximum - minimum) / (root.height - pill.height) * (pixels - pill.height / 2) + minimum // value from pixels
         
+        // Snap to grid
+        // stepSize is in terms of value*totalDepth, but we are only adjusting value here
+        var step = root.stepSize / soilLayerFormBackground.totalDepth
+        var delta = (value*100)%(step*100)
+        value = ((value*100)-delta)/100
+
         // Update handle value
         root.value = Math.min(Math.max(minimum, value))
        
