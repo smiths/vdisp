@@ -11,7 +11,9 @@ Rectangle {
         bounds.sort(function(a, b){return a - b});
         for(var i = 1; i < bounds.length; i++){
             // Check if layer is larger than min allowed size
-            if((bounds[i] - bounds[i-1]) < minLayerSize) return false
+            if((bounds[i] - bounds[i-1]) < minLayerSize) {
+                return false
+            }
         }
         return true
     }
@@ -95,9 +97,17 @@ Rectangle {
             height: parent.height
 
             delegate: Item {
+                id: layerInfoItem
+
+                property int inputHeight: 20
+                property int inputGap: 10
+
                 property double layerHeight: (soilLayerFormBackground.calculatedBounds) ? (soilLayerFormBackground.bounds[index+1]-soilLayerFormBackground.bounds[index]) / soilLayerFormBackground.totalDepth * mainSliderBackground.height  : 0
-                property double boxHeight: 0.7*layerHeight
-              
+                property double boxHeight: 2*inputHeight + inputGap
+                property bool tooSmall: layerHeight <= boxHeight + inputGap
+
+                visible: !tooSmall
+
                 width: 0.9 * mainSliderBackground.width
                 height: boxHeight
                 x: mainSliderBackground.width/2 - width/2
@@ -106,18 +116,19 @@ Rectangle {
                 // Just for testing
                 Rectangle{
                     anchors.fill: parent 
-                    color: "red"
+                    color: (layerInfoItem.tooSmall) ? "red" : "green"
                     radius: 3
-                    opacity: 0
+                    opacity: 0.3
+                    visible: false
                 }
 
                 // Layer type selection
                 ComboBox {
                     id: materialDropdown
                     model: props.materialNames
+                    currentIndex: layerInfoItem.index
                     anchors {
                         top: parent.top
-                        topMargin: 10
                         horizontalCenter: parent.horizontalCenter
                     }
                     width: 0.6 * parent.width
@@ -182,7 +193,7 @@ Rectangle {
                     }
                     // Background of main box
                     background: Rectangle {
-                        height: formMiddle.itemHeight
+                        height: layerInfoItem.inputHeight
                         color: "#fff3e4"
                         border.color: "#483434"
                         border.width: 1
@@ -207,6 +218,99 @@ Rectangle {
                     }
                 }
                 ////////////////////////
+
+                // Subdivisions ////////
+                SpinBox {
+                    id: subdivisionSpinbox
+                    value: 2
+                    editable: true
+                    from: 2
+                    to: 50 // Should we have max?
+
+                    font.pixelSize: 14
+
+                    height: layerInfoItem.inputHeight
+                    width: 0.4 * parent.width
+
+                    onValueModified: {
+                        print(value)
+                    }
+
+                    validator: IntValidator{
+                        bottom: 2
+                    }
+
+                    anchors {
+                        top: materialDropdown.bottom
+                        topMargin: layerInfoItem.inputGap
+                        horizontalCenter: parent.horizontalCenter
+                    }
+
+                    contentItem: TextInput {
+                        z: 2
+                        text: subdivisionSpinbox.textFromValue(subdivisionSpinbox.value, subdivisionSpinbox.locale)
+
+                        font.pixelSize: subdivisionSpinbox.font.pixelSize
+                        color: "#fff3e4"
+                        selectionColor: "#21be2b"
+                        selectedTextColor: "#ffffff"
+                        
+                        readOnly: !subdivisionSpinbox.editable
+                        validator: subdivisionSpinbox.validator
+                        inputMethodHints: Qt.ImhFormattedNumbersOnly
+
+                        anchors {
+                            bottom: parent.bottom
+                            bottomMargin: 3
+                            horizontalCenter: parent.horizontalCenter
+                        }
+                    }
+
+                    up.indicator: Rectangle {
+                        x: subdivisionSpinbox.mirrored ? 0 : parent.width - width
+                        height: parent.height
+                        radius: 5
+                        implicitWidth: 40
+                        implicitHeight: layerInfoItem.inputHeight
+                        color: subdivisionSpinbox.up.pressed ? "#6e4f4f" : "#483434"
+
+                        Text {
+                            text: "+"
+                            font.pixelSize: subdivisionSpinbox.font.pixelSize * 2
+                            color: "#fff3e4"
+                            anchors.fill: parent
+                            fontSizeMode: Text.Fit
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
+
+                    down.indicator: Rectangle {
+                        x: subdivisionSpinbox.mirrored ? parent.width - width : 0
+                        height: parent.height
+                        radius: 5
+                        implicitWidth: 40
+                        implicitHeight: layerInfoItem.inputHeight
+                        color: subdivisionSpinbox.down.pressed ? "#6e4f4f" : "#483434"
+
+                        Text {
+                            text: "-"
+                            font.pixelSize: subdivisionSpinbox.font.pixelSize * 2
+                            color: "#fff3e4"
+                            fontSizeMode: Text.Fit
+                            anchors.centerIn: parent
+                        }
+                    }
+
+                    background: Rectangle {
+                        id: subdivisionSpinboxBg
+                        width: parent.width
+                        height: parent.height
+                        color: "#483434"
+                        radius: 5
+                    }
+                }
+                ///////////////////////
             }
         }
     }
