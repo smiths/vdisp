@@ -80,6 +80,7 @@ Item {
             soilLayerFormBackground.bounds.push(soilLayerFormBackground.values[i] * soilLayerFormBackground.totalDepth)
         }
         soilLayerFormBackground.bounds.push(0.0)
+        props.bounds = [...soilLayerFormBackground.bounds]  // Update Julia list of bounds
         soilLayerFormBackground.calculatedBounds = true
 
         // Broadcast clicked signal

@@ -13,7 +13,7 @@ using Observables
 
 export readInputFile, State
 
-PRINT_DEBUG = false
+PRINT_DEBUG = true
 
 # System variables
 # Enter Data Stage 1
@@ -32,6 +32,12 @@ materialNames = Observable([])
 specificGravity = Observable([])
 voidRatio = Observable([])
 waterContent = Observable([])
+# Enter Data Stage 3
+bounds = Observable([])
+subdivisions = Observable([])
+totalDepth = Observable(10.0)
+soilLayerNumbers = Observable([])
+depthToGroundWaterTable = Observable(5.0)
 
 # Update system variables
 setProblemName = on(problemName) do val
@@ -81,7 +87,7 @@ setSaturatedAboveWaterTable = on(saturatedAboveWaterTable) do val
 end
 setMaterials = on(materials) do val
     if PRINT_DEBUG
-        println("Got an update: ", val)
+        println("\nGot an update for materials: ", val)
     end
 end
 setMaterialNames = on(materialNames) do val
@@ -104,9 +110,34 @@ setWaterContent = on(waterContent) do val
         println("Got an update: ", val)
     end
 end
+setSubdivisions = on(subdivisions) do val
+    if PRINT_DEBUG
+        println("\nGot an update for subdivisions: ", val)
+    end
+end
+setTotalDepth = on(totalDepth) do val
+    if PRINT_DEBUG
+        println("Got an update: ", val)
+    end
+end
+setSoilLayerNumbers = on(soilLayerNumbers) do val
+    if PRINT_DEBUG
+        println("\nGot an update for soilLayerNumbers: ", val)
+    end
+end
+setBounds = on(bounds) do val
+    if PRINT_DEBUG
+        println("\nGot an update for bounds: ", val)
+    end
+end
+setDepthToGroundWaterTable = on(depthToGroundWaterTable) do val
+    if PRINT_DEBUG
+        println("\nGot an update for depthToGroundWaterTable: ", val)
+    end
+end
 
 # Load file main.qml
-loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent))
+loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent, "bounds" => bounds, "subdivisions" => subdivisions, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbers, "depthToGroundWaterTable" => depthToGroundWaterTable))
 
 # Run the app
 exec()
