@@ -213,6 +213,7 @@ Rectangle {
                 x: mainSliderBackground.width/2 - width/2
                 y: (soilLayerFormBackground.calculatedBounds) ? (soilLayerFormBackground.bounds[index]/soilLayerFormBackground.totalDepth)*mainSliderBackground.height: 0
 
+                // Subdivision Selection
                 Item {
                     width: parent.width
                     height: boxHeight
@@ -324,33 +325,11 @@ Rectangle {
                     ////////////////////////
 
                     // Subdivisions ////////
-                    SpinBox {
-                        id: subdivisionSpinbox
-                        value: 2
-                        editable: true
-                        from: 2
-                        to: 50 // Should we have max?
-
-                        font.pixelSize: 14
-
-                        height: layerInfoItem.inputHeight
-                        width: 75
-
-                        onValueModified: {
-                            var vals = []
-                            for (var i = 0; i < props.subdivisions.length; i++){
-                                if(i === index){
-                                    vals = [...vals, subdivisionSpinbox.value]
-                                }else{
-                                    vals = [...vals, props.subdivisions[i]]
-                                }
-                            }
-                            props.subdivisions = [...vals]
-                        }
-
-                        validator: IntValidator{
-                            bottom: 2
-                        }
+                    Item {
+                        id: subdivisionGroup
+                        property int labelGap: 6
+                        width: subdivisionSpinbox.width + labelGap + subdivsionLabel.width
+                        height: subdivisionSpinbox.height
 
                         anchors {
                             top: materialDropdown.bottom
@@ -358,73 +337,121 @@ Rectangle {
                             horizontalCenter: parent.horizontalCenter
                         }
 
-                        contentItem: TextInput {
-                            z: 2
-                            text: subdivisionSpinbox.textFromValue(subdivisionSpinbox.value, subdivisionSpinbox.locale)
+                        Text {
+                            id: subdivsionLabel
+                            text: "Subdivisions:"
+                            color: "#483434"
+                            font.pixelSize: 15
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                left: parent.left
+                            }
+                        }
 
-                            font.pixelSize: subdivisionSpinbox.font.pixelSize
-                            color: "#fff3e4"
-                            selectionColor: "#21be2b"
-                            selectedTextColor: "#ffffff"
-                            
-                            readOnly: !subdivisionSpinbox.editable
-                            validator: subdivisionSpinbox.validator
-                            inputMethodHints: Qt.ImhFormattedNumbersOnly
+                        SpinBox {
+                            id: subdivisionSpinbox
+                            value: 2
+                            editable: true
+                            from: 2
+                            to: 50 // Should we have max?
+
+                            font.pixelSize: 14
+
+                            height: layerInfoItem.inputHeight
+                            width: 75
+
+                            onValueModified: {
+                                var vals = []
+                                for (var i = 0; i < props.subdivisions.length; i++){
+                                    if(i === index){
+                                        vals = [...vals, subdivisionSpinbox.value]
+                                    }else{
+                                        vals = [...vals, props.subdivisions[i]]
+                                    }
+                                }
+                                props.subdivisions = [...vals]
+                            }
+
+                            validator: IntValidator{
+                                bottom: 2
+                            }
 
                             anchors {
-                                bottom: parent.bottom
-                                bottomMargin: 3
-                                left: parent.left 
-                                leftMargin: (subdivisionSpinbox.value > 10) ? parent.width/2 + 6 : parent.width/2 + 3
+                                verticalCenter: parent.verticalCenter
+                                left: subdivsionLabel.right
+                                leftMargin: parent.labelGap
                             }
-                        }
 
-                        up.indicator: Rectangle {
-                            x: subdivisionSpinbox.mirrored ? 0 : parent.width - width
-                            height: parent.height
-                            radius: 5
-                            implicitWidth: 20
-                            implicitHeight: layerInfoItem.inputHeight
-                            color: subdivisionSpinbox.up.pressed ? "#6e4f4f" : "#483434"
+                            contentItem: TextInput {
+                                z: 2
+                                text: subdivisionSpinbox.textFromValue(subdivisionSpinbox.value, subdivisionSpinbox.locale)
 
-                            Text {
-                                text: "+"
-                                font.pixelSize: subdivisionSpinbox.font.pixelSize * 2
+                                font.pixelSize: subdivisionSpinbox.font.pixelSize
                                 color: "#fff3e4"
-                                anchors.fill: parent
-                                fontSizeMode: Text.Fit
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
+                                selectionColor: "#21be2b"
+                                selectedTextColor: "#ffffff"
+                                
+                                readOnly: !subdivisionSpinbox.editable
+                                validator: subdivisionSpinbox.validator
+                                inputMethodHints: Qt.ImhFormattedNumbersOnly
+
+                                anchors {
+                                    bottom: parent.bottom
+                                    bottomMargin: 3
+                                    left: parent.left 
+                                    leftMargin: (subdivisionSpinbox.value > 10) ? parent.width/2 + 6 : parent.width/2 + 3
+                                }
                             }
-                        }
 
-                        down.indicator: Rectangle {
-                            x: subdivisionSpinbox.mirrored ? parent.width - width : 0
-                            height: parent.height
-                            radius: 5
-                            implicitWidth: 20
-                            implicitHeight: layerInfoItem.inputHeight
-                            color: subdivisionSpinbox.down.pressed ? "#6e4f4f" : "#483434"
+                            up.indicator: Rectangle {
+                                x: subdivisionSpinbox.mirrored ? 0 : parent.width - width
+                                height: parent.height
+                                radius: 5
+                                implicitWidth: 20
+                                implicitHeight: layerInfoItem.inputHeight
+                                color: subdivisionSpinbox.up.pressed ? "#6e4f4f" : "#483434"
 
-                            Text {
-                                text: "-"
-                                font.pixelSize: subdivisionSpinbox.font.pixelSize * 2
-                                color: "#fff3e4"
-                                fontSizeMode: Text.Fit
-                                anchors.centerIn: parent
+                                Text {
+                                    text: "+"
+                                    font.pixelSize: subdivisionSpinbox.font.pixelSize * 2
+                                    color: "#fff3e4"
+                                    anchors.fill: parent
+                                    fontSizeMode: Text.Fit
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
                             }
-                        }
 
-                        background: Rectangle {
-                            id: subdivisionSpinboxBg
-                            width: parent.width
-                            height: parent.height
-                            color: "#483434"
-                            radius: 5
+                            down.indicator: Rectangle {
+                                x: subdivisionSpinbox.mirrored ? parent.width - width : 0
+                                height: parent.height
+                                radius: 5
+                                implicitWidth: 20
+                                implicitHeight: layerInfoItem.inputHeight
+                                color: subdivisionSpinbox.down.pressed ? "#6e4f4f" : "#483434"
+
+                                Text {
+                                    text: "-"
+                                    font.pixelSize: subdivisionSpinbox.font.pixelSize * 2
+                                    color: "#fff3e4"
+                                    fontSizeMode: Text.Fit
+                                    anchors.centerIn: parent
+                                }
+                            }
+
+                            background: Rectangle {
+                                id: subdivisionSpinboxBg
+                                width: parent.width
+                                height: parent.height
+                                color: "#483434"
+                                radius: 5
+                            }
                         }
                     }
                     ///////////////////////
                 }
+                ///////////////////////
+                
                 // Subdivion Markers //
                 Repeater {
                     id: subdivisionMarkers
