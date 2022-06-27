@@ -147,13 +147,29 @@ Rectangle {
                     horizontalCenter: dgwtSliderHandleRect.left
                     verticalCenter: dgwtSliderHandleRect.verticalCenter
                 }
-                Text {
+
+                // DGWT Symbol ///
+                Image {
+                    source: "../Assets/GroundWaterTable.png"
                     anchors.centerIn: parent
-                    color: "white"
-                    font.pixelSize: dgwtSlider.textSize
-                    text: (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2)
+                    width: 14 + 15 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+                    height: 19 + 15 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
                 }
-            }                
+                //////////////////
+
+                // Label
+                Text {
+                id: dgwtSliderLabel
+                text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2)
+                color: "#fff3e4"
+                font.pixelSize: dgwtSlider.textSize
+                anchors {
+                    right: dgwtSliderHandleCircle.left
+                    rightMargin: 5
+                    verticalCenter: parent.verticalCenter
+                }
+            }  
+            }              
         }
     }
     /////////////////////////////////
