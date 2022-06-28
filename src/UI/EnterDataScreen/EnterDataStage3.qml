@@ -159,16 +159,96 @@ Rectangle {
 
                 // Label
                 Text {
-                id: dgwtSliderLabel
-                text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2)
+                    id: dgwtSliderLabel
+                    text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2)
+                    color: "#fff3e4"
+                    font.pixelSize: dgwtSlider.textSize
+                    anchors {
+                        right: dgwtSliderHandleCircle.left
+                        rightMargin: 5
+                        verticalCenter: parent.verticalCenter
+                    }
+                }  
+            }              
+        }
+    }
+    /////////////////////////////////
+
+    // Foundation Depth //
+    Slider {
+        id: foundationDepthSlider
+        from: 0
+        to: soilLayerFormBackground.totalDepth
+        stepSize: 0.25
+        value: 3*soilLayerFormBackground.totalDepth/4
+        width: 30 + (55-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        height: mainSliderBackground.height - mainSliderBackground.radius
+        orientation: Qt.Vertical
+
+        property int textSize: 9 + (14-9) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+
+        anchors {
+            top: mainSliderBackground.top
+            topMargin: mainSliderBackground.radius
+            left: mainSliderBackground.right
+        }
+
+        onValueChanged: props.foundationDepth = (props.totalDepth - value)
+
+        // Invisible background
+        background: Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+        }
+
+        handle: Item {
+            id: foundationDepthSliderHandle
+            width: parent.width
+            height: width
+
+            Rectangle {
+                id: foundationDepthSliderHandleRect
                 color: "#fff3e4"
-                font.pixelSize: dgwtSlider.textSize
+                width: parent.width
+                height: width
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: foundationDepthSlider.visualPosition * (foundationDepthSlider.availableHeight - height)
+            }
+
+            Rectangle{
+                id: foundationDepthSliderHandleCircle
+                width: parent.width
+                height: width
+                color: "#fff3e4"
+                radius: 0.5*width
                 anchors {
-                    right: dgwtSliderHandleCircle.left
-                    rightMargin: 5
-                    verticalCenter: parent.verticalCenter
+                    horizontalCenter: foundationDepthSliderHandleRect.right
+                    verticalCenter: foundationDepthSliderHandleRect.verticalCenter
                 }
-            }  
+
+                // Foundation Symbol ///
+                Rectangle {
+                    width: 16
+                    height: 16
+                    anchors.centerIn: parent
+                    border.color: "#483434"
+                    border.width: 2
+                    color: "transparent"
+                }
+                //////////////////
+
+                // Label
+                Text {
+                    id: foundationDepthSliderLabel
+                    text: "Depth to Foundation: " + (soilLayerFormBackground.totalDepth - foundationDepthSlider.value).toFixed(2)
+                    color: "#fff3e4"
+                    font.pixelSize: foundationDepthSlider.textSize
+                    anchors {
+                        left: foundationDepthSliderHandleCircle.right
+                        leftMargin: 5
+                        verticalCenter: parent.verticalCenter
+                    }
+                }  
             }              
         }
     }
@@ -451,7 +531,7 @@ Rectangle {
                     ///////////////////////
                 }
                 ///////////////////////
-                
+
                 // Subdivion Markers //
                 Repeater {
                     id: subdivisionMarkers

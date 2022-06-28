@@ -38,6 +38,7 @@ subdivisions = Observable([])
 totalDepth = Observable(10.0)
 soilLayerNumbers = Observable([])
 depthToGroundWaterTable = Observable(5.0)
+foundationDepth = Observable(2.5)
 
 # Update system variables
 setProblemName = on(problemName) do val
@@ -135,9 +136,14 @@ setDepthToGroundWaterTable = on(depthToGroundWaterTable) do val
         println("\nGot an update for depthToGroundWaterTable: ", val)
     end
 end
+setFoundationDepth = on(foundationDepth) do val
+    if PRINT_DEBUG
+        println("\nGot an update for foundationDepth: ", val)
+    end
+end
 
 # Load file main.qml
-loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent, "bounds" => bounds, "subdivisions" => subdivisions, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbers, "depthToGroundWaterTable" => depthToGroundWaterTable))
+loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent, "bounds" => bounds, "subdivisions" => subdivisions, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbers, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth))
 
 # Run the app
 exec()
