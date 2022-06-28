@@ -609,6 +609,10 @@ Rectangle {
                     
                     // Update Julia property
                     props.totalDepth = depth
+                    
+                    // Update Julia slider values 
+                    props.foundationDepth = (props.totalDepth - foundationDepthSlider.value)
+                    props.depthToGroundWaterTable = (props.totalDepth - dgwtSlider.value)
 
                     // Update Bounds
                     soilLayerFormBackground.bounds = [depth]
