@@ -13,7 +13,7 @@ using Observables
 
 export readInputFile, State
 
-PRINT_DEBUG = true
+PRINT_DEBUG = false
 
 # System variables
 # Enter Data Stage 1

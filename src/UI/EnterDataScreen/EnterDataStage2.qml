@@ -33,8 +33,6 @@ Rectangle {
     color: "#6B4F4F"
     anchors {
         fill: parent
-        horizontalCenter: (parent) ? parent.horizontalCenter : undefined
-        verticalCenter: (parent) ? parent.verticalCenter : undefined
     }
 
     // Title /////////////
@@ -266,7 +264,7 @@ Rectangle {
                 width: wcSlider.availableWidth
                 height: 3
                 radius: 2
-                color: "#fff3e4"
+                color: "#483434"
                 anchors.verticalCenter: parent.verticalCenter
             }
 

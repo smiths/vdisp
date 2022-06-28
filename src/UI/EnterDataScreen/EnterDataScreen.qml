@@ -20,9 +20,7 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left 
-            right: enterDataStackView.left
             leftMargin: 5
-            rightMargin: 5
         }
         MouseArea {
             anchors.fill: parent
@@ -44,8 +42,6 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right 
-            left: enterDataStackView.right
-            leftMargin: 5
             rightMargin: 5
         }
         MouseArea {

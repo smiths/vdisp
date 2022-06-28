@@ -19,8 +19,6 @@ Rectangle {
     color: "#6B4F4F"
     anchors {
         fill: parent
-        horizontalCenter: parent.horizontalCenter
-        verticalCenter: parent.verticalCenter
     }
     
     property int formTopMargin: 40 + (120-40) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
