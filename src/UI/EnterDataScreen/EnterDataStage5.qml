@@ -7,14 +7,36 @@ import org.julialang 1.0
 Rectangle {
     id: schmertmannDataBackground
 
+    function formIsFilled() {
+        for(var i = 0; i < props.materials; i++){
+            if(!filled[i]) return false
+        }
+        return true
+    }
     function isFilled(){
-        return false
+        return forceUpdateInt === 2 && timeTextInput.text && timeTextInput.acceptableInput && formIsFilled()
+    }
+
+    function forceUpdate(){
+        forceUpdateInt = 1
+        forceUpdateInt = 2
     }
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
     
+    property variant filled: []
+    property int forceUpdateInt: 2
+
     property int formGap: 20
+
+    Component.onCompleted: {
+        for(var i = 0; i < props.materials; i++){
+            filled.push(false)
+            // Initialize cone penetration values to 0.0
+            props.conePenetration = [...props.conePenetration, 0.0]
+        }
+    }
 
     radius: 20
     color: "#6B4F4F"
@@ -53,10 +75,11 @@ Rectangle {
     Item {
         id: schmertmannDataForm
 
-        property int inputWidth: 100
-        property int labelGap: 5
-        property int inputGap: 10
-        property int fontSize: 15
+        property int inputWidth: 100 + 20 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+        property int inputHeight: 20 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        property int labelGap: 5 + 2 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+        property int inputGap: 10 + 5 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+        property int fontSize: 15 + 3 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
 
         width: timeContainer.width
         height: timeContainer.height + schmertmannDataBackground.formGap + schmertmannDataList.height
@@ -108,6 +131,7 @@ Rectangle {
                     }
                     // Change for input handling
                     onTextChanged: {
+                        if(acceptableInput) props.timeAfterConstruction = parseInt(text)
                     }
                     // Placeholder Text
                     property string placeholderText: "Enter Time..."
@@ -127,10 +151,10 @@ Rectangle {
             id: schmertmannDataList
             model: props.materials
 
-            property int rowGap: 5
+            property int rowGap: 5 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
 
             width: schmertmannDataListEntry.width
-            height: props.materials * (20+rowGap)
+            height: props.materials * (schmertmannDataForm.inputHeight+rowGap)
 
             anchors {
                 horizontalCenter: parent.horizontalCenter
@@ -142,7 +166,7 @@ Rectangle {
                 id: schmertmannDataListEntry
 
                 width: materialLabel.width + conePenLabel.width + schmertmannDataForm.inputGap + schmertmannDataForm.inputWidth + schmertmannDataForm.labelGap
-                height: 20
+                height: schmertmannDataForm.inputHeight
 
                 anchors.horizontalCenter: parent.horizontalCenter
 
@@ -176,7 +200,7 @@ Rectangle {
                 Rectangle{
                     id: conePenTextBox
                     width: schmertmannDataForm.inputWidth
-                    height: 20
+                    height: schmertmannDataForm.inputHeight
                     radius: 5
                     color: "#fff3e4"
 
@@ -201,6 +225,26 @@ Rectangle {
                         }
                         // Change for input handling
                         onTextChanged: {
+                            if(acceptableInput){
+                                // Update form filled
+                                schmertmannDataBackground.filled[index] = true
+                                // Force update in isFilled
+                                schmertmannDataBackground.forceUpdate()
+                                // Update Julia
+                                var cp = []
+                                for(var i = 0; i < props.materials; i++){
+                                    if(i === index)
+                                        cp = [...cp, parseFloat(text)]
+                                    else
+                                        cp = [...cp, props.conePenetration[i]]
+                                }
+                                props.conePenetration = [...cp]
+                            }else{
+                                // Update form filled
+                                schmertmannDataBackground.filled[index] = false
+                                // Force update in isFilled
+                                schmertmannDataBackground.forceUpdate()
+                            }
                         }
                         // Placeholder Text
                         property string placeholderText: "Enter Value..."
@@ -234,7 +278,7 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                if(consolidationSwellDataBackground.formFilled){
+                if(schmertmannDataBackground.formFilled){
                     // mainLoader.source = "" (switch to next screen when it's designed)
                     Qt.quit()
                 }
