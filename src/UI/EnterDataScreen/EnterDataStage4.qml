@@ -7,16 +7,52 @@ import org.julialang 1.0
 Rectangle {
     id: consolidationSwellDataBackground
 
+    function formIsFilled(){
+        // Check that all arrays have correct length
+        if(filledSP.length != props.materials || filledSI.length != props.materials || filledCI.length != props.materials || filledRI.length != props.materials) return false
+        // Check that each properties entries are valid
+        for(var i = 0; i < props.materials; i++){
+            if(!filledSP[i] || !filledSI[i] || !filledCI[i] || !filledRI[i]) return false
+        }
+        return true
+    }
+
+    function forceUpdate(){
+        var temp = props.heaveActive
+        props.heaveActive = 12
+        props.heaveActive = temp
+    }
+
     function isFilled(){
-        return false
+        // should there be a min difference between heave begin and heave active depth
+        return (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
     }
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
-    // Next screen 
-    property string nextScreen: "EnterDataStage" + (4 + props.model) + ".qml"
     
-    property variant filled: []
+    
+    property int formGap: 20
+
+    property variant filledSP: []
+    property variant filledSI: []
+    property variant filledCI: []
+    property variant filledRI: []
+
+    Component.onCompleted: {
+        for(var i = 0; i < props.materials; i++){
+            // Populate arrays that check if forms are filled properly
+            filledSP.push(false)
+            filledSI.push(false)
+            filledCI.push(false)
+            filledRI.push(false)
+            // Initialize Julia arrays to correct number of entries, 0.0 for all
+            props.swellPressure = [...props.swellPressure, 0.0]
+            props.swellIndex = [...props.swellIndex, 0.0]
+            props.compressionIndex = [...props.compressionIndex, 0.0]
+            props.recompressionIndex = [...props.recompressionIndex, 0.0]
+        }
+    }
 
     radius: 20
     color: "#6B4F4F"
@@ -55,10 +91,18 @@ Rectangle {
     Item {
         id: consolidationSwellDataContainer
 
-        // set width and height
-        width: heaveSliderContainer.width
-        height: heaveSliderContainer.height
+        // BOUNDS
+        Rectangle {
+            anchors.fill: parent
+            color: "green"
+            opacity: 0.3
+            visible: false
+        }
 
+        // set width and height
+        width: Math.max(heaveSliderContainer.width, consolidationSwellDataList.maxWidth)
+        height: heaveSliderContainer.height + consolidationSwellDataBackground.formGap + consolidationSwellDataList.height
+        
         anchors {
             horizontalCenter: parent.horizontalCenter
             verticalCenter: parent.verticalCenter 
@@ -67,13 +111,6 @@ Rectangle {
         // Heave Slider //////
         Item {
             id: heaveSliderContainer
-
-            // BOUNDS
-            Rectangle {
-                anchors.fill: parent
-                color: "red"
-                opacity: 0.3
-            }
 
             property int sliderWidth: 0.8*(consolidationSwellDataBackground.width - heaveSliderLabel.width)
             property int labelGap: 5
@@ -118,8 +155,14 @@ Rectangle {
                 width: parent.sliderWidth
                 height: 26
 
-                first.onMoved: print(first.value)
-                second.onMoved: print(second.value)
+                first.onMoved: {
+                    // Update Julia Variable
+                    props.heaveBegin = first.value
+                }
+                second.onMoved: {
+                    // Update Julia Variable
+                    props.heaveActive = second.value
+                }
 
                 anchors {
                     verticalCenter: parent.verticalCenter
@@ -203,7 +246,360 @@ Rectangle {
         //////////////////////
 
         // Items /////////////
-        
+        Repeater {
+            id: consolidationSwellDataList
+            model: props.materials
+
+            property int maxWidth: 0
+            property int rowGap: 5
+
+            width: consolidationSwellDataListEntry.width
+            height: props.materials * (35+rowGap)
+
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: heaveSliderContainer.bottom
+                topMargin: consolidationSwellDataBackground.formGap
+            }
+
+            delegate: Item {
+                id: consolidationSwellDataListEntry
+
+                property int inputWidth: 35 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+                property int inputGap: 10
+                property int labelGap: 5
+                property int fontSize: 10 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+
+                width: consolidationSwellDataListEntryMaterialLabel.width + consolidationSwellDataListEntrySPLabel.width + consolidationSwellDataListEntrySILabel.width + consolidationSwellDataListEntryCILabel.width + consolidationSwellDataListEntryRILabel.width + 4*inputWidth + 4*inputGap + 4*labelGap
+                height: 35
+
+                Component.onCompleted: {
+                    consolidationSwellDataList.maxWidth = Math.max(consolidationSwellDataListEntryMaterialLabel.width + consolidationSwellDataListEntrySPLabel.width + consolidationSwellDataListEntrySILabel.width + consolidationSwellDataListEntryCILabel.width + consolidationSwellDataListEntryRILabel.width + 4*inputWidth + 4*inputGap + 4*labelGap, consolidationSwellDataList.maxWidth)
+                }
+
+                y: heaveSliderContainer.height + consolidationSwellDataBackground.formGap + (height + consolidationSwellDataList.rowGap) * index
+
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                // Material Name ///////////
+                Text {
+                    id: consolidationSwellDataListEntryMaterialLabel
+                    text: props.materialNames[index] + ":"
+                    color: "#fff3e4"
+                    font.pixelSize: consolidationSwellDataListEntry.fontSize
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: consolidationSwellDataListEntry.left
+                    }
+                }
+                /////////////////////////////
+
+                // Swell Pressure ///////////
+                Text {
+                    id: consolidationSwellDataListEntrySPLabel
+                    text: "Swell Pressure: "
+                    color: "#fff3e4"
+                    font.pixelSize: consolidationSwellDataListEntry.fontSize
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: consolidationSwellDataListEntryMaterialLabel.right
+                        leftMargin: consolidationSwellDataListEntry.inputGap
+                    }
+                }
+
+                Rectangle {
+                    id: spTextbox
+                    width: consolidationSwellDataListEntry.inputWidth
+                    height: 20
+                    color: "#fff3e4"
+                    radius: 4
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: consolidationSwellDataListEntrySPLabel.right
+                        leftMargin: consolidationSwellDataListEntry.labelGap
+                    }
+
+                    TextInput {
+                        id: spTextInput
+                        width: parent.width - 10
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: parent.left 
+                            leftMargin: 5
+                            verticalCenter: parent.verticalCenter
+                        }
+                        
+                        selectByMouse: true
+                        clip: true
+                        validator: DoubleValidator {
+                            bottom: 0
+                        }
+                        // Change for input handling
+                        onTextChanged: {
+                            if(acceptableInput){
+                                // Set filled to true
+                                filledSP[index] = true
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                                var sp = []
+                                for(var i = 0; i < props.materials; i++){
+                                    if(i === index){
+                                        sp = [...sp, parseFloat(text)]
+                                    }else{
+                                        sp = [...sp, props.swellPressure[i]]
+                                    }
+                                }
+                                props.swellPressure = [...sp]
+                            }else {
+                                // Set filled to false
+                                filledSP[index] = false
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                            }
+                        }
+                        // Placeholder Text
+                        property string placeholderText: "--.--"
+                        Text {
+                            text: spTextInput.placeholderText
+                            font.pixelSize: consolidationSwellDataListEntry.fontSize
+                            color: "#483434"
+                            visible: !spTextInput.text
+                        }
+                    }
+                }
+                //////////////////////////////////////
+
+                // Swell Index ///////////
+                Text {
+                    id: consolidationSwellDataListEntrySILabel
+                    text: "Swell Index: "
+                    color: "#fff3e4"
+                    font.pixelSize: consolidationSwellDataListEntry.fontSize
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: spTextbox.right
+                        leftMargin: consolidationSwellDataListEntry.inputGap
+                    }
+                }
+
+                Rectangle {
+                    id: siTextbox
+                    width: consolidationSwellDataListEntry.inputWidth
+                    height: 20
+                    color: "#fff3e4"
+                    radius: 4
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: consolidationSwellDataListEntrySILabel.right
+                        leftMargin: consolidationSwellDataListEntry.labelGap
+                    }
+
+                    TextInput {
+                        id: siTextInput
+                        width: parent.width - 10
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: parent.left 
+                            leftMargin: 5
+                            verticalCenter: parent.verticalCenter
+                        }
+                        
+                        selectByMouse: true
+                        clip: true
+                        validator: DoubleValidator {
+                            bottom: 0
+                        }
+                        // Change for input handling
+                        onTextChanged: {
+                            if(acceptableInput){
+                                // Set filled to true
+                                filledSI[index] = true
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                                var si = []
+                                for(var i = 0; i < props.materials; i++){
+                                    if(i === index){
+                                        si = [...si, parseFloat(text)]
+                                    }else{
+                                        si = [...si, props.swellIndex[i]]
+                                    }
+                                }
+                                props.swellIndex = [...si]
+                            }else {
+                                // Set filled to false
+                                filledSI[index] = false
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                            }
+                        }
+                        // Placeholder Text
+                        property string placeholderText: "--.--"
+                        Text {
+                            text: siTextInput.placeholderText
+                            font.pixelSize: consolidationSwellDataListEntry.fontSize
+                            color: "#483434"
+                            visible: !siTextInput.text
+                        }
+                    }
+                }
+                //////////////////////////////////////                
+
+                // Compression Index ///////////
+                Text {
+                    id: consolidationSwellDataListEntryCILabel
+                    text: "Compression Index: "
+                    color: "#fff3e4"
+                    font.pixelSize: consolidationSwellDataListEntry.fontSize
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: siTextbox.right
+                        leftMargin: consolidationSwellDataListEntry.inputGap
+                    }
+                }
+
+                Rectangle {
+                    id: ciTextbox
+                    width: consolidationSwellDataListEntry.inputWidth
+                    height: 20
+                    color: "#fff3e4"
+                    radius: 4
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: consolidationSwellDataListEntryCILabel.right
+                        leftMargin: consolidationSwellDataListEntry.labelGap
+                    }
+
+                    TextInput {
+                        id: ciTextInput
+                        width: parent.width - 10
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: parent.left 
+                            leftMargin: 5
+                            verticalCenter: parent.verticalCenter
+                        }
+                        
+                        selectByMouse: true
+                        clip: true
+                        validator: DoubleValidator {
+                            bottom: 0
+                        }
+                        // Change for input handling
+                        onTextChanged: {
+                            if(acceptableInput){
+                                // Set filled to true
+                                filledCI[index] = true
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                                var ci = []
+                                for(var i = 0; i < props.materials; i++){
+                                    if(i === index){
+                                        ci = [...ci, parseFloat(text)]
+                                    }else{
+                                        ci = [...ci, props.compressionIndex[i]]
+                                    }
+                                }
+                                props.compressionIndex = [...ci]
+                            }else {
+                                // Set filled to false
+                                filledCI[index] = false
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                            }
+                        }
+                        // Placeholder Text
+                        property string placeholderText: "--.--"
+                        Text {
+                            text: ciTextInput.placeholderText
+                            font.pixelSize: consolidationSwellDataListEntry.fontSize
+                            color: "#483434"
+                            visible: !ciTextInput.text
+                        }
+                    }
+                }
+                //////////////////////////////////////
+
+                // Recompression Index ///////////
+                Text {
+                    id: consolidationSwellDataListEntryRILabel
+                    text: "Recompression Index: "
+                    color: "#fff3e4"
+                    font.pixelSize: consolidationSwellDataListEntry.fontSize
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: ciTextbox.right
+                        leftMargin: consolidationSwellDataListEntry.inputGap
+                    }
+                }
+
+                Rectangle {
+                    id: riTextbox
+                    width: consolidationSwellDataListEntry.inputWidth
+                    height: 20
+                    color: "#fff3e4"
+                    radius: 4
+                    anchors {
+                        verticalCenter: consolidationSwellDataListEntry.verticalCenter
+                        left: consolidationSwellDataListEntryRILabel.right
+                        leftMargin: consolidationSwellDataListEntry.labelGap
+                    }
+
+                    TextInput {
+                        id: riTextInput
+                        width: parent.width - 10
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: parent.left 
+                            leftMargin: 5
+                            verticalCenter: parent.verticalCenter
+                        }
+                        
+                        selectByMouse: true
+                        clip: true
+                        validator: DoubleValidator {
+                            bottom: 0
+                        }
+                        // Change for input handling
+                        onTextChanged: {
+                            if(acceptableInput){
+                                // Set filled to true
+                                filledRI[index] = true
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                                // Update Julia
+                                var ri = []
+                                for(var i = 0; i < props.materials; i++){
+                                    if(i === index){
+                                        ri = [...ri, parseFloat(text)]
+                                    }else{
+                                        ri = [...ri, props.recompressionIndex[i]]
+                                    }
+                                }
+                                props.recompressionIndex = [...ri]
+                            }else {
+                                // Set filled to false
+                                filledRI[index] = false
+                                // Force formFilled to update
+                                consolidationSwellDataBackground.forceUpdate()
+                            }
+                        }
+                        // Placeholder Text
+                        property string placeholderText: "--.--"
+                        Text {
+                            text: riTextInput.placeholderText
+                            font.pixelSize: consolidationSwellDataListEntry.fontSize
+                            color: "#483434"
+                            visible: !riTextInput.text
+                        }
+                    }
+                }
+                //////////////////////////////////////              
+            }
+        }
         //////////////////////
     }
     ////////////////////////////////
@@ -223,8 +619,10 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                if(consolidationSwellDataBackground.formFilled)
-                    enterDataStackView.push(consolidationSwellDataBackground.nextScreen)
+                if(consolidationSwellDataBackground.formFilled){
+                    // mainLoader.source = "" (switch to next screen when it's designed)
+                    Qt.quit()
+                }
             }
         }
         Text {

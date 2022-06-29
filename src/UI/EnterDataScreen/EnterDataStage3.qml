@@ -613,6 +613,10 @@ Rectangle {
                     // Update Julia slider values 
                     props.foundationDepth = (props.totalDepth - foundationDepthSlider.value)
                     props.depthToGroundWaterTable = (props.totalDepth - dgwtSlider.value)
+                    
+                    // Update heave begin and active depth
+                    props.heaveBegin = depth/4
+                    props.heaveActive = 3*depth/4
 
                     // Update Bounds
                     soilLayerFormBackground.bounds = [depth]
@@ -651,8 +655,8 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                if(materialPropertiesFormBackground.formFilled)
-                    enterDataStackView.push(materialPropertiesFormBackground.nextScreen)
+                if(soilLayerFormBackground.formFilled)
+                    enterDataStackView.push(soilLayerFormBackground.nextScreen)
             }
         }
         Text {

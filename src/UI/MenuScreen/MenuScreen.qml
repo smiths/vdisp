@@ -158,6 +158,11 @@ Item {
                     leftMargin: 20
                 }
             }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: Qt.quit()
+            }
         }
         
     }

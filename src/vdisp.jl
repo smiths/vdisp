@@ -39,6 +39,13 @@ totalDepth = Observable(10.0)
 soilLayerNumbers = Observable([])
 depthToGroundWaterTable = Observable(5.0)
 foundationDepth = Observable(2.5)
+# Enter Data Stage 4 (Consolidation Swell)
+heaveBegin = Observable(2.5)
+heaveActive = Observable(7.5)
+swellPressure = Observable([])
+swellIndex = Observable([])
+compressionIndex = Observable([])
+recompressionIndex = Observable([])
 
 # Update system variables
 setProblemName = on(problemName) do val
@@ -141,12 +148,45 @@ setFoundationDepth = on(foundationDepth) do val
         println("\nGot an update for foundationDepth: ", val)
     end
 end
+setHeaveBegin = on(heaveBegin) do val
+    if PRINT_DEBUG
+        println("\nGot an update for heaveBegin: ", val)
+    end
+end
+setHeaveActive = on(heaveActive) do val
+    if PRINT_DEBUG
+        println("\nGot an update for heaveActive: ", val)
+    end
+end
+setSwellPressure = on(swellPressure) do val
+    if PRINT_DEBUG
+        println("\nGot an update for swellPressure: ", val)
+    end
+end
+setSwellIndex = on(swellIndex) do val
+    if PRINT_DEBUG
+        println("\nGot an update for swellIndex: ", val)
+    end
+end
+setCompressionIndex = on(compressionIndex) do val
+    if PRINT_DEBUG
+        println("\nGot an update for compressionIndex: ", val)
+    end
+end
+setRecompressionIndex = on(recompressionIndex) do val
+    if PRINT_DEBUG
+        println("\nGot an update for recompressionIndex: ", val)
+    end
+end
 
 # Load file main.qml
-loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent, "bounds" => bounds, "subdivisions" => subdivisions, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbers, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth))
+loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent, "bounds" => bounds, "subdivisions" => subdivisions, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbers, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressure, "swellIndex" => swellIndex, "compressionIndex" => compressionIndex, "recompressionIndex" => recompressionIndex))
 
 # Run the app
 exec()
+
+# After app is done executing
+print("Problem Name: ", problemName, " Model: ", model, " Foundation: ", foundation, "\nApplied Pressure: ", appliedPressure, " Center: ",center, "\nMaterial Names: ", materialNames, " Specific Gravity: ", specificGravity, " Void Ratio: ", voidRatio, " Water Content: ", waterContent, "\nTotal Depth: ", totalDepth, " Soil Layer Numbers: ", soilLayerNumbers, "\nHeave Active: ", heaveActive, " Heave Begin: ", heaveBegin, "\nSwell Pressure: ", swellPressure, " Swell Index: ", swellIndex, " Compression Index: ", compressionIndex, " Recompression Index: ", recompressionIndex, "\n")
 
 
 #if size(ARGS)[1] == 2

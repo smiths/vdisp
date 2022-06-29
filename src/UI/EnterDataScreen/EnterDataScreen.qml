@@ -14,7 +14,7 @@ Item {
     // Back arrow
     Image {
         id: backArrow
-        width: 25
+        width: height
         height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         source: "../Assets/back.png"
         anchors {
@@ -36,7 +36,7 @@ Item {
     // Next arrow
     Image {
         id: nextArrow
-        width: 25
+        width: height 
         height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         source: "../Assets/next.png"
         anchors {
@@ -48,6 +48,7 @@ Item {
             anchors.fill: parent
             onClicked: {
                 // If current form is filled, go to next screen
+                if(enterDataStackView.depth > 3) Qt.quit()
                 if(enterDataStackView.currentItem.formFilled)
                     enterDataStackView.push(enterDataStackView.currentItem.nextScreen)
             }
