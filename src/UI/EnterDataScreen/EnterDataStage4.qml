@@ -91,15 +91,6 @@ Rectangle {
     Item {
         id: consolidationSwellDataContainer
 
-        // BOUNDS
-        Rectangle {
-            anchors.fill: parent
-            color: "green"
-            opacity: 0.3
-            visible: false
-        }
-
-        // set width and height
         width: Math.max(heaveSliderContainer.width, consolidationSwellDataList.maxWidth)
         height: heaveSliderContainer.height + consolidationSwellDataBackground.formGap + consolidationSwellDataList.height
         

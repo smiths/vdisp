@@ -186,7 +186,7 @@ loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName
 exec()
 
 # After app is done executing
-print("Problem Name: ", problemName, " Model: ", model, " Foundation: ", foundation, "\nApplied Pressure: ", appliedPressure, " Center: ",center, "\nMaterial Names: ", materialNames, " Specific Gravity: ", specificGravity, " Void Ratio: ", voidRatio, " Water Content: ", waterContent, "\nTotal Depth: ", totalDepth, " Soil Layer Numbers: ", soilLayerNumbers, "\nHeave Active: ", heaveActive, " Heave Begin: ", heaveBegin, "\nSwell Pressure: ", swellPressure, " Swell Index: ", swellIndex, " Compression Index: ", compressionIndex, " Recompression Index: ", recompressionIndex, "\n")
+print("Problem Name: ", problemName[], " Model: ", model[], " Foundation: ", foundation[], "\nApplied Pressure: ", appliedPressure[], " Center: ", center[], "\nMaterial Names: ", materialNames[], " Specific Gravity: ", specificGravity[], " Void Ratio: ", voidRatio[], " Water Content: ", waterContent[], "\nTotal Depth: ", totalDepth[], " Soil Layer Numbers: ", soilLayerNumbers[], "\nHeave Active: ", heaveActive[], " Heave Begin: ", heaveBegin[], "\nSwell Pressure: ", swellPressure[], " Swell Index: ", swellIndex[], " Compression Index: ", compressionIndex[], " Recompression Index: ", recompressionIndex[], "\n")
 
 
 #if size(ARGS)[1] == 2

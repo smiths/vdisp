@@ -48,9 +48,12 @@ Item {
             anchors.fill: parent
             onClicked: {
                 // If current form is filled, go to next screen
-                if(enterDataStackView.depth > 3) Qt.quit()
-                if(enterDataStackView.currentItem.formFilled)
+                if(enterDataStackView.currentItem.formFilled){
+                    // If we are at 4th stage, move on to output
+                    if(enterDataStackView.depth > 3) Qt.quit()
+                    // Else, go to next stage of data entry
                     enterDataStackView.push(enterDataStackView.currentItem.nextScreen)
+                }
             }
         }
     }
