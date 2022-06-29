@@ -49,6 +49,8 @@ recompressionIndex = Observable([])
 # Enter Data Stage 4 (Schmertmann)
 timeAfterConstruction = Observable(1)
 conePenetration = Observable([])
+# Enter Data Stage 5 (Elastic Modulus)
+elasticModulus = Observable([])
 
 # Update system variables
 setProblemName = on(problemName) do val
@@ -191,9 +193,14 @@ setConePenetration = on(conePenetration) do val
         println("\nGot an update for conePenetration: ", val)
     end
 end
+setElasticMod = on(elasticModulus) do val
+    if PRINT_DEBUG
+        println("\nGot an update for elasticModulus: ", val)
+    end
+end
 
 # Load file main.qml
-loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent, "bounds" => bounds, "subdivisions" => subdivisions, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbers, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressure, "swellIndex" => swellIndex, "compressionIndex" => compressionIndex, "recompressionIndex" => recompressionIndex, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetration))
+loadqml("./src/UI/main.qml", props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNames, "specificGravity" => specificGravity, "voidRatio" => voidRatio, "waterContent" => waterContent, "bounds" => bounds, "subdivisions" => subdivisions, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbers, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressure, "swellIndex" => swellIndex, "compressionIndex" => compressionIndex, "recompressionIndex" => recompressionIndex, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetration, "elasticModulus" => elasticModulus))
 
 # Run the app
 exec()
@@ -229,7 +236,19 @@ elseif model[] == 1
         println("Cone Penetration of $(QML.value(materialNames[][i])): ", QML.value(conePenetration[][i]))
     end
 else
-    print("3")
+    println("Problem Name: ", problemName[], " Model: ", model[], " Foundation: ", foundation[])
+    println("Applied Pressure: ", appliedPressure[], " Center: ", center[])
+    for i in 1:materials[]
+        println("Material Name: ", QML.value(materialNames[][i]), " Specific Gravity: ", QML.value(specificGravity[][i]), " Void Ratio: ", QML.value(voidRatio[][i]), " Water Content: ", QML.value(waterContent[][i]))
+    end
+    println("Total Depth: ", totalDepth[])
+    for i in 1:materials[]
+        println("Soil Layer Number of Layer $i: ", QML.value(soilLayerNumbers[][i])) 
+    end
+    println("Time After Construction: ", timeAfterConstruction[])
+    for i in 1:materials[]
+        println("Elastic Modulus of $(QML.value(materialNames[][i])): ", QML.value(elasticModulus[][i]))
+    end
 end
 
 #if size(ARGS)[1] == 2
