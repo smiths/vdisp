@@ -105,6 +105,8 @@ struct InputData
     groundToHeaveDepth::Float64
     timeAfterConstruction::Int
     strainAtPoints::Array{Float64, 2}
+    totalDepth::Float64
+    foundationDepth::Float64
 
     # Parses input file at filePath and returns corresponding InputData object
     function InputData(filePath::String)
@@ -215,7 +217,6 @@ struct InputData
         dataLine1 = []
         try
             dataLine1 = parseCurrentLine(input, soilLayers, lastLineIndex+1)
-            println(dataLine1)
         catch e
             if isa(e, NotEnoughValuesError)
                 println("Error: Invalid input file!")
@@ -766,7 +767,17 @@ struct InputData
             lastLineIndex += soilLayers
         end
 
-        new(problemName, numProblems, model, foundation, nodalPoints, elements, bottomPointIndex, soilLayers, dx, soilLayerNumber, specificGravity, waterContent, voidRatio, depthGroundWaterTable, equilibriumMoistureProfile, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, swellPressure, swellIndex, compressionIndex, maxPastPressure, pressureDilatometerA, pressureDilatometerB, conePenetrationResistance, appliedPressureAtPoints, elasticModulus, heaveActiveZoneDepth, groundToHeaveDepth, timeAfterConstruction, strainAtPoints)
+        # Calculate total depth and foundation depth
+        totalDepth = 0
+        for i = 1:elements
+            totalDepth += dx[soilLayerNumber[i]]
+        end
+        foundationDepth = 0
+        for i = 1:bottomPointIndex-1
+            foundationDepth += dx[soilLayerNumber[i]]
+        end
+
+        new(problemName, numProblems, model, foundation, nodalPoints, elements, bottomPointIndex, soilLayers, dx, soilLayerNumber, specificGravity, waterContent, voidRatio, depthGroundWaterTable, equilibriumMoistureProfile, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, swellPressure, swellIndex, compressionIndex, maxPastPressure, pressureDilatometerA, pressureDilatometerB, conePenetrationResistance, appliedPressureAtPoints, elasticModulus, heaveActiveZoneDepth, groundToHeaveDepth, timeAfterConstruction, strainAtPoints, totalDepth, foundationDepth)
     end
 end
 

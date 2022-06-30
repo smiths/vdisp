@@ -68,11 +68,7 @@ function getFoundationDepth(outputData::OutputData)
 end
 function getFoundationDepthValues(outputData::OutputData)
     inData = outputData.inputData
-    # DEPF = DX*FLOAT(NBX-1)
-    foundationDepth = inData.dx * float(inData.bottomPointIndex-1)
-    # DEPPR = DX*FLOAT(NNP-1)
-    totalDepth = inData.dx * float(inData.nodalPoints-1)
-    return (foundationDepth, totalDepth)
+    return (inData.foundationDepth, inData.totalDepth)
 end
 
 # Soil Table 
