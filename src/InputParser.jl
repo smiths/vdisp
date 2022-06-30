@@ -80,7 +80,7 @@ struct InputData
     elements::Int
     bottomPointIndex::Int
     soilLayers::Int
-    dx::Float64
+    dx::Array{Float64}
     soilLayerNumber::Array{Int}
     specificGravity::Array{Float64}
     waterContent::Array{Float64}
@@ -134,10 +134,10 @@ struct InputData
         lastLineIndex += 1
 
         # Get following data:
-        #  NPROB NOPT NBPRES NNP NBX NMAT DX 
+        #  NPROB NOPT NBPRES NNP NBX NMAT 
         dataLine1 = []
         try
-            dataLine1 = parseCurrentLine(input, 7, lastLineIndex+1)
+            dataLine1 = parseCurrentLine(input, 6, lastLineIndex+1)
         catch e
             if isa(e, NotEnoughValuesError)
                 println("Error: Invalid input file!")
@@ -189,13 +189,12 @@ struct InputData
         elements = 0
         bottomPointIndex = 0
         soilLayers = 0
-        dx = 0.0
+        
         try
             nodalPoints = parse(Int64, dataLine1[4])
             elements = nodalPoints - 1
             bottomPointIndex = parse(Int64, dataLine1[5])
             soilLayers = parse(Int64, dataLine1[6]) # NMAT
-            dx = parse(Float64, dataLine1[7])
         catch e 
             if isa(e, ArgumentError)
                 println("Error, invalid value on line $(lastLineIndex+1)!")
@@ -209,6 +208,37 @@ struct InputData
             throw(ParsingError())
         end
         
+        lastLineIndex += 1
+
+        # DX array
+        dx = Array{Float64}(undef, soilLayers)
+        dataLine1 = []
+        try
+            dataLine1 = parseCurrentLine(input, soilLayers, lastLineIndex+1)
+            println(dataLine1)
+        catch e
+            if isa(e, NotEnoughValuesError)
+                println("Error: Invalid input file!")
+                println("\t>Line $(e.line): $(e.requiredValues) values expected!")
+                throw(ParsingError())
+            end
+        end
+        try
+            for i = 1:soilLayers
+                dx[i] = parse(Float64, dataLine1[i])
+            end
+        catch e 
+            if isa(e, ArgumentError)
+                println("Error, invalid value on line $(lastLineIndex+1)!")
+            elseif isa(e, BoundsError)
+                # File ran out of lines
+                println("Error, encountered end of file unexpectedly!")
+            else
+                # Some other problem
+                println("Unexpected error occured while reading file at $(filePath)!")
+            end
+            throw(ParsingError())
+        end
         lastLineIndex += 1
 
         # Soil layer number of element N

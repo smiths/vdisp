@@ -1,7 +1,8 @@
 # Input Data taken from p.176 of https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf    
     FOOTING IN GRANULAR SOIL - SCHMERTMANN
 # Changed NOPT to 4, this means user must enter elastic moduli instead of cone peneteration results
-1   4   1   17  7   2   0.50
+1   4   1   17  7   2
+0.50  0.50
 1   1
 12  2
 16  2

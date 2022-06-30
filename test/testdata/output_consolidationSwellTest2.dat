@@ -1,14 +1,14 @@
 Title:     FOOTING IN EXPANSIVE SOIL
 Nodal Points: 17, Base Nodal Point Index: 7
 Number of different soil layers: 2
-Increment depth(dx): 0.5
+Increment depth(dx): [0.5, 0.5]
 
 Model: Consolidation Swell
 
 Foundation Type: Rectangular Slab
 
-Depth of Foundation: 3.0
-Total Depth of Soil Profile: 8.0
+Depth of Foundation: [3.0, 3.0]
+Total Depth of Soil Profile: [8.0, 8.0]
 
 | Element | Soil Layer Number |
 |---------|-------------------|
