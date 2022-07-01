@@ -62,7 +62,22 @@ function writeHeader(outputData::OutputData, path::String)
         write(file, getHeader(outputData))
     end
 end
-getHeader(outputData::OutputData) = "Title: $(outputData.inputData.problemName)\nNodal Points: $(outputData.inputData.nodalPoints), Base Nodal Point Index: $(outputData.inputData.bottomPointIndex)\nNumber of different soil layers: $(outputData.inputData.soilLayers)\nIncrement depths(dx): $(outputData.inputData.dx)\n"
+function getHeader(outputData::OutputData)
+    inData = outputData.inputData
+    
+    headerString = "Title: $(inData.problemName)\nNodal Points: $(inData.nodalPoints), Base Nodal Point Index: $(inData.bottomPointIndex)\nNumber of different soil layers: $(inData.soilLayers)\n\n"
+    
+    incrementTable = []
+    for (i,x) in enumerate(inData.dx)
+        if size(incrementTable)[1] == 0
+            incrementTable = [i inData.materialNames[i] x]
+        else
+            incrementTable = vcat(incrementTable, [i inData.materialNames[i] x])
+        end
+    end
+    headerString *= pretty_table(String, incrementTable; header = ["Material", "Material Name", "Increment Depth(dx)"],tf = tf_markdown)
+    headerString *= "\n"
+end
 getHeaderValues(outputData::OutputData) = (outputData.inputData.problemName, outputData.inputData.nodalPoints, outputData.inputData.bottomPointIndex, outputData.inputData.soilLayers, outputData.inputData.dx)
 
 # Foundation Depth
@@ -88,13 +103,13 @@ function writeSoilTable(outputData::OutputData, path::String)
 end
 function getSoilTable(outputData::OutputData)
     values = getSoilTableValues(outputData)
-    return pretty_table(String, values; header = ["Element", "Soil Layer Number"],tf = tf_markdown)
+    return pretty_table(String, values; header = ["Soil Layer", "Material", "Material Name"],tf = tf_markdown)
 end
 function getSoilTableValues(outputData::OutputData)
     inData = outputData.inputData
-    values = [1 inData.soilLayerNumber[1]]
+    values = [1 inData.soilLayerNumber[1] inData.materialNames[inData.soilLayerNumber[1]]]
     for i=2:inData.elements
-        values = vcat(values, [i inData.soilLayerNumber[i]])
+        values = vcat(values, [i inData.soilLayerNumber[i] inData.materialNames[inData.soilLayerNumber[i]]])
     end
     return values
 end
@@ -107,13 +122,13 @@ function writeMaterialInfoTable(outputData::OutputData, path::String)
 end
 function getMaterialInfoTable(outputData::OutputData)
     values = getMaterialInfoTableValues(outputData)
-    return pretty_table(String, values; header = ["Material", "Specific Gravity", "Water Content(%)", "Void Ratio"],tf = tf_markdown)
+    return pretty_table(String, values; header = ["Material", "Material Name", "Specific Gravity", "Water Content(%)", "Void Ratio"],tf = tf_markdown)
 end
 function getMaterialInfoTableValues(outputData::OutputData)
     inData = outputData.inputData
-    values = [1 inData.specificGravity[1] inData.waterContent[1] inData.voidRatio[1]]
+    values = [1 inData.materialNames[1] inData.specificGravity[1] inData.waterContent[1] inData.voidRatio[1]]
     for i=2:inData.soilLayers
-        values = vcat(values, [i inData.specificGravity[i] inData.waterContent[i] inData.voidRatio[i]])
+        values = vcat(values, [i inData.materialNames[i] inData.specificGravity[i] inData.waterContent[i] inData.voidRatio[i]])
     end
     return values
 end

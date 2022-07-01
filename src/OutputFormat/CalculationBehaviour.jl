@@ -582,8 +582,10 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
         while depth < behaviour.depthGroundWaterTable
             depth += behaviour.dx[behaviour.soilLayerNumber[groudWaterTableIndex]]
             groudWaterTableIndex += 1
+            if groudWaterTableIndex == behaviour.elements
+                break
+            end
         end
-        groudWaterTableIndex -= 1
         MO = min(groudWaterTableIndex, behaviour.nodalPoints)
         for i=1:MO 
             BN = groudWaterTableIndex - float(i-1)
