@@ -52,7 +52,7 @@ conePenetrationQML = Observable([])
 # Enter Data Stage 5 (Elastic Modulus)
 elasticModulusQML = Observable([])
 
-finishedInput = false
+finishedInput = Observable(false)
 
 # Update system variables
 setProblemName = on(problemName) do val
@@ -213,17 +213,13 @@ if size(ARGS)[1] == 2
     exec()
 
     # After app is done executing
-    global finishedInput
-    if finishedInput
-        # Process data and output to file if form was filled
-        processGUIData()
-    else
-        println("Form was not completed, exiting app...")
-    end
-end
 
-# Processes data given in QML GUI, creates OutputData instance, and outputs calculations to a file
-function processGUIData()
+
+    if !finishedInput[]
+        print("Form not filled. Exiting app....")
+        exit()
+    end
+
     # Convert QML arrays to Julia Arrays
     materialNames = Array{String}(undef,0)
     specificGravity = Array{Float64}(undef,0)
@@ -239,7 +235,6 @@ function processGUIData()
     conePenetration = Array{Float64}(undef,0)
     elasticModulus = Array{Float64}(undef,0)
     for i in 1:materials[]
-        global materialNames, specificGravity, waterContent, voidRatio, subdivisions, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, conePenetration, elasticModulus
         push!(materialNames, QML.value(materialNamesQML[][i]))
         push!(specificGravity, QML.value(specificGravityQML[][i]))
         push!(waterContent, QML.value(waterContentQML[][i]))
@@ -258,7 +253,6 @@ function processGUIData()
         end
     end
     for i = 1:1+materials[]
-        global bounds
         push!(bounds, QML.value(boundsQML[][i]))
     end
 
@@ -274,7 +268,7 @@ function processGUIData()
     # Calculate dx
     dx = Array{Float64}(undef,0)
     for i in 1:materials[]
-        global bounds, subdivisions
+        global bounds, dx, subdivisions
         index = materials[] - i + 1
         push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
     end
@@ -282,9 +276,8 @@ function processGUIData()
     # Soil layer numbers
     soilLayerNums = Array{Int32}(undef,0)
     for i in 1:materials[]
-        global subdivisions
+        global subdivisions, soilLayerNumbers, soilLayerNums
         for j in 1:subdivisions[i]
-            global soilLayerNums, soilLayerNumbers
             push!(soilLayerNums, soilLayerNumbers[i]+1)
         end
     end

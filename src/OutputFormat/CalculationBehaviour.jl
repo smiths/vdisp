@@ -75,12 +75,16 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     end
 
     if behaviour.outputIncrements
-        out *= "Heave Distribution Above Foundation: \n"
-        out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
-        out *= "\n"
-        out *= "Heave Distribution Below Foundation: \n"
-        out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
-        out *= "\n"
+        if size(heaveAboveFoundationTable)[1] > 0
+            out *= "Heave Distribution Above Foundation: \n"
+            out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= "\n"
+            out *= "Heave Distribution Below Foundation: \n"
+            out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= "\n"
+        else
+            out *= "Not enough increments to show tables\n\n"
+        end
     end
 
     out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * string(Δh1) * "ft\n"
@@ -188,7 +192,6 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
 
             finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
-
             if behaviour.outputIncrements
                 Δp = swellPressure - pressure
                 # TODO: Round values to a fixed number of decimal places
