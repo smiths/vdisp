@@ -280,6 +280,7 @@ Rectangle {
             onClicked: {
                 if(schmertmannElasticDataBackground.formFilled){
                     // mainLoader.source = "" (switch to next screen when it's designed)
+                    props.finishedInput = true
                     Qt.quit()
                 }
             }

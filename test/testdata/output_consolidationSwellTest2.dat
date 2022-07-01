@@ -1,7 +1,7 @@
 Title:     FOOTING IN EXPANSIVE SOIL
 Nodal Points: 17, Base Nodal Point Index: 7
 Number of different soil layers: 2
-Increment depth(dx): 0.5
+Increment depths(dx): [0.5, 0.5]
 
 Model: Consolidation Swell
 

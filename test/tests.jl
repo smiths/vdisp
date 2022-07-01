@@ -16,7 +16,6 @@ function consolidationSwellTest(outputData)
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
     @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
     @test string(inputData.model) == string(InputParser.ConsolidationSwell)
     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
     @test inputData.soilLayerNumber[1] == 1
@@ -57,7 +56,6 @@ function consolidationSwellTest2(outputData)
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
     @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
     @test string(inputData.model) == string(InputParser.ConsolidationSwell)
     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
     @test inputData.soilLayerNumber[1] == 1
@@ -98,7 +96,6 @@ function schmertTest(outputData)
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
     @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
     @test string(inputData.model) == string(InputParser.Schmertmann)
     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
     @test inputData.soilLayerNumber[1] == 1
@@ -131,7 +128,6 @@ function schmertElasticTest(outputData)
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
     @test inputData.soilLayers == 2
-    @test inputData.dx == 0.5
     @test string(inputData.model) == string(InputParser.SchmertmannElastic)
     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
     @test inputData.soilLayerNumber[1] == 1
@@ -164,7 +160,6 @@ end
 #     @test inputData.nodalPoints == 17
 #     @test inputData.bottomPointIndex == 7
 #     @test inputData.soilLayers == 2
-#     @test inputData.dx == 0.5
 #     @test string(inputData.model) == string(InputParser.LeonardFrost)
 #     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
 #     @test inputData.soilLayerNumber[1] == 1
@@ -192,7 +187,6 @@ end
 #     @test inputData.nodalPoints == 17
 #     @test inputData.bottomPointIndex == 7
 #     @test inputData.soilLayers == 2
-#     @test inputData.dx == 0.5
 #     @test string(inputData.model) == string(InputParser.CollapsibleSoil)
 #     @test string(inputData.foundation) == string(InputParser.RectangularSlab)
 #     @test inputData.soilLayerNumber[1] == 1

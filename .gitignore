@@ -312,7 +312,7 @@ Manifest.toml
 
 # Ignore output data
 src/.data/output_data.dat
-test/testdata/test_output_*.dat
+test/testdata/output_*.dat
 
 # Ignore FORTRAN output
 Resources/fortran_src/VDOU.DAT
