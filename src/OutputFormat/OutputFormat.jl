@@ -23,9 +23,18 @@ export OutputData, writeOutput, writeDefaultOutput, getData
 # Output Data Struct
 struct OutputData
     inputData::InputData
-    # When I tried passing in an InputData object
-    # directly there were lots of errors
+    
+    # Generates OutputData from input file at path
     OutputData(path::String) = new(InputData(path))
+
+    # Generates OutputData from ConsolidationSwell data collected from QML GUI
+    OutputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, swellPressure::Array{Float64}, swellIndex::Array{Float64}, compressionIndex::Array{Float64}, maxPastPressure::Array{Float64}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64) = new(InputData(problemName, foundationType, materialCount, dx, soilLayerNumbers, nodalPoints, elements, materialNames, specificGravity, voidRatio, waterContent, subdivisions, swellPressure, swellIndex, compressionIndex, maxPastPressure, foundationIndex, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, heaveActive, heaveBegin, totalDepth, foundationDepth))
+    
+    # Generates OutputData from Schmertmann data collected from QML GUI
+    OutputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, conePenetration::Array{Float64}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64, timeAfterConstruction::Int32) = new(InputData(problemName, foundationType, materialCount, dx, soilLayerNumbers, nodalPoints, elements, materialNames, specificGravity, voidRatio, waterContent, subdivisions, conePenetration, foundationIndex, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, heaveActive, heaveBegin, totalDepth, foundationDepth, timeAfterConstruction))
+    
+    # Generates OutputData from SchmertmannElastic data collected from QML GUI
+    OutputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64, elasticModulus::Array{Float64}, timeAfterConstruction::Int32) = new(InputData(problemName, foundationType, materialCount, dx, soilLayerNumbers, nodalPoints, elements, materialNames, specificGravity, voidRatio, waterContent, subdivisions, foundationIndex, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, heaveActive, heaveBegin, totalDepth, foundationDepth, elasticModulus, timeAfterConstruction))
 end
 
 # Function to write outputs in order we want
@@ -53,7 +62,7 @@ function writeHeader(outputData::OutputData, path::String)
         write(file, getHeader(outputData))
     end
 end
-getHeader(outputData::OutputData) = "Title: $(outputData.inputData.problemName)\nNodal Points: $(outputData.inputData.nodalPoints), Base Nodal Point Index: $(outputData.inputData.bottomPointIndex)\nNumber of different soil layers: $(outputData.inputData.soilLayers)\nIncrement depth(dx): $(outputData.inputData.dx)\n"
+getHeader(outputData::OutputData) = "Title: $(outputData.inputData.problemName)\nNodal Points: $(outputData.inputData.nodalPoints), Base Nodal Point Index: $(outputData.inputData.bottomPointIndex)\nNumber of different soil layers: $(outputData.inputData.soilLayers)\nIncrement depths(dx): $(outputData.inputData.dx)\n"
 getHeaderValues(outputData::OutputData) = (outputData.inputData.problemName, outputData.inputData.nodalPoints, outputData.inputData.bottomPointIndex, outputData.inputData.soilLayers, outputData.inputData.dx)
 
 # Foundation Depth

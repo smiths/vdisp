@@ -122,6 +122,7 @@ setWaterContent = on(waterContentQML) do val
     if PRINT_DEBUG
         println("Got an update: ", val)
     end
+    println(val)
 end
 setSubdivisions = on(subdivisionsQML) do val
     if PRINT_DEBUG
@@ -211,19 +212,19 @@ if size(ARGS)[1] == 2
     # After app is done executing
 
     # Convert QML arrays to Julia Arrays
-    materialNames = []
-    specificGravity = []
-    waterContent = []
-    voidRatio = []
-    bounds = []
-    subdivisions = []
-    soilLayerNumbers = []
-    swellPressure = []
-    swellIndex = []
-    compressionIndex = []
-    recompressionIndex = []
-    conePenetration = []
-    elasticModulus = []
+    materialNames = Array{String}(undef,0)
+    specificGravity = Array{Float64}(undef,0)
+    waterContent = Array{Float64}(undef,0)
+    voidRatio = Array{Float64}(undef,0)
+    bounds = Array{Float64}(undef,0)
+    subdivisions = Array{Int32}(undef,0)
+    soilLayerNumbers = Array{Int32}(undef,0)
+    swellPressure = Array{Float64}(undef,0)
+    swellIndex = Array{Float64}(undef,0)
+    compressionIndex = Array{Float64}(undef,0)
+    recompressionIndex = Array{Float64}(undef,0)
+    conePenetration = Array{Float64}(undef,0)
+    elasticModulus = Array{Float64}(undef,0)
     for i in 1:materials[]
         global materialNames, specificGravity, waterContent, voidRatio, subdivisions, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, conePenetration, elasticModulus
         push!(materialNames, QML.value(materialNamesQML[][i]))
@@ -248,54 +249,7 @@ if size(ARGS)[1] == 2
         push!(bounds, QML.value(boundsQML[][i]))
     end
 
-    # Print Data
-    println("\n\nFollowing Data Given:\n\n")
-
-    if model[] == 0
-        println("Problem Name: ", problemName[], " Model: ", model[], " Foundation: ", foundation[])
-        println("Applied Pressure: ", appliedPressure[], " Center: ", center[])
-        for i in 1:materials[]
-            println("Material Name: ", materialNames[i], " Specific Gravity: ", specificGravity[i], " Void Ratio: ", voidRatio[i], " Water Content: ", waterContent[i])
-        end
-        println("Total Depth: ", totalDepth[])
-        for i in 1:materials[]
-            println("Soil Layer Number of Layer $i: ", soilLayerNumbers[i]) 
-        end
-        println("Heave Active: ", heaveActive[], " Heave Begin: ", heaveBegin[])
-        for i in 1:materials[]
-            println("Swell Pressure: ", swellPressure[i], " Swell Index: ", swellIndex[i], " Compression Index: ", compressionIndex[i], " Recompression Index: ", recompressionIndex[i])
-        end
-    elseif model[] == 1
-        println("Problem Name: ", problemName[], " Model: ", model[], " Foundation: ", foundation[])
-        println("Applied Pressure: ", appliedPressure[], " Center: ", center[])
-        for i in 1:materials[]
-            println("Material Name: ", materialNames[i], " Specific Gravity: ", specificGravity[i], " Void Ratio: ", voidRatio[i], " Water Content: ", waterContent[i])
-        end
-        println("Total Depth: ", totalDepth[])
-        for i in 1:materials[]
-            println("Soil Layer Number of Layer $i: ", soilLayerNumbers[i])
-        end
-        println("Time After Construction: ", timeAfterConstruction[])
-        for i in 1:materials[]
-            println("Cone Penetration of $(materialNames[i]): ", conePenetration[i])
-        end
-    else
-        println("Problem Name: ", problemName[], " Model: ", model[], " Foundation: ", foundation[])
-        println("Applied Pressure: ", appliedPressure[], " Center: ", center[])
-        for i in 1:materials[]
-            println("Material Name: ", materialNames[i], " Specific Gravity: ", specificGravity[i], " Void Ratio: ", voidRatio[i], " Water Content: ", waterContent[i])
-        end
-        println("Total Depth: ", totalDepth[])
-        for i in 1:materials[]
-            println("Soil Layer Number of Layer $i: ", soilLayerNumbers[i]) 
-        end
-        println("Time After Construction: ", timeAfterConstruction[])
-        for i in 1:materials[]
-            println("Elastic Modulus of $(materialNames[i]): ", elasticModulus[i])
-        end
-    end
-
-    println("\nConverting to input file\n")
+    println("New Julia Arrays created")
 
     # Calculate elements and nodal points
     elements = 0
@@ -303,19 +257,17 @@ if size(ARGS)[1] == 2
         global elements += i
     end
     nodalPoints = elements + 1
-    println("Elements: ", elements, ", Nodal Points: ", nodalPoints, "\n")
 
     # Calculate dx
-    dx = []
+    dx = Array{Float64}(undef,0)
     for i in 1:materials[]
         global bounds, subdivisions
         index = materials[] - i + 1
         push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
     end
-    println("dx: ", dx, "\n")
 
     # Soil layer numbers
-    soilLayerNums = []
+    soilLayerNums = Array{Int32}(undef,0)
     for i in 1:materials[]
         global subdivisions
         for j in 1:subdivisions[i]
@@ -323,7 +275,6 @@ if size(ARGS)[1] == 2
             push!(soilLayerNums, soilLayerNumbers[i]+1)
         end
     end
-    println("Soil Layer Nums: ", soilLayerNums, "\n")
 
     # Foundation index, layer
     depth = 0
@@ -341,21 +292,25 @@ if size(ARGS)[1] == 2
         end
     end
 
+    # Converting from dropdown menu index to value
     modelConversion = [0, 2, 4] # Consolidation Swell NOPT = 0, Schmertmann NOPT = 2, Schemrtmann Elastic NOPT = 4
+    foundationType = (foundation[] == 0) ? "RectangularSlab" : "LongStripFooting"
 
-    content = ""
-    content *= "1 " * string(modelConversion[model[]+1]) * " " * string(foundationIndex) * " " * string(materials[]) * "\n"
-    for x in dx
-        global content *= string(x) * " "
+    println("Data calculated")
+
+    # Creating OutputData Object
+    outData = 0
+    if model[] == 0
+        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, swellPressure, swellIndex, compressionIndex, recompressionIndex, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[])
+    elseif model[] == 1
+        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, conePenetration, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], Int32(timeAfterConstruction[]))
+    else
+        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], elasticModulus, Int32(timeAfterConstruction[]))
     end
-    content *= "\n"
-    content *= string(soilLayerNums) * "\n"
 
-    print(content)
+    println("OutputData created")
 
-    # open("test.dat", "w") do file
-    #     write(file, content)
-    # end
+    writeDefaultOutput(outData, "./src/.data/output_data.dat")
 end
 
 """
