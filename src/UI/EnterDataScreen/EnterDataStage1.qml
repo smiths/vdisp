@@ -140,12 +140,20 @@ Rectangle {
                 width: modelDropdown.width
                 contentItem: Text {
                     text: modelData
-                    color: "#483434"
+                    color: highlighted ? "#6B4F4F" : "#483434"
                     font: modelDropdown.font
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
                 }
                 highlighted: modelDropdown.highlightedIndex === index
+                
+                Rectangle {
+                    visible: highlighted
+                    anchors.fill: parent
+                    color: "#fff3e4"
+                    radius: 2
+                }
+                
                 required property int index
                 required property var modelData
             }
@@ -167,7 +175,7 @@ Rectangle {
                     context.lineTo(width / 2, height);
                     context.closePath();
                     // Color of arrow
-                    context.fillStyle = modelDropdown.pressed ? "#e8e4e4" : "#483434";
+                    context.fillStyle = "#483434";
                     context.fill();
                 }
             }
@@ -175,7 +183,7 @@ Rectangle {
             contentItem: Text {
                 text: modelDropdown.displayText
                 font: modelDropdown.font
-                color: modelDropdown.pressed ? "#989494" : "#483434"
+                color: "#483434"
                 verticalAlignment: Text.AlignVCenter
                 // elide: Text.ElideRight
                 anchors {
@@ -193,14 +201,13 @@ Rectangle {
                 y: modelDropdown.height - 1
                 width: modelDropdown.width
                 implicitHeight: contentItem.implicitHeight
-                padding: 1
+                padding: 0
                 contentItem: ListView {
                     id: modelDropdownItem
                     clip: true
                     implicitHeight: contentHeight
                     model: modelDropdown.popup.visible ? modelDropdown.delegateModel : null
                     currentIndex: modelDropdown.highlightedIndex
-                    ScrollIndicator.vertical: ScrollIndicator { }
                 }
                 background: Rectangle {
                     color: "#fff3e4"
@@ -245,14 +252,25 @@ Rectangle {
             // Text of dropdown list
             delegate: ItemDelegate {
                 width: foundationDropdown.width
-                contentItem: Text {
-                    text: modelData
-                    color: "#483434"
-                    font: foundationDropdown.font
-                    elide: Text.ElideRight
-                    verticalAlignment: Text.AlignVCenter
+                contentItem: Item {
+                    Text { 
+                        text: modelData
+                        color: highlighted ? "#6B4F4F" : "#483434"
+                        font: foundationDropdown.font
+                        elide: Text.ElideRight
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
                 highlighted: foundationDropdown.highlightedIndex === index
+                
+                Rectangle {
+                    visible: highlighted
+                    anchors.fill: parent
+                    // no background highlighting, just keep background same as before
+                    color: "#fff3e4"
+                    radius: 2 // to match curved bg
+                }
+                
                 required property int index
                 required property var modelData
             }
@@ -274,7 +292,7 @@ Rectangle {
                     context.lineTo(width / 2, height);
                     context.closePath();
                     // Color of arrow
-                    context.fillStyle = foundationDropdown.pressed ? "#e8e4e4" : "#483434";
+                    context.fillStyle = "#483434";
                     context.fill();
                 }
             }
@@ -282,7 +300,7 @@ Rectangle {
             contentItem: Text {
                 text: foundationDropdown.displayText
                 font: foundationDropdown.font
-                color: foundationDropdown.pressed ? "#989494" : "#483434"
+                color: "#483434"
                 verticalAlignment: Text.AlignVCenter
                 // elide: Text.ElideRight
                 anchors {
@@ -300,17 +318,16 @@ Rectangle {
                 y: foundationDropdown.height - 1
                 width: foundationDropdown.width
                 implicitHeight: contentItem.implicitHeight
-                padding: 1
+                padding: 0
                 contentItem: ListView {
                     clip: true
                     implicitHeight: contentHeight
                     model: foundationDropdown.popup.visible ? foundationDropdown.delegateModel : null
                     currentIndex: foundationDropdown.highlightedIndex
-                    ScrollIndicator.vertical: ScrollIndicator { }
                 }
                 background: Rectangle {
                     color: "#fff3e4"
-                    radius: 2
+                    radius: 3
                 }
             }
         }
@@ -536,12 +553,20 @@ Rectangle {
                 width: appliedDropdown.width
                 contentItem: Text {
                     text: modelData
-                    color: "#483434"
+                    color: highlighted ? "#6B4F4F" : "#483434"
                     font: appliedDropdown.font
                     elide: Text.ElideRight
                     verticalAlignment: Text.AlignVCenter
                 }
                 highlighted: appliedDropdown.highlightedIndex === index
+                
+                Rectangle {
+                    visible: highlighted
+                    anchors.fill: parent
+                    color: "#fff3e4"
+                    radius: 2
+                }
+                
                 required property int index
                 required property var modelData
             }
@@ -563,7 +588,7 @@ Rectangle {
                     context.lineTo(width / 2, height);
                     context.closePath();
                     // Color of arrow
-                    context.fillStyle = appliedDropdown.pressed ? "#e8e4e4" : "#483434";
+                    context.fillStyle = "#483434";
                     context.fill();
                 }
             }
@@ -571,7 +596,7 @@ Rectangle {
             contentItem: Text {
                 text: appliedDropdown.displayText
                 font: appliedDropdown.font
-                color: appliedDropdown.pressed ? "#989494" : "#483434"
+                color: "#483434"
                 verticalAlignment: Text.AlignVCenter
                 // elide: Text.ElideRight
                 anchors {
@@ -589,13 +614,12 @@ Rectangle {
                 y: appliedDropdown.height - 1
                 width: appliedDropdown.width
                 implicitHeight: contentItem.implicitHeight
-                padding: 1
+                padding: 0
                 contentItem: ListView {
                     clip: true
                     implicitHeight: contentHeight
                     model: appliedDropdown.popup.visible ? appliedDropdown.delegateModel : null
                     currentIndex: appliedDropdown.highlightedIndex
-                    ScrollIndicator.vertical: ScrollIndicator { }
                 }
                 background: Rectangle {
                     color: "#fff3e4"
@@ -619,10 +643,12 @@ Rectangle {
         // Diagram //////////
         Shape {
             id: diagramRect
-            property int max_width: (vdispWindow.height > 800) ? 200 : (vdispWindow.height > 700) ? 150 : 130
-            property int max_length: (vdispWindow.height > 800) ? 170 : (vdispWindow.height > 700) ? 120 : 100
-            width: (enterDataFormBackground.widthValue < 0 || enterDataFormBackground.lengthValue < 0) ? max_width : Math.min((enterDataFormBackground.widthValue/enterDataFormBackground.lengthValue)*max_width, max_width);
-            height: (enterDataFormBackground.lengthValue < 0 || enterDataFormBackground.widthValue < 0) ? max_length : Math.min((enterDataFormBackground.lengthValue/enterDataFormBackground.widthValue)*max_length, max_length);
+            property int max_length: 100 + 70 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+            property int max_width: max_length + 20
+            property int min_width: 40
+            property int min_length: 30
+            width: (enterDataFormBackground.widthValue < 0 || enterDataFormBackground.lengthValue < 0) ? max_width : Math.max(Math.min((enterDataFormBackground.widthValue/enterDataFormBackground.lengthValue)*max_width, max_width), min_width);
+            height: (enterDataFormBackground.lengthValue < 0 || enterDataFormBackground.widthValue < 0) ? max_length : Math.max(Math.min((enterDataFormBackground.lengthValue/enterDataFormBackground.widthValue)*max_length, max_length), min_length);
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: appliedDropdown.bottom
@@ -698,8 +724,8 @@ Rectangle {
         radius: 5
         color: "#fff3e4"
         anchors {
-            top: formMiddle.bottom
-            topMargin: enterDataFormBackground.checkboxMargin
+            bottom: continueButton.top
+            bottomMargin: enterDataFormBackground.checkboxMargin
             right: parent.horizontalCenter
             rightMargin: parent.checkboxGap / 2
         }
@@ -742,8 +768,8 @@ Rectangle {
         radius: 5
         color: "#fff3e4"
         anchors {
-            top: formMiddle.bottom
-            topMargin: enterDataFormBackground.checkboxMargin
+            bottom: continueButton.top
+            bottomMargin: enterDataFormBackground.checkboxMargin
             left: saturationLabel.right
             leftMargin: parent.checkboxLabelGap
         }
