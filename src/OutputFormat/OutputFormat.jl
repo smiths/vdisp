@@ -232,7 +232,7 @@ function getForcePointOutputBehaviour(outputData::OutputData)
         return CenterForceBehaviour()
     end
     foundation = outputData.inputData.foundation
-    return EdgeForceBehaviour(foundation)
+    return EdgeForceBehaviour(string(foundation))
 end
 # Get CalculationOutputBehaviour instance
 function getCalculationOutputBehaviour(outputData)

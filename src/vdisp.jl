@@ -214,7 +214,6 @@ if size(ARGS)[1] == 2
 
     # After app is done executing
 
-
     if !finishedInput[]
         println("Form not filled. Exiting app....")
         exit()

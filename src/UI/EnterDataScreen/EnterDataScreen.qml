@@ -50,8 +50,10 @@ Item {
                 // If current form is filled, go to next screen
                 if(enterDataStackView.currentItem.formFilled){
                     // If we are at 4th stage, move on to output
-                    props.finishedInput = true
-                    if(enterDataStackView.depth > 3) Qt.quit()
+                    if(enterDataStackView.depth > 3) {
+                        Qt.quit()
+                        props.finishedInput = true
+                    }
                     // Else, go to next stage of data entry
                     enterDataStackView.push(enterDataStackView.currentItem.nextScreen)
                 }
@@ -59,7 +61,42 @@ Item {
         }
     }
 
-    // Add "progress bar" at bottom of screen
+    // Progress Bar ///
+    Item {
+        id: progressBarContainer
+
+        property int barGap: 20
+        property int barWidth: 40
+        property int barHeight: 5
+
+        width: 4 * barWidth + 3 * barGap
+        height: barHeight
+
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: parent.bottom
+            bottomMargin: 10 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        }
+
+        Repeater {
+            id: progressBarRepeater
+            model: 4
+
+            anchors.fill: parent
+
+            delegate: Rectangle {
+                x: index*(progressBarContainer.barWidth + progressBarContainer.barGap)
+                y: 0
+
+                width: progressBarContainer.barWidth
+                height: progressBarContainer.barHeight
+
+                color: (index < enterDataStackView.depth) ? "#fff3e4" : "#9D8F84"
+                radius: 3
+            }
+        }
+    }
+    //////////////////
 
     StackView {
         id: enterDataStackView
