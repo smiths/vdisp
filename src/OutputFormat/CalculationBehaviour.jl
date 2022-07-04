@@ -517,15 +517,26 @@ Which can be derived from the following equations:
 
 This calculation is repeated at each depth increment.
 
+The bulk unit weight, ``\gamma``, which is equal to ``\gamma_{sat}-\gamma_w`` 
+is calculated by the following formula:
+
+``\gamma = \frac{W}{V} = \frac{G_s (1+w) \gamma_w}{1+e}``
+
 # Variables
 
-``\sigma_z``: stress at depth `z``
+``\sigma_z``: stress at depth `z`
 
 ``\sigma_z'``: effective stress at depth `z`
 
 ``\gamma_w``: unit weight of water
 
 ``\gamma_{sat}``: unit weight of saturated soil
+
+``G_s``: specific gravity of soil
+
+``w``: water content of soil
+
+``e``: void ratio of soil
 """
 function getEffectiveStress(behaviour::CalculationOutputBehaviour)
     # Initialize arrays (TODO: Think of better names)
