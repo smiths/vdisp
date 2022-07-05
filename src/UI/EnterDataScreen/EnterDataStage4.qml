@@ -602,19 +602,44 @@ Rectangle {
         id: selectOutputButton
         color: "#fff3e4"
         radius: 5
-        width: selectOutputButtonText.width
-        height: 20
+        width: selectOutputButtonContainer.width + 10
+        height: selectOutputButtonContainer.height + 5
         anchors {
             horizontalCenter: parent.horizontalCenter
             top: consolidationSwellDataContainer.bottom
             topMargin: 20
         }
-        Text{
-            id: selectOutputButtonText
-            text: "Select Output File"
-            color: "#483434"
-            font.pixelSize: 15
+        Item {
+            id: selectOutputButtonContainer
+            
+            height: selectOutputButtonIcon.height
+            width: selectOutputButtonText.width + gap + selectOutputButtonIcon.width
+
             anchors.centerIn: parent
+
+            property int gap: 10
+
+            Text{
+                id: selectOutputButtonText
+                text: "Select Output File"
+                color: "#483434"
+                font.pixelSize: 15
+                anchors{
+                    left: parent.left
+                    verticalCenter: selectOutputButtonIcon.verticalCenter
+                }
+            }
+            Image {
+                id: selectOutputButtonIcon
+                source: (consolidationSwellDataBackground.selectedOutputFile) ? "../Assets/fileAccept.png" : "../Assets/fileUpload.png"
+                width: 20
+                height: 20
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: selectOutputButtonText.right
+                    leftMargin: selectOutputButtonContainer.gap
+                }
+            }
         }
         MouseArea {
             anchors.fill: parent
@@ -625,6 +650,7 @@ Rectangle {
         id: fileDialog
         title: "Please select output file"
         selectMultiple: false
+        selectExisting: false
         folder: shortcuts.home
         nameFilters: ["VDisp data files (*.dat)" ]
         onAccepted: {

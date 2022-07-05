@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
+import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -14,7 +15,7 @@ Rectangle {
         return true
     }
     function isFilled(){
-        return forceUpdateInt === 2 && timeTextInput.text && timeTextInput.acceptableInput && formIsFilled()
+        return selectedOutputFile && forceUpdateInt === 2 && timeTextInput.text && timeTextInput.acceptableInput && formIsFilled()
     }
 
     function forceUpdate(){
@@ -25,6 +26,7 @@ Rectangle {
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
     
+    property bool selectedOutputFile: false
     property variant filled: []
     property int forceUpdateInt: 2
 
@@ -262,6 +264,72 @@ Rectangle {
         //////////////////////////////
     }
     //////////////////////
+
+    // Select Output Location /////
+    Rectangle {
+        id: selectOutputButton
+        color: "#fff3e4"
+        radius: 5
+        width: selectOutputButtonContainer.width + 10
+        height: selectOutputButtonContainer.height + 5
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: schmertmannElasticDataForm.bottom
+            topMargin: 20
+        }
+        Item {
+            id: selectOutputButtonContainer
+            
+            height: selectOutputButtonIcon.height
+            width: selectOutputButtonText.width + gap + selectOutputButtonIcon.width
+
+            anchors.centerIn: parent
+
+            property int gap: 10
+
+            Text{
+                id: selectOutputButtonText
+                text: "Select Output File"
+                color: "#483434"
+                font.pixelSize: 15
+                anchors{
+                    left: parent.left
+                    verticalCenter: selectOutputButtonIcon.verticalCenter
+                }
+            }
+            Image {
+                id: selectOutputButtonIcon
+                source: (schmertmannElasticDataBackground.selectedOutputFile) ? "../Assets/fileAccept.png" : "../Assets/fileUpload.png"
+                width: 20
+                height: 20
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: selectOutputButtonText.right
+                    leftMargin: selectOutputButtonContainer.gap
+                }
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: fileDialog.open()
+        }
+    }
+    FileDialog {
+        id: fileDialog
+        title: "Please select output file"
+        selectMultiple: false
+        selectExisting: false
+        folder: shortcuts.home
+        nameFilters: ["VDisp data files (*.dat)" ]
+        onAccepted: {
+            schmertmannElasticDataBackground.selectedOutputFile = true
+            props.outputFile = fileUrl.toString()
+        }
+        onRejected: {
+            schmertmannElasticDataBackground.selectedOutputFile = false
+        }
+    }
+    ///////////////////////////////
 
     // Continue Button ///
     Rectangle {
