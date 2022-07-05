@@ -301,17 +301,17 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    //if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
-                    if(topForm.ready) {
+                    //if(topForm.ready) {
+                    if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
                         var name = qsTr("Material " + (materialsModel.count + 1))
                         // Update UI
-                        materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseInt(wcSlider.value)})
+                        materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": wcSlider.value})
                         // Update Julia lists
                         props.materials = props.materials+1
                         props.materialNames = [...props.materialNames,name]
                         props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
                         props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
-                        props.waterContent = [...props.waterContent, parseFloat(wcSlider.value)]
+                        props.waterContent = [...props.waterContent, wcSlider.value]
                         // Clear fields
                         sgTextInput.text = ""
                         vrTextInput.text = ""
@@ -332,8 +332,8 @@ Rectangle {
         id: materialsList
         model: materialsModel
         
-        property int maxMaterials: 7
-        property bool overcrowded: vdispWindow.isMinHeight() && model.count > 7
+        property int maxMaterials: 5
+        property bool overcrowded: vdispWindow.isMinHeight() && model.count > maxMaterials
         property int maximumHeight: materialPropertiesFormBackground.materialListEntryHeight * maxMaterials
         
         interactive: (model.count <= maxMaterials) ? false : true  // Allow scrolling when list becomes too large
@@ -344,14 +344,6 @@ Rectangle {
             horizontalCenter: parent.horizontalCenter
             verticalCenter: parent.verticalCenter
             topMargin: (overcrowded) ? 20 : 0 
-        }
-
-        // Just for viewing bounds during development
-        Rectangle {
-            anchors.fill: parent
-            color: "transparent"
-            border.color: "red"
-            border.width: 1
         }
 
         // If we went to a different screen and came back, reload previous entries
@@ -375,16 +367,11 @@ Rectangle {
             
             // Entry ////////////////
             Item {
-                implicitWidth: 2*materialEntry.sideGap + 4*materialEntry.inputGap + 3*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryName.width + deleteEntryBtn.width
+                implicitWidth: editImage.width + 2*materialEntry.sideGap + 4*materialEntry.inputGap + 4*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryName.width + deleteEntryBtn.width
                 height: parent.height
                 anchors.horizontalCenter: parent.horizontalCenter
-                // Just for viewing bounds during development
-                Rectangle {
-                    anchors.fill: parent
-                    color: "transparent"
-                    border.color: "green"
-                    border.width: 1
-                }
+                
+                // Material Name //
                 TextInput {
                     id: entryName
                     text: materialName
@@ -408,7 +395,20 @@ Rectangle {
                         props.materialNames = [...nameList]
                     }
                 }
+                Image {
+                    id: editImage
+                    source: "../Assets/pencil.png"
+                    width: materialEntry.textSize - 5
+                    height: width
+                    anchors {
+                        left: entryName.right
+                        leftMargin: materialEntry.labelGap
+                        verticalCenter: entryName.verticalCenter
+                    }
+                }
+                //////////////////
 
+                // SG ////////////
                 Text {
                     id: sgLabelEntry
                     text: "Specific Gravity: "
@@ -416,7 +416,7 @@ Rectangle {
                     font.pixelSize: materialEntry.textSize
                     anchors {
                         verticalCenter: parent.verticalCenter
-                        left: entryName.right
+                        left: editImage.right
                         leftMargin: materialEntry.inputGap
                     }
                 }
@@ -432,13 +432,15 @@ Rectangle {
                         leftMargin: materialEntry.labelGap
                     }
                     Text {
-                        text: specificGravity
+                        text: specificGravity.toFixed(2)
                         color: "#483434"
                         font.pixelSize: materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }
+                //////////////////
 
+                // VR ////////////
                 Text {
                     id: vrLabelEntry
                     text: "Void Ratio: "
@@ -462,13 +464,15 @@ Rectangle {
                         leftMargin: materialEntry.labelGap
                     }
                     Text {
-                        text: voidRatio
+                        text: voidRatio.toFixed(2)
                         color: "#483434"
                         font.pixelSize: materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }
+                //////////////////
 
+                // WC ////////////
                 Text {
                     id: wcLabelEntry
                     text: "Water Content: "
@@ -492,12 +496,15 @@ Rectangle {
                         leftMargin: materialEntry.labelGap
                     }
                     Text {
-                        text: waterContent
+                        text: waterContent.toFixed(1)
                         color: "#483434"
                         font.pixelSize: materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }
+                //////////////////
+
+                // DELETE ////////
                 Image {
                     id: deleteEntryBtn
                     width: 15
@@ -544,6 +551,7 @@ Rectangle {
                         }
                     }
                 }
+                /////////////////
             }
             ///////////////////////
         }
