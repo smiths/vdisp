@@ -377,7 +377,7 @@ Rectangle {
                     text: materialName
                     font.pixelSize: materialEntry.textSize
                     color: "#fff3e4"
-                    maximumLength: 13
+                    maximumLength: 12
                     anchors {
                         verticalCenter: parent.verticalCenter
                         left: parent.left
