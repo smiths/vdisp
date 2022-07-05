@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
+import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -25,11 +26,12 @@ Rectangle {
 
     function isFilled(){
         // should there be a min difference between heave begin and heave active depth
-        return (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
+        return selectedOutputFile && (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
     }
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool selectedOutputFile: false
     
     
     property int formGap: 20
@@ -594,6 +596,46 @@ Rectangle {
         //////////////////////
     }
     ////////////////////////////////
+
+    // Select Output Location /////
+    Rectangle {
+        id: selectOutputButton
+        color: "#fff3e4"
+        radius: 5
+        width: selectOutputButtonText.width
+        height: 20
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: consolidationSwellDataContainer.bottom
+            topMargin: 20
+        }
+        Text{
+            id: selectOutputButtonText
+            text: "Select Output File"
+            color: "#483434"
+            font.pixelSize: 15
+            anchors.centerIn: parent
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: fileDialog.open()
+        }
+    }
+    FileDialog {
+        id: fileDialog
+        title: "Please select output file"
+        selectMultiple: false
+        folder: shortcuts.home
+        nameFilters: ["VDisp data files (*.dat)" ]
+        onAccepted: {
+            consolidationSwellDataBackground.selectedOutputFile = true
+            props.outputFile = fileUrl.toString()
+        }
+        onRejected: {
+            consolidationSwellDataBackground.selectedOutputFile = false
+        }
+    }
+    ///////////////////////////////
 
     // Continue Button ///
     Rectangle {

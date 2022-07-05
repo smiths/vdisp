@@ -11,11 +11,26 @@ using Qt5QuickControls_jll
 using Qt5QuickControls2_jll
 using Observables
 
-export readInputFile, State
+export readInputFile
 
 PRINT_DEBUG = false
 
-# System variables
+# Julia variables
+materialNames = Array{String}(undef,0)
+specificGravity = Array{Float64}(undef,0)
+waterContent = Array{Float64}(undef,0)
+voidRatio = Array{Float64}(undef,0)
+bounds = Array{Float64}(undef,0)
+subdivisions = Array{Int32}(undef,0)
+soilLayerNumbers = Array{Int32}(undef,0)
+swellPressure = Array{Float64}(undef,0)
+swellIndex = Array{Float64}(undef,0)
+compressionIndex = Array{Float64}(undef,0)
+recompressionIndex = Array{Float64}(undef,0)
+conePenetration = Array{Float64}(undef,0)
+elasticModulus = Array{Float64}(undef,0)
+
+# QML variables
 # Enter Data Stage 1
 problemName = Observable("")
 model = Observable(0)
@@ -51,10 +66,11 @@ timeAfterConstruction = Observable(1)
 conePenetrationQML = Observable([])
 # Enter Data Stage 5 (Elastic Modulus)
 elasticModulusQML = Observable([])
-
+# Misc
 finishedInput = Observable(false)
+outputFileQML = Observable("")
 
-# Update system variables
+# Update QML variables
 setProblemName = on(problemName) do val
     if PRINT_DEBUG
         println("Got an update: ", val)
@@ -109,27 +125,51 @@ setMaterialNames = on(materialNamesQML) do val
     if PRINT_DEBUG
         println("Got an update: ", val)
     end
+    matNames = Array{String}(undef,0)
+    for v in val
+        push!(matNames, QML.value(v))
+    end
+    global materialNames = copy(matNames)
 end
 setSpecificGravity = on(specificGravityQML) do val
     if PRINT_DEBUG
         println("Got an update: ", val)
     end
+    sg = Array{Float64}(undef,0)
+    for v in val
+        push!(sg, QML.value(v))
+    end
+    global specificGravity = copy(sg)
 end
 setVoidRatio = on(voidRatioQML) do val
     if PRINT_DEBUG
         println("Got an update: ", val)
     end
+    vr = Array{Float64}(undef,0)
+    for v in val
+        push!(vr, QML.value(v))
+    end
+    global voidRatio = copy(vr)
 end
 setWaterContent = on(waterContentQML) do val
     if PRINT_DEBUG
         println("Got an update: ", val)
     end
-    println(val)
+    wc = Array{Float64}(undef,0)
+    for v in val
+        push!(wc, QML.value(v))
+    end
+    global waterContent = copy(wc)
 end
 setSubdivisions = on(subdivisionsQML) do val
     if PRINT_DEBUG
         println("\nGot an update for subdivisions: ", val)
     end
+    sub = Array{Int32}(undef,0)
+    for v in val
+        push!(sub, QML.value(v))
+    end
+    global subdivisions = copy(sub)
 end
 setTotalDepth = on(totalDepth) do val
     if PRINT_DEBUG
@@ -140,11 +180,21 @@ setSoilLayerNumbers = on(soilLayerNumbersQML) do val
     if PRINT_DEBUG
         println("\nGot an update for soilLayerNumbers: ", val)
     end
+    sln = Array{Int32}(undef,0)
+    for v in val
+        push!(sln, QML.value(v))
+    end
+    global soilLayerNumbers = copy(sln)
 end
 setBounds = on(boundsQML) do val
     if PRINT_DEBUG
         println("\nGot an update for bounds: ", val)
     end
+    b = Array{Float64}(undef,0)
+    for v in val
+        push!(b, QML.value(v))
+    end
+    global bounds = copy(b)
 end
 setDepthToGroundWaterTable = on(depthToGroundWaterTable) do val
     if PRINT_DEBUG
@@ -170,21 +220,41 @@ setSwellPressure = on(swellPressureQML) do val
     if PRINT_DEBUG
         println("\nGot an update for swellPressure: ", val)
     end
+    sp = Array{Float64}(undef,0)
+    for v in val
+        push!(sp, QML.value(v))
+    end
+    global swellPressure = copy(sp)
 end
 setSwellIndex = on(swellIndexQML) do val
     if PRINT_DEBUG
         println("\nGot an update for swellIndex: ", val)
     end
+    si = Array{Float64}(undef,0)
+    for v in val
+        push!(si, QML.value(v))
+    end
+    global swellIndex = copy(si)
 end
 setCompressionIndex = on(compressionIndexQML) do val
     if PRINT_DEBUG
         println("\nGot an update for compressionIndex: ", val)
     end
+    ci = Array{Float64}(undef,0)
+    for v in val
+        push!(ci, QML.value(v))
+    end
+    global compressionIndex = copy(ci)
 end
 setRecompressionIndex = on(recompressionIndexQML) do val
     if PRINT_DEBUG
         println("\nGot an update for recompressionIndex: ", val)
     end
+    mpp = Array{Float64}(undef,0)
+    for v in val
+        push!(mpp, QML.value(v))
+    end
+    global recompressionIndex = copy(mpp)
 end
 setTimeAfterConstruction = on(timeAfterConstruction) do val
     if PRINT_DEBUG
@@ -195,11 +265,21 @@ setConePenetration = on(conePenetrationQML) do val
     if PRINT_DEBUG
         println("\nGot an update for conePenetration: ", val)
     end
+    cp = Array{Float64}(undef,0)
+    for v in val
+        push!(cp, QML.value(v))
+    end
+    global conePenetration = copy(cp)
 end
 setElasticMod = on(elasticModulusQML) do val
     if PRINT_DEBUG
         println("\nGot an update for elasticModulus: ", val)
     end
+    em = Array{Float64}(undef,0)
+    for v in val
+        push!(em, QML.value(v))
+    end
+    global elasticModulus = copy(em)
 end
 
 # Don't load or run anything for tests
@@ -207,55 +287,22 @@ if size(ARGS)[1] == 2
     path = (size(ARGS)[1] == 2) ? "./src/UI/main.qml" : "../src/UI/main.qml"
     
     # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput))
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML))
     
     # Run the app
     exec()
 
     # After app is done executing
 
+    # Exit if form is not filled
     if !finishedInput[]
         println("Form not filled. Exiting app....")
         exit()
     end
 
-    # Convert QML arrays to Julia Arrays
-    materialNames = Array{String}(undef,0)
-    specificGravity = Array{Float64}(undef,0)
-    waterContent = Array{Float64}(undef,0)
-    voidRatio = Array{Float64}(undef,0)
-    bounds = Array{Float64}(undef,0)
-    subdivisions = Array{Int32}(undef,0)
-    soilLayerNumbers = Array{Int32}(undef,0)
-    swellPressure = Array{Float64}(undef,0)
-    swellIndex = Array{Float64}(undef,0)
-    compressionIndex = Array{Float64}(undef,0)
-    recompressionIndex = Array{Float64}(undef,0)
-    conePenetration = Array{Float64}(undef,0)
-    elasticModulus = Array{Float64}(undef,0)
-    for i in 1:materials[]
-        push!(materialNames, QML.value(materialNamesQML[][i]))
-        push!(specificGravity, QML.value(specificGravityQML[][i]))
-        push!(waterContent, QML.value(waterContentQML[][i]))
-        push!(voidRatio, QML.value(voidRatioQML[][i]))
-        push!(subdivisions, QML.value(subdivisionsQML[][i]))
-        push!(soilLayerNumbers, QML.value(soilLayerNumbersQML[][i]))
-        if model[] == 0
-            push!(swellPressure, QML.value(swellPressureQML[][i]))
-            push!(swellIndex, QML.value(swellIndexQML[][i]))
-            push!(compressionIndex, QML.value(compressionIndexQML[][i]))
-            push!(recompressionIndex, QML.value(recompressionIndexQML[][i]))
-        elseif model[] == 1
-            push!(conePenetration, QML.value(conePenetrationQML[][i]))
-        else   
-            push!(elasticModulus, QML.value(elasticModulusQML[][i]))
-        end
-    end
-    for i = 1:1+materials[]
-        push!(bounds, QML.value(boundsQML[][i]))
-    end
+    global materialNames, specificGravity, voidRatio, waterContent, subdivisions, bounds, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, elasticModulus, conePenetration
 
-    println("New Julia Arrays created")
+    println("Converting Data")
 
     # Calculate elements and nodal points
     elements = 0
@@ -315,7 +362,11 @@ if size(ARGS)[1] == 2
 
     println("OutputData created")
 
-    writeDefaultOutput(outData, "./src/.data/output_data.dat")
+    # Remove "file://" from beginning of path
+    outputPath = outputFileQML[][7:end]
+    # defaultFile = "./src/.data/output_data.dat"
+    
+    writeDefaultOutput(outData, outputPath)
 end
 
 """
