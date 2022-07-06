@@ -286,10 +286,11 @@ Rectangle {
             anchors.centerIn: parent
 
             property int gap: 10
+            property string fileName: ""
 
             Text{
                 id: selectOutputButtonText
-                text: "Select Output File"
+                text: (schmertmannElasticDataBackground.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Select Output File"
                 color: "#483434"
                 font.pixelSize: 15
                 anchors{
@@ -324,6 +325,13 @@ Rectangle {
         onAccepted: {
             schmertmannElasticDataBackground.selectedOutputFile = true
             props.outputFile = fileUrl.toString()
+            // Convert URL to string
+            var name = fileUrl.toString()
+            // Split URL String at each "/" and extract last piece of data
+            var path = name.split("/")
+            var fileName = path[path.length - 1]
+            // Update fileName property
+            selectOutputButtonContainer.fileName = fileName
         }
         onRejected: {
             schmertmannElasticDataBackground.selectedOutputFile = false
