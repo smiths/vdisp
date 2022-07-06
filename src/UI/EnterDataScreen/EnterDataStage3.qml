@@ -333,12 +333,22 @@ Rectangle {
                             width: materialDropdown.width
                             contentItem: Text {
                                 text: modelData
-                                color: "#483434"
+                                color: highlighted ? "#6B4F4F" : "#483434"
                                 font: materialDropdown.font
                                 elide: Text.ElideRight
                                 verticalAlignment: Text.AlignVCenter
                             }
                             highlighted: materialDropdown.highlightedIndex === index
+                            
+                            Rectangle {
+                                visible: highlighted
+                                anchors.fill: parent
+                                color : "#fff3e4"
+                                border.width: 2
+                                border.color: "#483434"
+                                radius: 2
+                            }
+                            
                             required property int index
                             required property var modelData
                         }
@@ -360,7 +370,7 @@ Rectangle {
                                 context.lineTo(width / 2, height);
                                 context.closePath();
                                 // Color of arrow
-                                context.fillStyle = materialDropdown.pressed ? "#e8e4e4" : "#483434";
+                                context.fillStyle = "#483434";
                                 context.fill();
                             }
                         }
@@ -368,7 +378,7 @@ Rectangle {
                         contentItem: Text {
                             text: materialDropdown.displayText
                             font: materialDropdown.font
-                            color: materialDropdown.pressed ? "#989494" : "#483434"
+                            color: "#483434"
                             verticalAlignment: Text.AlignVCenter
                             // elide: Text.ElideRight
                             anchors {
@@ -388,17 +398,18 @@ Rectangle {
                             y: materialDropdown.height - 1
                             width: materialDropdown.width
                             implicitHeight: contentItem.implicitHeight
-                            padding: 1
+                            padding: 0
                             contentItem: ListView {
                                 clip: true
                                 implicitHeight: contentHeight
                                 model: materialDropdown.popup.visible ? materialDropdown.delegateModel : null
                                 currentIndex: materialDropdown.highlightedIndex
-                                ScrollIndicator.vertical: ScrollIndicator { }
                             }
                             background: Rectangle {
                                 color: "#fff3e4"
                                 radius: 2
+                                border.width: 2
+                                border.color: "#483434"
                             }
                         }
                     }
@@ -532,7 +543,7 @@ Rectangle {
                 }
                 ///////////////////////
 
-                // Subdivion Markers //
+                // Subdivision Markers //
                 Repeater {
                     id: subdivisionMarkers
                     model: subdivisionSpinbox.value-1

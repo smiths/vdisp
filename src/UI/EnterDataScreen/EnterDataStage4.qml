@@ -261,7 +261,7 @@ Rectangle {
                 property int inputWidth: 35 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
                 property int inputGap: 10
                 property int labelGap: 5
-                property int fontSize: 10 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+                property int fontSize: 12 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
 
                 width: consolidationSwellDataListEntryMaterialLabel.width + consolidationSwellDataListEntrySPLabel.width + consolidationSwellDataListEntrySILabel.width + consolidationSwellDataListEntryCILabel.width + consolidationSwellDataListEntryRILabel.width + 4*inputWidth + 4*inputGap + 4*labelGap
                 height: 35
@@ -515,10 +515,10 @@ Rectangle {
                 }
                 //////////////////////////////////////
 
-                // Recompression Index ///////////
+                // Max Past Pressure ///////////
                 Text {
                     id: consolidationSwellDataListEntryRILabel
-                    text: "Recompression Index: "
+                    text: "Max Past Pressure: "
                     color: "#fff3e4"
                     font.pixelSize: consolidationSwellDataListEntry.fontSize
                     anchors {
