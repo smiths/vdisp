@@ -23,9 +23,18 @@ export OutputData, writeOutput, writeDefaultOutput, getData
 # Output Data Struct
 struct OutputData
     inputData::InputData
-    # When I tried passing in an InputData object
-    # directly there were lots of errors
+    
+    # Generates OutputData from input file at path
     OutputData(path::String) = new(InputData(path))
+
+    # Generates OutputData from ConsolidationSwell data collected from QML GUI
+    OutputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, swellPressure::Array{Float64}, swellIndex::Array{Float64}, compressionIndex::Array{Float64}, maxPastPressure::Array{Float64}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64) = new(InputData(problemName, foundationType, materialCount, dx, soilLayerNumbers, nodalPoints, elements, materialNames, specificGravity, voidRatio, waterContent, subdivisions, swellPressure, swellIndex, compressionIndex, maxPastPressure, foundationIndex, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, heaveActive, heaveBegin, totalDepth, foundationDepth))
+    
+    # Generates OutputData from Schmertmann data collected from QML GUI
+    OutputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, conePenetration::Array{Float64}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64, timeAfterConstruction::Int32) = new(InputData(problemName, foundationType, materialCount, dx, soilLayerNumbers, nodalPoints, elements, materialNames, specificGravity, voidRatio, waterContent, subdivisions, conePenetration, foundationIndex, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, heaveActive, heaveBegin, totalDepth, foundationDepth, timeAfterConstruction))
+    
+    # Generates OutputData from SchmertmannElastic data collected from QML GUI
+    OutputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64, elasticModulus::Array{Float64}, timeAfterConstruction::Int32) = new(InputData(problemName, foundationType, materialCount, dx, soilLayerNumbers, nodalPoints, elements, materialNames, specificGravity, voidRatio, waterContent, subdivisions, foundationIndex, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, heaveActive, heaveBegin, totalDepth, foundationDepth, elasticModulus, timeAfterConstruction))
 end
 
 # Function to write outputs in order we want
@@ -53,7 +62,22 @@ function writeHeader(outputData::OutputData, path::String)
         write(file, getHeader(outputData))
     end
 end
-getHeader(outputData::OutputData) = "Title: $(outputData.inputData.problemName)\nNodal Points: $(outputData.inputData.nodalPoints), Base Nodal Point Index: $(outputData.inputData.bottomPointIndex)\nNumber of different soil layers: $(outputData.inputData.soilLayers)\nIncrement depth(dx): $(outputData.inputData.dx)\n"
+function getHeader(outputData::OutputData)
+    inData = outputData.inputData
+    
+    headerString = "Title: $(inData.problemName)\nNodal Points: $(inData.nodalPoints), Base Nodal Point Index: $(inData.bottomPointIndex)\nNumber of different soil layers: $(inData.soilLayers)\n\n"
+    
+    incrementTable = []
+    for (i,x) in enumerate(inData.dx)
+        if size(incrementTable)[1] == 0
+            incrementTable = [i inData.materialNames[i] x]
+        else
+            incrementTable = vcat(incrementTable, [i inData.materialNames[i] x])
+        end
+    end
+    headerString *= pretty_table(String, incrementTable; header = ["Material", "Material Name", "Increment Depth(dx)"],tf = tf_markdown)
+    headerString *= "\n"
+end
 getHeaderValues(outputData::OutputData) = (outputData.inputData.problemName, outputData.inputData.nodalPoints, outputData.inputData.bottomPointIndex, outputData.inputData.soilLayers, outputData.inputData.dx)
 
 # Foundation Depth
@@ -68,11 +92,7 @@ function getFoundationDepth(outputData::OutputData)
 end
 function getFoundationDepthValues(outputData::OutputData)
     inData = outputData.inputData
-    # DEPF = DX*FLOAT(NBX-1)
-    foundationDepth = inData.dx * float(inData.bottomPointIndex-1)
-    # DEPPR = DX*FLOAT(NNP-1)
-    totalDepth = inData.dx * float(inData.nodalPoints-1)
-    return (foundationDepth, totalDepth)
+    return (inData.foundationDepth, inData.totalDepth)
 end
 
 # Soil Table 
@@ -83,13 +103,13 @@ function writeSoilTable(outputData::OutputData, path::String)
 end
 function getSoilTable(outputData::OutputData)
     values = getSoilTableValues(outputData)
-    return pretty_table(String, values; header = ["Element", "Soil Layer Number"],tf = tf_markdown)
+    return pretty_table(String, values; header = ["Soil Layer", "Material", "Material Name"],tf = tf_markdown)
 end
 function getSoilTableValues(outputData::OutputData)
     inData = outputData.inputData
-    values = [1 inData.soilLayerNumber[1]]
+    values = [1 inData.soilLayerNumber[1] inData.materialNames[inData.soilLayerNumber[1]]]
     for i=2:inData.elements
-        values = vcat(values, [i inData.soilLayerNumber[i]])
+        values = vcat(values, [i inData.soilLayerNumber[i] inData.materialNames[inData.soilLayerNumber[i]]])
     end
     return values
 end
@@ -102,13 +122,13 @@ function writeMaterialInfoTable(outputData::OutputData, path::String)
 end
 function getMaterialInfoTable(outputData::OutputData)
     values = getMaterialInfoTableValues(outputData)
-    return pretty_table(String, values; header = ["Material", "Specific Gravity", "Water Content(%)", "Void Ratio"],tf = tf_markdown)
+    return pretty_table(String, values; header = ["Material", "Material Name", "Specific Gravity", "Water Content(%)", "Void Ratio"],tf = tf_markdown)
 end
 function getMaterialInfoTableValues(outputData::OutputData)
     inData = outputData.inputData
-    values = [1 inData.specificGravity[1] inData.waterContent[1] inData.voidRatio[1]]
+    values = [1 inData.materialNames[1] inData.specificGravity[1] inData.waterContent[1] inData.voidRatio[1]]
     for i=2:inData.soilLayers
-        values = vcat(values, [i inData.specificGravity[i] inData.waterContent[i] inData.voidRatio[i]])
+        values = vcat(values, [i inData.materialNames[i] inData.specificGravity[i] inData.waterContent[i] inData.voidRatio[i]])
     end
     return values
 end
@@ -212,7 +232,7 @@ function getForcePointOutputBehaviour(outputData::OutputData)
         return CenterForceBehaviour()
     end
     foundation = outputData.inputData.foundation
-    return EdgeForceBehaviour(foundation)
+    return EdgeForceBehaviour(string(foundation))
 end
 # Get CalculationOutputBehaviour instance
 function getCalculationOutputBehaviour(outputData)

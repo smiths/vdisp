@@ -80,7 +80,7 @@ struct InputData
     elements::Int
     bottomPointIndex::Int
     soilLayers::Int
-    dx::Float64
+    dx::Array{Float64}
     soilLayerNumber::Array{Int}
     specificGravity::Array{Float64}
     waterContent::Array{Float64}
@@ -105,6 +105,30 @@ struct InputData
     groundToHeaveDepth::Float64
     timeAfterConstruction::Int
     strainAtPoints::Array{Float64, 2}
+    totalDepth::Float64
+    foundationDepth::Float64
+    materialNames::Array{String}
+
+    # Creates InputData instance from ConsolidationSwell data gathered from QML GUI. Normally called directly from OutputData instance
+    function InputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, swellPressure::Array{Float64}, swellIndex::Array{Float64}, compressionIndex::Array{Float64}, maxPastPressure::Array{Float64}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64)
+        model::Model = ConsolidationSwell
+        foundation::Foundation = (foundationType == "RectangularSlab") ? RectangularSlab : LongStripFooting
+        return new(problemName, 1, model, foundation, nodalPoints, elements, foundationIndex, materialCount, dx, soilLayerNumbers, specificGravity, waterContent, voidRatio, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, swellPressure, swellIndex, compressionIndex, maxPastPressure, Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64, 2}(undef, 0, 0), Array{Float64}(undef, 0), heaveActive, heaveBegin, 0, Array{Float64, 2}(undef, 0, 0), totalDepth, foundationDepth, materialNames)
+    end
+
+    # Creates InputData instance from Schmertmann data gathered from QML GUI. Normally called directly from OutputData instance
+    function InputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, conePenetrationResistance::Array{Float64},foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64, timeAfterConstruction::Int32)
+        model::Model = Schmertmann
+        foundation::Foundation = (foundationType == "RectangularSlab") ? RectangularSlab : LongStripFooting
+        return new(problemName, 1, model, foundation, nodalPoints, elements, foundationIndex, materialCount, dx, soilLayerNumbers, specificGravity, waterContent, voidRatio, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), conePenetrationResistance, Array{Float64, 2}(undef, 0, 0), Array{Float64}(undef, 0), heaveActive, heaveBegin, timeAfterConstruction, Array{Float64, 2}(undef, 0, 0), totalDepth, foundationDepth, materialNames)
+    end
+    
+    # Creates InputData instance from SchmertmannElastic data gathered from QML GUI. Normally called directly from OutputData instance
+    function InputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32},foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64, elasticModulus::Array{Float64}, timeAfterConstruction::Int32)
+        model::Model = SchmertmannElastic
+        foundation::Foundation = (foundationType == "RectangularSlab") ? RectangularSlab : LongStripFooting
+        return new(problemName, 1, model, foundation, nodalPoints, elements, foundationIndex, materialCount, dx, soilLayerNumbers, specificGravity, waterContent, voidRatio, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, 0), Array{Float64}(undef, materialCount), Array{Float64, 2}(undef, 0, 0), elasticModulus, heaveActive, heaveBegin, timeAfterConstruction, Array{Float64, 2}(undef, 0, 0), totalDepth, foundationDepth, materialNames)
+    end
 
     # Parses input file at filePath and returns corresponding InputData object
     function InputData(filePath::String)
@@ -134,10 +158,10 @@ struct InputData
         lastLineIndex += 1
 
         # Get following data:
-        #  NPROB NOPT NBPRES NNP NBX NMAT DX 
+        #  NPROB NOPT NBPRES NNP NBX NMAT 
         dataLine1 = []
         try
-            dataLine1 = parseCurrentLine(input, 7, lastLineIndex+1)
+            dataLine1 = parseCurrentLine(input, 6, lastLineIndex+1)
         catch e
             if isa(e, NotEnoughValuesError)
                 println("Error: Invalid input file!")
@@ -189,13 +213,12 @@ struct InputData
         elements = 0
         bottomPointIndex = 0
         soilLayers = 0
-        dx = 0.0
+        
         try
             nodalPoints = parse(Int64, dataLine1[4])
             elements = nodalPoints - 1
             bottomPointIndex = parse(Int64, dataLine1[5])
             soilLayers = parse(Int64, dataLine1[6]) # NMAT
-            dx = parse(Float64, dataLine1[7])
         catch e 
             if isa(e, ArgumentError)
                 println("Error, invalid value on line $(lastLineIndex+1)!")
@@ -209,6 +232,36 @@ struct InputData
             throw(ParsingError())
         end
         
+        lastLineIndex += 1
+
+        # DX array
+        dx = Array{Float64}(undef, soilLayers)
+        dataLine1 = []
+        try
+            dataLine1 = parseCurrentLine(input, soilLayers, lastLineIndex+1)
+        catch e
+            if isa(e, NotEnoughValuesError)
+                println("Error: Invalid input file!")
+                println("\t>Line $(e.line): $(e.requiredValues) values expected!")
+                throw(ParsingError())
+            end
+        end
+        try
+            for i = 1:soilLayers
+                dx[i] = parse(Float64, dataLine1[i])
+            end
+        catch e 
+            if isa(e, ArgumentError)
+                println("Error, invalid value on line $(lastLineIndex+1)!")
+            elseif isa(e, BoundsError)
+                # File ran out of lines
+                println("Error, encountered end of file unexpectedly!")
+            else
+                # Some other problem
+                println("Unexpected error occured while reading file at $(filePath)!")
+            end
+            throw(ParsingError())
+        end
         lastLineIndex += 1
 
         # Soil layer number of element N
@@ -736,7 +789,25 @@ struct InputData
             lastLineIndex += soilLayers
         end
 
-        new(problemName, numProblems, model, foundation, nodalPoints, elements, bottomPointIndex, soilLayers, dx, soilLayerNumber, specificGravity, waterContent, voidRatio, depthGroundWaterTable, equilibriumMoistureProfile, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, swellPressure, swellIndex, compressionIndex, maxPastPressure, pressureDilatometerA, pressureDilatometerB, conePenetrationResistance, appliedPressureAtPoints, elasticModulus, heaveActiveZoneDepth, groundToHeaveDepth, timeAfterConstruction, strainAtPoints)
+        # Calculate total depth and foundation depth
+        totalDepth = 0
+        for i = 1:elements
+            totalDepth += dx[soilLayerNumber[i]]
+        end
+        foundationDepth = 0
+        for i = 1:bottomPointIndex-1
+            foundationDepth += dx[soilLayerNumber[i]]
+        end
+
+        # materialNames = Array{String}(undef, soilLayers)
+        # for i in 1:soilLayers
+        #     # Default name for ith material is "Material i" 
+        #     materialNames[i] = "Material " * string(i)
+        # end
+        # Material names array
+        materialNames::Array{String} = ["Material " * string(i) for i in 1:soilLayers]
+
+        new(problemName, numProblems, model, foundation, nodalPoints, elements, bottomPointIndex, soilLayers, dx, soilLayerNumber, specificGravity, waterContent, voidRatio, depthGroundWaterTable, equilibriumMoistureProfile, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, swellPressure, swellIndex, compressionIndex, maxPastPressure, pressureDilatometerA, pressureDilatometerB, conePenetrationResistance, appliedPressureAtPoints, elasticModulus, heaveActiveZoneDepth, groundToHeaveDepth, timeAfterConstruction, strainAtPoints, totalDepth, foundationDepth, materialNames)
     end
 end
 

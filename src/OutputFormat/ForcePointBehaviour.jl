@@ -34,10 +34,10 @@ getValue(behaviour::CenterForceBehaviour) = behaviour.center
 ### CenterForceBehaviour "class" ############
 struct EdgeForceBehaviour <: ForcePointOutputBehaviour
     center::Bool
-    foundation::Foundation
-    CenterForceBehaviour(foundation::Foundation)=new(false)
+    foundation::String
+    EdgeForceBehaviour(foundation::String)=new(false, foundation)
 end
-getOutput(behaviour::EdgeForceBehaviour) = (string(behaviour.foundation) == "RectangularSlab") ? "\tCorner of Slab" : "\tEdge of Long Strip Footing"
+getOutput(behaviour::EdgeForceBehaviour) = (behaviour.foundation == "RectangularSlab") ? "\tCorner of Slab" : "\tEdge of Long Strip Footing"
 getValue(behaviour::EdgeForceBehaviour) = behaviour.center
 #############################################
 

@@ -31,7 +31,7 @@ end
 struct ConsolidationSwellCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
     model::String
-    dx::Float64
+    dx::Array{Float64}
     soilLayerNumber::Array{Int}
     specificGravity::Array{Float64}
     waterContent::Array{Float64}
@@ -63,24 +63,28 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
 
     if OUTPUT_EFFECTIVE_STRESS
         for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
+            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
             out *= "$(z), $(P[i])\n"
         end
         out *= "\n"
         for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
+            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
             out *= "$(z), $(PP[i])\n"
         end
         out *= "\n"
     end
 
     if behaviour.outputIncrements
-        out *= "Heave Distribution Above Foundation: \n"
-        out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
-        out *= "\n"
-        out *= "Heave Distribution Below Foundation: \n"
-        out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
-        out *= "\n"
+        if size(heaveAboveFoundationTable)[1] > 0
+            out *= "Heave Distribution Above Foundation: \n"
+            out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= "\n"
+            out *= "Heave Distribution Below Foundation: \n"
+            out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= "\n"
+        else
+            out *= "Not enough increments to show tables\n\n"
+        end
     end
 
     out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * string(Δh1) * "ft\n"
@@ -148,9 +152,22 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
 
     # Begin main calculations
     Δh1 = 0.0
-    heaveBeginIndex = Int(floor(behaviour.groundToHeaveDepth / behaviour.dx))+1
-    heaveActiveIndex = Int(floor(behaviour.heaveActiveZoneDepth / behaviour.dx))
-    Δx = behaviour.groundToHeaveDepth + (behaviour.dx / 2)
+    # Get Heave begin index
+    heaveBeginIndex = 1
+    depth = 0
+    while depth < behaviour.groundToHeaveDepth
+        depth += behaviour.dx[behaviour.soilLayerNumber[heaveBeginIndex]]
+        heaveBeginIndex += 1
+    end
+    # Get Heave active index
+    heaveActiveIndex = 1
+    depth = 0
+    while depth < behaviour.heaveActiveZoneDepth
+        depth += behaviour.dx[behaviour.soilLayerNumber[heaveActiveIndex]]
+        heaveActiveIndex += 1
+    end
+    # Get initial depth (Δx)
+    Δx = behaviour.groundToHeaveDepth + (behaviour.dx[behaviour.soilLayerNumber[behaviour.bottomPointIndex]] / 2)
     foundationBottomIndex = behaviour.bottomPointIndex - 1
     if heaveActiveIndex > foundationBottomIndex
         heaveActiveIndex = foundationBottomIndex
@@ -175,7 +192,6 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
 
             finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
-
             if behaviour.outputIncrements
                 Δp = swellPressure - pressure
                 # TODO: Round values to a fixed number of decimal places
@@ -185,13 +201,13 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
                     heaveAboveFoundationTable = vcat(heaveAboveFoundationTable, [i Δx Δe Δp]) 
                 end
             end
-            Δh1 += behaviour.dx * Δe
-            Δx += behaviour.dx
+            Δh1 += behaviour.dx[material] * Δe
+            Δx += behaviour.dx[material]
         end
     end
     
     Δh2 = 0.0
-    Δx = float(behaviour.bottomPointIndex)*behaviour.dx - (behaviour.dx/2)
+    Δx = float(behaviour.bottomPointIndex) * behaviour.dx[behaviour.soilLayerNumber[behaviour.bottomPointIndex]] - (behaviour.dx[behaviour.soilLayerNumber[behaviour.bottomPointIndex]]/2)
     heaveBelowFoundationTable = []
     for i=behaviour.bottomPointIndex:behaviour.elements
         material = behaviour.soilLayerNumber[i]
@@ -219,8 +235,8 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
                 heaveBelowFoundationTable = vcat(heaveBelowFoundationTable, [i Δx Δe Δp]) 
             end
         end
-        Δh2 += behaviour.dx * Δe
-        Δx += behaviour.dx
+        Δh2 += behaviour.dx[material] * Δe
+        Δx += behaviour.dx[material]
     end
 
     Δh = Δh1 + Δh2 
@@ -233,7 +249,7 @@ end
 struct LeonardFrostCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
     model::String
-    dx::Float64
+    dx::Array{Float64}
     soilLayerNumber::Array{Int}
     specificGravity::Array{Float64}
     waterContent::Array{Float64}
@@ -292,7 +308,7 @@ end
 struct SchmertmannCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
     model::String
-    dx::Float64
+    dx::Array{Float64}
     soilLayerNumber::Array{Int}
     specificGravity::Array{Float64}
     waterContent::Array{Float64}
@@ -320,12 +336,12 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
 
     if OUTPUT_EFFECTIVE_STRESS
         for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
+            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
             out *= "$(z), $(P[i])\n"
         end
         out *= "\n"
         for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
+            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
             out *= "$(z), $(PP[i])\n"
         end
         out *= "\n"
@@ -363,7 +379,7 @@ end
 struct CollapsibleSoilCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
     model::String
-    dx::Float64
+    dx::Array{Float64}
     soilLayerNumber::Array{Int}
     specificGravity::Array{Float64}
     waterContent::Array{Float64}
@@ -422,7 +438,7 @@ end
 struct SchmertmannElasticCalculationBehaviour <: CalculationOutputBehaviour
     nodalPoints::Int
     model::String
-    dx::Float64
+    dx::Array{Float64}
     soilLayerNumber::Array{Int}
     specificGravity::Array{Float64}
     waterContent::Array{Float64}
@@ -451,12 +467,12 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
 
     if OUTPUT_EFFECTIVE_STRESS
         for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
+            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
             out *= "$(z), $(P[i])\n"
         end
         out *= "\n"
         for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
+            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
             out *= "$(z), $(PP[i])\n"
         end
         out *= "\n"
@@ -546,7 +562,7 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
     # Initial values
     P[1] = 0.0
     PP[1] = 0.0 
-    Δx = behaviour.dx
+    Δx = behaviour.dx[1]
 
     for i = 2:behaviour.nodalPoints
         # Get material of current soil layer
@@ -563,19 +579,30 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
         gamma_sat = (Δx > behaviour.depthGroundWaterTable) ? (gamma_sat - GAMMA_W) : gamma_sat
         
         # Effective stress of layer i is stress of previous layer plus gamma_sat*dx
-        P[i] = P[i-1] + gamma_sat * behaviour.dx
+        P[i] = P[i-1] + gamma_sat * behaviour.dx[material]
         PP[i] = P[i]
 
-        Δx += behaviour.dx
+        Δx += behaviour.dx[material]
     end
 
     # Not sure why we have to do this, or theory behind it
     if behaviour.model == "ConsolidationSwell" && behaviour.equilibriumMoistureProfile
         # MO = DGWT/DX, but cannot be bigger than NNP
-        MO = min(Int(floor(behaviour.depthGroundWaterTable/behaviour.dx)), behaviour.nodalPoints)
+        groudWaterTableIndex = 1
+        depth = 0
+        while depth < behaviour.depthGroundWaterTable
+            depth += behaviour.dx[behaviour.soilLayerNumber[groudWaterTableIndex]]
+            groudWaterTableIndex += 1
+            if groudWaterTableIndex == behaviour.elements
+                break
+            end
+        end
+        MO = min(groudWaterTableIndex, behaviour.nodalPoints)
         for i=1:MO 
-            BN = behaviour.depthGroundWaterTable/behaviour.dx - float(i-1)
-            P[i] = P[i] + BN * GAMMA_W * behaviour.dx
+            BN = groudWaterTableIndex - float(i-1)
+            # weird dx behaviour
+            index = (i < behaviour.nodalPoints) ? i : i - 1
+            P[i] = P[i] + BN * GAMMA_W * behaviour.dx[behaviour.soilLayerNumber[index]]
         end
     end
 
@@ -638,7 +665,7 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
         if Δx < 0.01 # TODO: Why was this hardcoded to 0.01? Make this a constant. Maybe named MIN_DX?
             # This ensures pressure at bottom of foundation is equal to behaviour.appliedPressure
             P[i] += Qnet
-            Δx += behaviour.dx
+            Δx += behaviour.dx[behaviour.soilLayerNumber[i]]
             continue
         end
 
@@ -666,7 +693,8 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
         end
 
         # Increment depth
-        Δx += behaviour.dx
+        index = (i < behaviour.nodalPoints) ? i : i -1
+        Δx += behaviour.dx[behaviour.soilLayerNumber[index]]
     end
     return P
 end
@@ -745,7 +773,18 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
     Δh1 = 0.0
     # Net Applied Footing Pressure
     Qnet = behaviour.appliedPressure - PP[behaviour.bottomPointIndex]
-    Δx = behaviour.dx * float(behaviour.bottomPointIndex) - behaviour.dx/2
+    # Foundation Depth and Index
+    foundationMaterial = behaviour.soilLayerNumber[behaviour.bottomPointIndex]
+    foundationDepth = 0
+    for i = 1:behaviour.bottomPointIndex
+        foundationDepth += behaviour.dx[behaviour.soilLayerNumber[i]]
+    end
+    Δx = foundationDepth - behaviour.dx[foundationMaterial]/2
+    # Depth of nodal point above the base of foundation
+    aboveFoundationDepth = 0
+    for i = 1:behaviour.bottomPointIndex-1
+        aboveFoundationDepth += behaviour.dx[behaviour.soilLayerNumber[i]]
+    end
 
     # Correction to account for strain relief from embedment
     C1 = max(0.5, 1 - 0.5*PP[behaviour.bottomPointIndex]/Qnet)
@@ -768,19 +807,19 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
         Iz = 0.0
         if behaviour.foundation == "RectangularSlab"            
             halfWidth = 0.5 * behaviour.foundationWidth
-            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
+            depth = Δx - aboveFoundationDepth
             Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ) 
             # Influence factor of soil layer i
             Iz = (depth > halfWidth) ?  Izp + Izp/3 - Izp*depth/(3*halfWidth) : (depth > 4*halfWidth) ?  0.0 : 0.1 + (Izp-0.1) * depth/(halfWidth)
         else
-            depth = Δx - float(behaviour.bottomPointIndex-1)*behaviour.dx
+            depth = Δx - aboveFoundationDepth
             Izp = 0.5 + 0.1 * sqrt(Qnet/Δσ)
             # Influence factor of soil layer i 
             Iz = (depth > behaviour.foundationWidth) ?  Izp + Izp/3 - Izp*depth/(3*behaviour.foundationWidth) : (depth > 4*behaviour.foundationWidth) ?  0.0 : 0.2 + (Izp-0.2) * depth/(behaviour.foundationWidth)
         end
 
         # Give names closer to original formula
-        Δz = behaviour.dx
+        Δz = behaviour.dx[material]
         Δp = Qnet
 
         # Settlment of layer i 
@@ -798,7 +837,7 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
         end
 
         # Increment current depth
-        Δx += behaviour.dx
+        Δx += behaviour.dx[material]
     end
 
     return (settlementTable, Δh)
