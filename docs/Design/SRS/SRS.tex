@@ -653,6 +653,8 @@ likely change [LC], in which the respective assumption is used.
   independent of dry or saturated conditions, with the exception of unit weight.
   (RefBy: ?.)}
           
+  \item [A:2DPlane:\phantomsection\label{A:2DPlane}]{The domain is a 2D Euclidean plane. (RefBy: \hyperref[TM:Equilibrium]{TM:Equilibrium})}
+  
   \item [A:HalfPlane:\phantomsection\label{A:HalfPlane}]{The domain is half of a
   2D Euclidean plane, as divided by a straight line. (RefBy: ?.)}
 
@@ -661,7 +663,7 @@ likely change [LC], in which the respective assumption is used.
   the pores of the material \citep{WikipediaTerzaghi2022}. (RefBy: ?.)}
 
   \item [A:Continuum:\phantomsection\label{A:Continuum}]{The underlying molecular structure of matter is not considered and gaps and empty spaces within a material particle are ignored. The material is assumed to be continuous. \citep[p.\ 33--34]{Long1961}, \citep[p.\ 1-2]{Malvern1969} (RefBy: ?.)}
-  
+
 \end{itemize}
   
 \subsubsection{Theoretical Models}\label{sec_theoretical}
@@ -756,6 +758,166 @@ effective stress. The total stress $\sigma$ is defined in
 {
 \begin{itemize}
 \item \hyperref[A:Terzaghi]{A:Terzaghi}
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\deftheory
+% #2 refname of theory
+{TM:Equilibrium}
+% #3 label
+{Equilibrium}
+% #4 equation
+{
+\( \sum{F_x} = 0, \sum{F_y} = 0, \sum{M}=0 \)
+}
+% #5 description
+{
+\begin{symbDescription}
+  \item{$\sum F_x$ is the sum of the x-components of all the forces (\si{\newton})}
+  \item{$\sum F_y$ is the sum of the y-components of all the forces (\si{\newton})}
+  \item{$M$ is the moment (\si{\newton\metre})}
+\end{symbDescription}
+}
+% #6 Notes
+{
+  For a body in static equilibrium, the net forces and moments acting on the body will cancel out. 
+  Assuming a 2D problem, the sum of the x-components of all the forces, $\sum F_x$, and the sum of the
+  y-components of all the forces, $\sum F_y$, will be equal to 0. All forces and their distance from the 
+  chosen point of rotation will create a net moment equal to 0.
+}
+% #7 Source
+{
+\citet{FredlundKrahn}
+}
+% #8 Referenced by
+{
+?.
+}
+% #9 Preconditions
+{
+\begin{itemize}
+  \item \hyperref[A:2DPlane]{A:2DPlane}
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\deftheory
+% #2 refname of theory
+{GD:Weight}
+% #3 label
+{Weight}
+% #4 equation
+{
+\( W = V\gamma \)
+}
+% #5 description
+{
+\begin{symbDescription}
+  \item{$W$ is the weight (\si{\newton})}
+  \item{$V$ is the volume (\si{\metre\cubed})}
+  \item{$\gamma$ is the specific weight (\si{\frac{\newton}{\metre\cubed}})}
+\end{symbDescription}
+}
+% #6 Notes
+{
+  None.
+}
+% #7 Source
+{
+\citet{WikipediaWeight}
+}
+% #8 Referenced by
+{
+?.
+}
+% #9 Preconditions
+{
+\begin{itemize}
+\item add preconditions
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\deftheory
+% #2 refname of theory
+{GD:hsPressure}
+% #3 label
+{Hydrostatic Pressure}
+% #4 equation
+{
+\( p = \gamma h \)
+}
+% #5 description
+{
+\begin{symbDescription}
+  \item{$p$ is the pressure (\si{\pascal})}
+  \item{$\gamma$ is the specific weight (\si{\frac{\newton}{\metre\cubed}})}
+  \item{$h$ is the height (\si{\metre})}
+\end{symbDescription}
+}
+% #6 Notes
+{
+  This equation is derived from Bernoulli's equation for a slow moving fluid through a porous material.
+}
+% #7 Source
+{
+\citet{WikipediaPressure}
+}
+% #8 Referenced by
+{
+?.
+}
+% #9 Preconditions
+{
+\begin{itemize}
+\item add preconditions
+\end{itemize}
+}
+% #1 derivation - not applicable by default
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\deftheory
+% #2 refname of theory
+{TM:saintVenant}
+% #3 label
+{Saint-Venant's Principle}
+% #4 equation
+{
+  N/A
+}
+% #5 description
+{
+  N/A
+}
+% #6 Notes
+{
+  The difference between the effects of two different but statically equivalent
+loads becomes very small at sufficiently large distances from the load
+}
+% #7 Source
+{
+\citet{WikipediaSaintVenant}
+}
+% #8 Referenced by
+{
+?.
+}
+% #9 Preconditions
+{
+\begin{itemize}
+\item add preconditions
 \end{itemize}
 }
 % #1 derivation - not applicable by default
