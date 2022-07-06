@@ -368,43 +368,40 @@ Rectangle {
             
             // Entry ////////////////
             Item {
-                implicitWidth: editImage.width + 2*materialEntry.sideGap + 4*materialEntry.inputGap + 4*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryName.width + deleteEntryBtn.width
+                implicitWidth: 2*materialEntry.sideGap + 4*materialEntry.inputGap + 4*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryNameTextbox.width + deleteEntryBtn.width
                 height: parent.height
                 anchors.horizontalCenter: parent.horizontalCenter
                 
                 // Material Name //
-                TextInput {
-                    id: entryName
-                    text: materialName
-                    font.pixelSize: materialEntry.textSize
+                Rectangle {
+                    id: entryNameTextbox
                     color: "#fff3e4"
-                    maximumLength: 12
+                    width: entryName.width + 10
+                    height: 20
+                    radius: 4
                     anchors {
                         verticalCenter: parent.verticalCenter
                         left: parent.left
                         leftMargin: materialEntry.sideGap
                     }
-                    selectByMouse: true
-                    clip: true
-                    onTextChanged: {
-                        // update Julia lists
-                        materialsModel.get(index).materialName = text
-                        var nameList = []
-                        for(var i = 0; i < materialsModel.count; i++){
-                            nameList.push(materialsModel.get(i).materialName)
+                    TextInput {
+                        id: entryName
+                        text: materialName
+                        font.pixelSize: materialEntry.textSize
+                        color: "#483434"
+                        anchors.centerIn: parent
+                        maximumLength: 12
+                        selectByMouse: true
+                        clip: true
+                        onTextChanged: {
+                            // update Julia lists
+                            materialsModel.get(index).materialName = text
+                            var nameList = []
+                            for(var i = 0; i < materialsModel.count; i++){
+                                nameList.push(materialsModel.get(i).materialName)
+                            }
+                            props.materialNames = [...nameList]
                         }
-                        props.materialNames = [...nameList]
-                    }
-                }
-                Image {
-                    id: editImage
-                    source: "../Assets/pencil.png"
-                    width: materialEntry.textSize - 5
-                    height: width
-                    anchors {
-                        left: entryName.right
-                        leftMargin: materialEntry.labelGap
-                        verticalCenter: entryName.verticalCenter
                     }
                 }
                 //////////////////
@@ -417,7 +414,7 @@ Rectangle {
                     font.pixelSize: materialEntry.textSize
                     anchors {
                         verticalCenter: parent.verticalCenter
-                        left: editImage.right
+                        left: entryNameTextbox.right
                         leftMargin: materialEntry.inputGap
                     }
                 }
@@ -508,7 +505,7 @@ Rectangle {
                 // DELETE ////////
                 Image {
                     id: deleteEntryBtn
-                    width: 15
+                    width: 15 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
                     height: width
                     source: "../Assets/delete.png"
                     anchors {
