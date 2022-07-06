@@ -322,6 +322,7 @@ Rectangle {
         }
         //////////////////////////
     }
+    ////////////////////////
 
     // Material List ////////
     ListModel {
@@ -509,7 +510,7 @@ Rectangle {
                     id: deleteEntryBtn
                     width: 15
                     height: width
-                    source: "../Assets/exit.png"
+                    source: "../Assets/delete.png"
                     anchors {
                         verticalCenter: parent.verticalCenter
                         left: wcEntryTextbox.right
@@ -557,5 +558,4 @@ Rectangle {
         }
     }
     /////////////////////////
-    ////////////////////////
 }
