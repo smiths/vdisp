@@ -108,7 +108,7 @@ Rectangle {
         }
 
         function isReady() {
-            return sgTextInput.text  && sgTextInput.acceptableInput && vrTextInput.text && vrTextInput.acceptableInput
+            return sgTextInput.text  && sgTextInput.acceptableInput && vrTextInput.text && vrTextInput.acceptableInput && wcTextInput.text && wcTextInput.acceptableInput
         }
         property bool ready: isReady()
 
@@ -244,43 +244,42 @@ Rectangle {
                 verticalCenter: parent.verticalCenter
             }
         }
-        Slider {
-            id: wcSlider
-            value: 50
-            from: 0
-            to: 100
-            stepSize: 0.5
-            
-            width: topForm.inputWidth
-
+        Rectangle {
+            id: wcTextbox
+            width: parent.inputWidth
+            height: 20
+            color: "#fff3e4"
+            radius: 4
             anchors {
+                verticalCenter: parent.verticalCenter
                 left: wcLabel.right
                 leftMargin: parent.labelGap
-                verticalCenter: parent.verticalCenter
             }
 
-            // Object that depicts background of slider
-            background: Rectangle {
-                width: wcSlider.availableWidth
-                height: 3
-                radius: 2
+            TextInput {
+                id: wcTextInput
+                width: parent.width - 10
+                font.pixelSize: topForm.textSize
                 color: "#483434"
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            handle: Rectangle {
-                color: "#fff3e4"
-                implicitWidth: 24
-                implicitHeight: 24
-                radius: width/2
-                anchors.verticalCenter: parent.verticalCenter
-                x: wcSlider.visualPosition * (wcSlider.availableWidth - width)
+                anchors {
+                    left: parent.left 
+                    leftMargin: 5
+                    verticalCenter: parent.verticalCenter
+                }
                 
+                selectByMouse: true
+                clip: true
+                validator: DoubleValidator{
+                    bottom: 0
+                    top: 100
+                }
+                // Placeholder Text
+                property string placeholderText: "Enter Value..."
                 Text {
-                    anchors.centerIn: parent
+                    text: wcTextInput.placeholderText
+                    font.pixelSize: topForm.textSize
                     color: "#483434"
-                    font.pixelSize: topForm.textSize - 5
-                    text: wcSlider.value
+                    visible: !wcTextInput.text
                 }
             }
         }
@@ -292,8 +291,8 @@ Rectangle {
             height: width
             source: "../Assets/add.png"
             anchors {
-                left: wcSlider.right
-                leftMargin: topForm.labelGap - 5
+                left: wcTextbox.right
+                leftMargin: topForm.labelGap
                 rightMargin: topForm.sideGap
                 verticalCenter: parent.verticalCenter
             }
@@ -305,17 +304,17 @@ Rectangle {
                     if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
                         var name = qsTr("Material " + (materialsModel.count + 1))
                         // Update UI
-                        materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": wcSlider.value})
+                        materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
                         // Update Julia lists
                         props.materials = props.materials+1
                         props.materialNames = [...props.materialNames,name]
                         props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
                         props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
-                        props.waterContent = [...props.waterContent, wcSlider.value]
+                        props.waterContent = [...props.waterContent, parseFloat(wcTextInput.text)]
                         // Clear fields
                         sgTextInput.text = ""
                         vrTextInput.text = ""
-                        wcSlider.value = 50.0
+                        wcTextInput.text = ""
                     }
                 }
             }
