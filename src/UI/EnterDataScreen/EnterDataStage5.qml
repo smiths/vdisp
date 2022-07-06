@@ -214,10 +214,13 @@ Rectangle {
 
                     TextInput {
                         id: conePenInput
-                        width: parent.width - 10
+                        width: text ? text.width : conePenInputPlaceholder.width
                         font.pixelSize: schmertmannDataForm.fontSize
                         color: "#483434"
-                        anchors.centerIn: parent
+                        anchors {
+                            left: parent.left 
+                            leftMargin: 5
+                        }
 
                         selectByMouse: true
                         clip: true
@@ -251,11 +254,23 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "Enter Value..."
                         Text {
+                            id: conePenInputPlaceholder
                             text: conePenInput.placeholderText
                             font.pixelSize: schmertmannDataForm.fontSize
                             color: "#483434"
                             visible: !conePenInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? "MPa" : "tsf"
+                        font.pixelSize: schmertmannDataForm.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: conePenInput.right
+                            leftMargin: 1
+                        }
+                        visible: conePenInput.text
                     }
                 }
                 ////////////////////////////////

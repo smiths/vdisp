@@ -258,7 +258,7 @@ Rectangle {
 
             TextInput {
                 id: wcTextInput
-                width: parent.width - 10
+                width: text ? text.width : wcTextInputPlaceholder.width
                 font.pixelSize: topForm.textSize
                 color: "#483434"
                 anchors {
@@ -276,13 +276,26 @@ Rectangle {
                 // Placeholder Text
                 property string placeholderText: "Enter Value..."
                 Text {
+                    id: wcTextInputPlaceholder
                     text: wcTextInput.placeholderText
                     font.pixelSize: topForm.textSize
                     color: "#483434"
                     visible: !wcTextInput.text
                 }
             }
+            // Units
+            Text{
+                text: "%"
+                font.pixelSize: 18
+                color: "#483434"
+                anchors {
+                    left: wcTextInput.right
+                    leftMargin: 1
+                }
+                visible: wcTextInput.text
+            }
         }
+        /////////////////////////
 
         // Add button
         Image {
@@ -431,7 +444,7 @@ Rectangle {
                     Text {
                         text: specificGravity.toFixed(2)
                         color: "#483434"
-                        font.pixelSize: materialEntry.textSize
+                        font.pixelSize: (parseFloat(specificGravity) > 999) ? materialEntry.textSize - 3 : materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }
@@ -493,9 +506,9 @@ Rectangle {
                         leftMargin: materialEntry.labelGap
                     }
                     Text {
-                        text: waterContent.toFixed(1)
+                        text: waterContent.toFixed(1) + "%"
                         color: "#483434"
-                        font.pixelSize: materialEntry.textSize
+                        font.pixelSize: (parseFloat(waterContent) === 100) ? materialEntry.textSize - 3 : materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }

@@ -306,6 +306,7 @@ Rectangle {
                     height: 20
                     color: "#fff3e4"
                     radius: 4
+                    clip: true
                     anchors {
                         verticalCenter: consolidationSwellDataListEntry.verticalCenter
                         left: consolidationSwellDataListEntrySPLabel.right
@@ -314,7 +315,7 @@ Rectangle {
 
                     TextInput {
                         id: spTextInput
-                        width: parent.width - 10
+                        width: text ? text.width : spTextInputPlaceholder.width
                         font.pixelSize: consolidationSwellDataListEntry.fontSize
                         color: "#483434"
                         anchors {
@@ -354,11 +355,24 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "--.--"
                         Text {
+                            id: spTextInputPlaceholder
                             text: spTextInput.placeholderText
                             font.pixelSize: consolidationSwellDataListEntry.fontSize
                             color: "#483434"
                             visible: !spTextInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? "Pa" : "tsf"
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: spTextInput.right
+                            leftMargin: 1
+                            verticalCenter: parent.verticalCenter
+                        }
+                        visible: spTextInput.text
                     }
                 }
                 //////////////////////////////////////
@@ -530,6 +544,7 @@ Rectangle {
 
                 Rectangle {
                     id: riTextbox
+                    clip: true
                     width: consolidationSwellDataListEntry.inputWidth
                     height: 20
                     color: "#fff3e4"
@@ -542,7 +557,7 @@ Rectangle {
 
                     TextInput {
                         id: riTextInput
-                        width: parent.width - 10
+                        width: text ? text.width : riTextInputPlaceholder.width
                         font.pixelSize: consolidationSwellDataListEntry.fontSize
                         color: "#483434"
                         anchors {
@@ -583,11 +598,24 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "--.--"
                         Text {
+                            id: riTextInputPlaceholder
                             text: riTextInput.placeholderText
                             font.pixelSize: consolidationSwellDataListEntry.fontSize
                             color: "#483434"
                             visible: !riTextInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? "Pa" : "tsf"
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: riTextInput.right
+                            leftMargin: 1
+                            verticalCenter: parent.verticalCenter
+                        }
+                        visible: riTextInput.text
                     }
                 }
                 //////////////////////////////////////              

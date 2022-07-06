@@ -34,10 +34,11 @@ Item {
         color: "#483434"
 
         Text {
+            property string unitString: (props.units === 0) ? "m" : "ft"
             anchors.centerIn: parent
             color: "#fff3e4"
             font.pixelSize: 13
-            text: "Depth: " + (root.value*soilLayerFormBackground.totalDepth).toFixed(3)
+            text: "Depth: " + (root.value*soilLayerFormBackground.totalDepth).toFixed(3) + unitString
         }
     }
    

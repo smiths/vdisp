@@ -214,10 +214,13 @@ Rectangle {
 
                     TextInput {
                         id: elasticModInput
-                        width: parent.width - 10
+                        width: text ? text.width : elasticModInputPlaceholder.width
                         font.pixelSize: schmertmannElasticDataForm.fontSize
                         color: "#483434"
-                        anchors.centerIn: parent
+                        anchors{
+                            left: parent.left
+                            leftMargin: 5
+                        }
 
                         selectByMouse: true
                         clip: true
@@ -251,11 +254,23 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "Enter Value..."
                         Text {
+                            id: elasticModInputPlaceholder
                             text: elasticModInput.placeholderText
                             font.pixelSize: schmertmannElasticDataForm.fontSize
                             color: "#483434"
                             visible: !elasticModInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? "MPa" : "tsf"
+                        font.pixelSize: schmertmannElasticDataForm.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: elasticModInput.right
+                            leftMargin: 1
+                        }
+                        visible: elasticModInput.text
                     }
                 }
                 ////////////////////////////////

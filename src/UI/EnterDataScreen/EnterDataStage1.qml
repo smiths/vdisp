@@ -372,8 +372,8 @@ Rectangle {
             }
             TextInput {
                 id: widthInput
-                width: parent.width - 10
                 font.pixelSize: 18
+                width: text ? text.width : widthPlaceholderText.width
                 color: "#483434"
                 anchors {
                     left: parent.left 
@@ -396,21 +396,32 @@ Rectangle {
                 // Placeholder Text
                 property string placeholderText: "Enter Width..."
                 Text {
+                    id: widthPlaceholderText
                     text: widthInput.placeholderText
                     font.pixelSize: 18
                     color: "#483434"
                     visible: !widthInput.text
                 }
             }
+            // Units
+            Text{
+                text: (props.units === 0) ? "m" : "ft"
+                font.pixelSize: 18
+                color: "#483434"
+                anchors {
+                    left: widthInput.right
+                    leftMargin: 1
+                }
+                visible: widthInput.text
+            }
         }
+        // Label
         Text {
             id: widthLabel
             text: "Width: "
             font.pixelSize: 18
             color: "#fff3e4"
             anchors {
-                // left: formMiddle.horizontalCenter
-                // leftMargin: formMiddle.itemGap / 2
                 right: lengthLabel.right
             }
         }
@@ -429,7 +440,7 @@ Rectangle {
             }
             TextInput {
                 id: appliedPressureInput
-                width: parent.width - 10
+                width: text ? text.width : appliedPressurePlaceholder.width
                 font.pixelSize: 18
                 color: "#483434"
                 anchors {
@@ -448,11 +459,23 @@ Rectangle {
                 // Placeholder Text
                 property string placeholderText: "Enter Pressure..."
                 Text {
+                    id: appliedPressurePlaceholder
                     text: appliedPressureInput.placeholderText
                     font.pixelSize: 18
                     color: "#483434"
                     visible: !appliedPressureInput.text
                 }
+            }
+            // Units
+            Text{
+                text: (props.units === 0) ? "Pa" : "tsf"
+                font.pixelSize: 18
+                color: "#483434"
+                anchors {
+                    left: appliedPressureInput.right
+                    leftMargin: 1
+                }
+                visible: appliedPressureInput.text
             }
         }
         Text {
@@ -482,7 +505,7 @@ Rectangle {
             }
             TextInput {
                 id: lengthInput
-                width: parent.width - 10
+                width: text ? text.width : lengthInputPlaceholder.width
                 font.pixelSize: 18
                 color: "#483434"
                 anchors {
@@ -506,11 +529,23 @@ Rectangle {
                 // Placeholder Text
                 property string placeholderText: "Enter Length..."
                 Text {
+                    id: lengthInputPlaceholder
                     text: lengthInput.placeholderText
                     font.pixelSize: 18
                     color: "#483434"
                     visible: !lengthInput.text
                 }
+            }
+            // Units
+            Text{
+                text: (props.units === 0) ? "m" : "ft"
+                font.pixelSize: 18
+                color: "#483434"
+                anchors {
+                    left: lengthInput.right
+                    leftMargin: 1
+                }
+                visible: lengthInput.text
             }
         }
         Text {

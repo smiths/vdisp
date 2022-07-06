@@ -160,7 +160,8 @@ Rectangle {
                 // Label
                 Text {
                     id: dgwtSliderLabel
-                    text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2)
+                    property string unitString: (props.units === 0) ? "m" : "ft"
+                    text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2) + unitString
                     color: "#fff3e4"
                     font.pixelSize: dgwtSlider.textSize
                     anchors {
@@ -240,7 +241,8 @@ Rectangle {
                 // Label
                 Text {
                     id: foundationDepthSliderLabel
-                    text: "Depth to Foundation: " + (soilLayerFormBackground.totalDepth - foundationDepthSlider.value).toFixed(2)
+                    property string unitString: (props.units === 0) ? "m" : "ft"
+                    text: "Depth to Foundation: " + (soilLayerFormBackground.totalDepth - foundationDepthSlider.value).toFixed(2) + unitString
                     color: "#fff3e4"
                     font.pixelSize: foundationDepthSlider.textSize
                     anchors {
@@ -598,10 +600,13 @@ Rectangle {
         }
         TextInput {
             id: depthInput
-            width: parent.width - 10
+            width: text ? text.width : depthInputPlaceholder.width
             font.pixelSize: 18
             color: "#483434"
-            anchors.centerIn: parent
+            anchors{
+                left: parent.left
+                leftMargin: 5
+            }
             
             selectByMouse: true
             clip: true
@@ -642,11 +647,23 @@ Rectangle {
             // Placeholder Text
             property string placeholderText: "Enter Depth..."
             Text {
+                id: depthInputPlaceholder
                 text: depthInput.placeholderText
                 font.pixelSize: 18
                 color: "#483434"
                 visible: !depthInput.text
             }
+        }
+        // Units
+        Text{
+            text: (props.units === 0) ? "m" : "ft"
+            font.pixelSize: 18
+            color: "#483434"
+            anchors {
+                left: depthInput.right
+                leftMargin: 1
+            }
+            visible: depthInput.text
         }
     }
     //////////////////////////////
