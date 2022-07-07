@@ -676,73 +676,40 @@ Rectangle {
         /////////////////////
 
         // Diagram //////////
-        Shape {
+        Rectangle {
             id: diagramRect
-            property int max_length: 100 + 70 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-            property int max_width: max_length + 20
+            
+            color: "transparent"
+            border.color: "#fff3e4"
+            border.width: 2
+            
+            property int max_length: 100 + 250 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+            property int max_width: max_length
             property int min_width: 40
             property int min_length: 30
             width: (enterDataFormBackground.widthValue < 0 || enterDataFormBackground.lengthValue < 0) ? max_width : Math.max(Math.min((enterDataFormBackground.widthValue/enterDataFormBackground.lengthValue)*max_width, max_width), min_width);
             height: (enterDataFormBackground.lengthValue < 0 || enterDataFormBackground.widthValue < 0) ? max_length : Math.max(Math.min((enterDataFormBackground.lengthValue/enterDataFormBackground.widthValue)*max_length, max_length), min_length);
+            
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 top: appliedDropdown.bottom
                 topMargin: enterDataFormBackground.diagramMargin
             }
-            ShapePath {
-                strokeWidth: 2
-                strokeColor: "#fff3e4"
-                startX: 20
-                startY: 0
-                fillColor: "transparent"
-                PathLine { x: diagramRect.width; y: 0 }
-                PathLine { x: diagramRect.width-20; y: diagramRect.height }
-                PathLine { x: 0; y: diagramRect.height }
-                PathLine { x: 20; y: 0 }
-            }
             //////////////
 
             // Force Point
-            Shape {
+            Rectangle {
                 id: diagramArrow
                 width: 10
-                height: diagramRect.height / 3
-                property int xOffset: (appliedDropdown.currentIndex === 2) ? -10 : 0
+                height: width
+                radius: width / 2
+
+                color: "#483434"
+                border.color: "#fff3e4"
+
                 anchors {
-                    horizontalCenter: (appliedDropdown.currentIndex === 1) ? diagramRect.left : diagramRect.horizontalCenter
-                    bottom: (appliedDropdown.currentIndex === 0) ? diagramRect.verticalCenter : diagramRect.bottom
-                }
-                ShapePath {
-                    strokeWidth: 2
-                    strokeColor: "#EED6C4"
-                    startX: 5 + diagramArrow.xOffset
-                    startY: 0
-                    fillColor: "transparent"
-                    PathLine { x: 5 + diagramArrow.xOffset; y: diagramArrow.height }
-                }
-                ShapePath {
-                    strokeWidth: 2
-                    strokeColor: "#EED6C4"
-                    startX: 0 + diagramArrow.xOffset
-                    startY: diagramArrow.height - 6
-                    fillColor: "transparent"
-                    PathLine { x: 5 + diagramArrow.xOffset; y: diagramArrow.height }
-                }
-                ShapePath {
-                    strokeWidth: 2
-                    strokeColor: "#EED6C4"
-                    startX: diagramArrow.width + diagramArrow.xOffset
-                    startY: diagramArrow.height - 6
-                    fillColor: "transparent"
-                    PathLine { x: 5 + diagramArrow.xOffset; y: diagramArrow.height }
-                }
-                Rectangle {
-                    id: diagramForcePoint
-                    width: 5
-                    height: width
-                    radius: width * 0.5
-                    color: "red"
-                    x: 5 + diagramArrow.xOffset - diagramForcePoint.width/2; y: diagramArrow.height - diagramForcePoint.height/2
+                    horizontalCenter: (appliedDropdown.currentIndex === 0) ? diagramRect.horizontalCenter : diagramRect.left
+                    verticalCenter: (appliedDropdown.currentIndex === 1) ? diagramRect.bottom : diagramRect.verticalCenter
                 }
             }
         }
