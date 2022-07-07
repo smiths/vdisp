@@ -10,6 +10,7 @@ Item {
         anchors.fill: parent
     }
 
+    // Title //////////////
     Text {
         id: title
         text: "VDisp"
@@ -21,7 +22,6 @@ Item {
             topMargin: 20
         }
     }
-
     Text {
         id: subtitle
         text: "Soil Settlment Analysis Software"
@@ -33,6 +33,8 @@ Item {
             topMargin: 10
         }
     }
+    ////////////////////////
+
     Item {
         property int buttonWidth: 305
         property int buttonHeight: 50
@@ -44,7 +46,8 @@ Item {
             horizontalCenter: parent.horizontalCenter
             verticalCenter: parent.verticalCenter
         }
-
+        
+        // Enter Data ////////
         Rectangle {
             id: enterDataButton
             width: menuButtons.buttonWidth
@@ -85,7 +88,9 @@ Item {
                 onClicked: mainLoader.source = "../EnterDataScreen/EnterDataScreen.qml"
             }
         }
+        /////////////////////
 
+        // Settings ////////
         Rectangle {
             id: settingsButton
             width: menuButtons.buttonWidth
@@ -121,8 +126,15 @@ Item {
                     leftMargin: 20
                 }
             }
-        }
 
+            MouseArea {
+                anchors.fill: parent
+                onClicked: mainLoader.source = "../SettingsScreen/SettingsScreen.qml"
+            }
+        }
+        ///////////////////
+
+        // Exit ///////////
         Rectangle {
             id: exitButton
             width: menuButtons.buttonWidth
@@ -164,6 +176,7 @@ Item {
                 onClicked: Qt.quit()
             }
         }
+        ///////////////////
         
     }
 }
