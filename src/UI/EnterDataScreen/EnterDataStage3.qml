@@ -101,13 +101,32 @@ Rectangle {
         id: dgwtSlider
         from: 0
         to: soilLayerFormBackground.totalDepth
-        stepSize: 0.25
+        stepSize: getStepSize()
         value: soilLayerFormBackground.totalDepth/2
         width: 30 + (55-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         height: mainSliderBackground.height - mainSliderBackground.radius
         orientation: Qt.Vertical
 
         property int textSize: 9 + (14-9) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        
+        function getStepSize() {
+            if(!soilLayerFormBackground.calculatedBounds) 
+                return 0.25
+
+            // Get index of layer handle is currently in
+            var currentLayerIndex = 0
+            var val = soilLayerFormBackground.totalDepth - value
+            while(soilLayerFormBackground.bounds[currentLayerIndex+1] < val)
+                currentLayerIndex+=1
+
+            // Get current layers height
+            var currentLayerHeight = soilLayerFormBackground.bounds[currentLayerIndex+1] - soilLayerFormBackground.bounds[currentLayerIndex]
+            // Get dx
+            var dx = currentLayerHeight / props.subdivisions[currentLayerIndex]
+
+
+            return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+        }
 
         anchors {
             top: mainSliderBackground.top
@@ -132,7 +151,7 @@ Rectangle {
                 id: dgwtSliderHandleRect
                 color: "#70A9FF"
                 width: parent.width
-                height: width
+                height: 5
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: dgwtSlider.visualPosition * (dgwtSlider.availableHeight - height)
             }
