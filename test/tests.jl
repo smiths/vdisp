@@ -7,7 +7,7 @@ using .OutputFormat
 include("../src/InputParser.jl")
 using .InputParser
 
-export consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest, consolidationSwellGUITest
+export consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest, consolidationSwellGUITest, schmertGUITest, schmertElasticGUITest
 
 function consolidationSwellTest(outputData)
     inputData = outputData.inputData
@@ -195,6 +195,95 @@ function consolidationSwellGUITest(filePath::String)
     @test guiData.maxPastPressure[2] == 3.0
 end
 
+function schmertGUITest(filePath::String)
+    guiData = GUIData(filePath)
+
+    @test guiData.problemName == "Problem 2 - Schmertmann"
+    @test guiData.model == 1
+    @test guiData.units == 1
+    @test guiData.foundation == 1
+    @test guiData.foundationWidth == 5.50
+    @test guiData.appliedPressure == 1.50
+    @test guiData.appliedAt == 0
+    @test guiData.outputIncrements == 1
+    @test guiData.saturatedAboveWaterTable == 0
+
+    @test guiData.materials == 3
+    @test guiData.materialNames[1] == "Sand"
+    @test guiData.specificGravity[1] == 2.6
+    @test guiData.waterContent[1] == 20.0
+    @test guiData.materialNames[2] == "Dirt"
+    @test guiData.specificGravity[2] == 2.3
+    @test guiData.voidRatio[2] == 1.35
+    @test guiData.materialNames[3] == "Clay"
+    @test guiData.specificGravity[3] == 3.567
+
+
+    @test guiData.totalDepth == 16.0
+    @test guiData.foundationDepth == 7.5
+    @test guiData.depthGroundWaterTable == 16.0
+    @test guiData.bounds[1] == 0.0
+    @test guiData.bounds[2] == 5.0
+    @test guiData.bounds[3] == 12.0
+    @test guiData.bounds[4] == 16.0
+    @test guiData.soilLayerNumbers[1] == 1
+    @test guiData.soilLayerNumbers[2] == 3
+    @test guiData.soilLayerNumbers[3] == 2
+    @test guiData.subdivisions[1] == 10
+    @test guiData.subdivisions[2] == 7
+    @test guiData.subdivisions[3] == 2
+
+    @test guiData.timeAfterConstruction == 35
+    @test guiData.conePenetration[1] == 70.0
+    @test guiData.conePenetration[2] == 140.0
+    @test guiData.conePenetration[3] == 240.0
+end
+
+function schmertElasticGUITest(filePath::String)
+    guiData = GUIData(filePath)
+
+    @test guiData.problemName == "Problem 3 - Schmertmann Elastic"
+    @test guiData.model == 2
+    @test guiData.units == 0
+    @test guiData.foundation == 1
+    @test guiData.foundationWidth == 5.50
+    @test guiData.appliedPressure == 1.50
+    @test guiData.appliedAt == 0
+    @test guiData.outputIncrements == 1
+    @test guiData.saturatedAboveWaterTable == 0
+
+    @test guiData.materials == 3
+    @test guiData.materialNames[1] == "Sand"
+    @test guiData.specificGravity[1] == 2.6
+    @test guiData.waterContent[1] == 20.0
+    @test guiData.materialNames[2] == "Dirt"
+    @test guiData.specificGravity[2] == 2.3
+    @test guiData.voidRatio[2] == 1.35
+    @test guiData.materialNames[3] == "Clay"
+    @test guiData.specificGravity[3] == 3.567
+
+
+    @test guiData.totalDepth == 16.0
+    @test guiData.foundationDepth == 7.5
+    @test guiData.depthGroundWaterTable == 16.0
+    @test guiData.bounds[1] == 0.0
+    @test guiData.bounds[2] == 5.0
+    @test guiData.bounds[3] == 12.0
+    @test guiData.bounds[4] == 16.0
+    @test guiData.soilLayerNumbers[1] == 1
+    @test guiData.soilLayerNumbers[2] == 3
+    @test guiData.soilLayerNumbers[3] == 2
+    @test guiData.subdivisions[1] == 20
+    @test guiData.subdivisions[2] == 7
+    @test guiData.subdivisions[3] == 2
+
+    @test guiData.timeAfterConstruction == 1
+    @test guiData.elasticModulus[1] == 34
+    @test guiData.elasticModulus[2] == 75.5
+    @test guiData.elasticModulus[3] == 112.4
+end
+
+# Testing files for old models (LeonardFrost and CollapsibleSoil)
 # function testFile2(outputData)
 #     inputData = outputData.inputData
 # 

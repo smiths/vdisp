@@ -1,4 +1,6 @@
 # Input Data taken from p.174 of https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf
+# VDisp will not be using this model!
+
     FOOTING IN GRANULAR SOIL - LEONARD AND FROST
 # NOTE: Leonard and Frost model will be removed from final product
 1   1   1   17  7   2   0.50

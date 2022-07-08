@@ -20,9 +20,9 @@ OUTPUT_TEST_PATHS = ["../test/testdata/output_$f.dat" for f in FILE_NAMES]
 INPUT_ERROR_PATHS = ["../test/testdata/test_error_$x.dat" for x in 1:2]
 
 # Test GUI Input files
-GUI_TEST_FILES = 1
-testFunctions = [consolidationSwellGUITest]
-for i=1:GUI_FILE_NAMES
+GUI_TEST_FILES = 3
+testFunctions = [consolidationSwellGUITest, schmertGUITest, schmertElasticGUITest]
+for i=1:GUI_TEST_FILES
     println("\nTesting input file \"input_$(GUI_FILE_NAMES[i]).dat\":")
     @testset "Testing input file \"input_$(GUI_FILE_NAMES[i]).dat\"" begin
         testFunctions[i]("../test/testdata/$(GUI_FILE_NAMES[i]).dat")
