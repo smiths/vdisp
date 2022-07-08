@@ -36,6 +36,59 @@ Rectangle {
     property int checkboxLabelGap: 6
     property int checkboxGap: 20
     
+    // Signal for changing values based on input file
+    JuliaSignals {
+        signal inputFileAccepted(variant values)
+        onInputFileAccepted: {
+            var problemName = values[0]
+            var model = values[1]
+            var foundation = values[2]
+            var appliedPressure = values[3]
+            var appliedAt = values[4]
+            var foundationWidth = values[5]
+            var foundationLength = values[6]
+            var outputIncrements = values[7]
+            var saturatedAboveWaterTable = values[8]
+            var materialNames = values[9]
+            var specificGravity = values[10]
+            var voidRatio = values[11]
+            var waterContent = values[12]
+            var materials = values[13]
+            // Update fields from input
+            problemNameInput.text = problemName
+            modelDropdown.currentIndex = model
+            foundationDropdown.currentIndex = foundation
+            appliedPressureInput.text = appliedPressure
+            appliedDropdown.currentIndex = appliedAt
+            widthInput.text = foundationWidth
+            lengthInput.text = foundationLength
+            outputIncrementsCheckbox.checked = outputIncrements
+            saturationCheckbox.checked = saturatedAboveWaterTable
+            // Update julia variables so other screens are ready
+            props.materials = materials
+            var matNames = []
+            for(var i = 0; i < materialNames.length; i++){
+                matNames = [...matNames, materialNames[i]]
+            }
+            props.materialNames = [...matNames]
+            var sg = []
+            for(var i = 0; i < specificGravity.length; i++){
+                sg = [...sg, specificGravity[i]]
+            }
+            props.specificGravity = [...sg]
+            var vr = []
+            for(var i = 0; i < voidRatio.length; i++){
+                vr = [...vr, voidRatio[i]]
+            }
+            props.voidRatio = [...vr]
+            var wc = []
+            for(var i = 0; i < waterContent.length; i++){
+                wc = [...wc, waterContent[i]]
+            }
+            props.waterContent = [...wc]
+        }
+    }
+
     // Add "Input From File"
     Item {
         id: inputFromFileContainer

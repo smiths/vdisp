@@ -13,7 +13,7 @@ using Observables
 
 export readInputFile
 
-PRINT_DEBUG = false
+PRINT_DEBUG = true
 
 # Julia variables
 materialNames = Array{String}(undef,0)
@@ -73,7 +73,31 @@ inputFile = Observable("")
 inputFileSelected = Observable(false)
 on(inputFileSelected) do val
     global inputFile
-    println(val, ", ", inputFile[])
+
+    # Only start process of auto fill if inputFileSelected was changed to true
+    if val
+        # Remove "file://" from inputFile 
+        inputPath = inputFile[][7:end]
+
+        # Parse input file
+        guiData = 0
+        inputFileWasAccepted = false
+        try
+            guiData = GUIData(inputPath)
+            inputFileWasAccepted = true
+        catch e
+            println("Not accepted")
+        end
+
+        
+        
+        # Emit correct signal
+        if inputFileWasAccepted
+            @emit inputFileAccepted([guiData.problemName, guiData.model, guiData.foundation, guiData.appliedPressure, guiData.appliedAt, guiData.foundationWidth, guiData.foundationLength, guiData.outputIncrements, guiData.saturatedAboveWaterTable, guiData.materialNames, guiData.specificGravity, guiData.voidRatio, guiData.waterContent, guiData.materials])
+        else
+            println("File $(inputPath) not accepted")
+        end
+    end
 end
 # Units
 @enum Units Metric Imperial
