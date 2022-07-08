@@ -7,7 +7,7 @@ using .OutputFormat
 include("../src/InputParser.jl")
 using .InputParser
 
-export consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest
+export consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest, consolidationSwellGUITest
 
 function consolidationSwellTest(outputData)
     inputData = outputData.inputData
@@ -151,6 +151,48 @@ function schmertElasticTest(outputData)
     @test settlementTable[1,3] ≈ -0.000689697 rtol=1e-6
     @test settlementTable[2,3] ≈ -0.001383052 rtol=1e-6
     @test settlementTable[3,3] ≈ -0.002045984 rtol=1e-6
+end
+
+function consolidationSwellGUITest(filePath::String)
+    guiData = GUIData(filePath)
+
+    @test guiData.problemName == "Problem 1 - Consolidation/Swell"
+    @test guiData.model == 0
+    @test guiData.units == 1
+    @test guiData.foundation == 0
+    @test guiData.foundationWidth == 3.00
+    @test guiData.appliedPressure == 1.00
+    @test guiData.appliedAt == 0
+    @test guiData.outputIncrements == 1
+    @test guiData.saturatedAboveWaterTable == 1
+
+    @test guiData.materials == 2
+    @test guiData.materialNames[1] == "Sand"
+    @test guiData.specificGravity[1] == 2.6
+    @test guiData.waterContent[1] == 20.0
+    @test guiData.materialNames[2] == "Dirt"
+    @test guiData.specificGravity[2] == 2.3
+    @test guiData.voidRatio[2] == 1.35
+
+    @test guiData.totalDepth == 16.0
+    @test guiData.foundationDepth == 7.5
+    @test guiData.depthGroundWaterTable == 15.0
+    @test guiData.bounds[1] == 0.0
+    @test guiData.bounds[2] == 12.0
+    @test guiData.bounds[3] == 16.0
+    @test guiData.subdivisions[1] == 12
+    @test guiData.subdivisions[2] == 4
+
+    @test guiData.heaveBeginDepth == 0.0
+    @test guiData.heaveActiveDepth == 8.0
+    @test guiData.swellPressure[1] == 2.0
+    @test guiData.swellIndex[1] == 0.1
+    @test guiData.compressionIndex[1] == 0.3
+    @test guiData.maxPastPressure[1] == 2.0
+    @test guiData.swellPressure[2] == 3.0
+    @test guiData.swellIndex[2] == 0.15
+    @test guiData.compressionIndex[2] == 0.35
+    @test guiData.maxPastPressure[2] == 3.0
 end
 
 # function testFile2(outputData)

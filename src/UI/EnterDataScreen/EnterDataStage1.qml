@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
+import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -36,6 +37,90 @@ Rectangle {
     property int checkboxGap: 20
     
     // Add "Input From File"
+    Item {
+        id: inputFromFileContainer
+        property string fileName: ""
+
+        property int gap: 4   
+        property int offset: 10    
+        width: inputFromFileImage.width + inputFromFileText.width + gap
+        height: 20
+
+        anchors{
+            left: parent.left
+            leftMargin: offset
+            top: parent.top
+            topMargin: offset
+        }
+
+        Image {
+            id: inputFromFileImage
+            source: "../Assets/fileUpload.png"
+
+            width: parent.height
+            height: width
+
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
+        }
+
+        Text {
+            id: inputFromFileText
+            text: (props.inputFileSelected) ? inputFromFileContainer.fileName : "Input From File"
+            font.pixelSize: 12
+            color: "#EED6C4"
+
+            anchors {
+                left: inputFromFileImage.right
+                leftMargin: inputFromFileContainer.gap
+                verticalCenter: parent.verticalCenter
+            }
+        }
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: fileDialog.open()
+        }
+    }
+    Image{
+        id: inputFromFileDelete
+        source: "../Assets/exit.png"
+        width: (props.inputFileSelected) ? inputFromFileContainer.height/2 : 0 
+        height: width
+        anchors {
+            left: inputFromFileContainer.right
+            leftMargin: inputFromFileContainer.gap
+            verticalCenter: inputFromFileContainer.verticalCenter
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                props.inputFileSelected = false
+                // Update form to empty
+            }
+        }
+    }
+    FileDialog {
+        id: fileDialog
+        title: "Please select input file"
+        selectMultiple: false
+        folder: shortcuts.home
+        nameFilters: ["VDisp data files (*.dat)" ]
+        onAccepted: {
+            props.inputFile = fileUrl.toString()
+            props.inputFileSelected = true
+            // Convert URL to string
+            var name = fileUrl.toString()
+            // Split URL String at each "/" and extract last piece of data
+            var path = name.split("/")
+            var fileName = path[path.length - 1]
+            // Update fileName property
+            inputFromFileContainer.fileName = fileName
+        }
+    }
+    ////////////////////////
     
     // Title
     Text {

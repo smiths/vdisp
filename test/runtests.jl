@@ -12,12 +12,24 @@ using .Tests
 
 # Paths to test input files from runtests.jl
 FILE_NAMES = ["consolidationSwellTest", "consolidationSwellTest2", "schmertTest", "schmertElasticTest"]
+GUI_FILE_NAMES = ["consolidationSwellGUITest",  "schmertGUITest", "schmertElasticGUITest"]
 INPUT_TEST_PATHS = ["../test/testdata/input_$f.dat" for f in FILE_NAMES]
 OUTPUT_TEST_PATHS = ["../test/testdata/output_$f.dat" for f in FILE_NAMES]
 
 # Paths to test input files with errors
 INPUT_ERROR_PATHS = ["../test/testdata/test_error_$x.dat" for x in 1:2]
 
+# Test GUI Input files
+GUI_TEST_FILES = 1
+testFunctions = [consolidationSwellGUITest]
+for i=1:GUI_FILE_NAMES
+    println("\nTesting input file \"input_$(GUI_FILE_NAMES[i]).dat\":")
+    @testset "Testing input file \"input_$(GUI_FILE_NAMES[i]).dat\"" begin
+        testFunctions[i]("../test/testdata/$(GUI_FILE_NAMES[i]).dat")
+    end
+end
+
+# Test data input files
 TEST_FILES = 4
 testFunctions = [consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest]
 for i=1:TEST_FILES

@@ -3,7 +3,7 @@ module InputParser
 # Julia implicitly numbers Enum items 0,1,2,3,4
 @enum Model ConsolidationSwell LeonardFrost Schmertmann CollapsibleSoil SchmertmannElastic 
 @enum Foundation ErrorFoundation RectangularSlab LongStripFooting 
-@enum ErrorID ParsingErrorId FoundationErrorId SoilNumberErrorId NotEnoughValuesErrorId
+@enum ErrorID ParsingErrorId FoundationErrorId SoilNumberErrorId NotEnoughValuesErrorId ModelErrorId FoundationTypeErrorId FloatConvertErrorId DimensionNegativeErrorId IntConvertErrorId UnitErrorId BoolConvertErrorId MaterialIndexOutOfBoundsErrorId PropertyErrorId
 
 #### Custom Exceptions  ################################
 
@@ -41,11 +41,94 @@ struct NotEnoughValuesError <: Exception
     line::Int
 end
 Base.showerror(io::IO, e::NotEnoughValuesError) = print(io, "Invalid input file!\n\t>Line $(e.line): $(e.requiredValues) values expected, only given $(e.givenValues)!")
+
+# ModelError is thrown when user enters invalid number for model in input file
+struct ModelError <: Exception
+    id::Int32
+    line::Int32
+    value::String
+    ModelError(line::Int32, value::String)=new(Int(ModelErrorId), line, value)
+end
+Base.showerror(io::IO, e::ModelError) = print(io, "Line $(e.line): Model input should be 0, 1 or 2. Input was $(e.value)")
+
+# UnitError is thrown when user enters invalid number for unit in input file
+struct UnitError <: Exception
+    id::Int32
+    line::Int32
+    value::String
+    UnitError(line::Int32, value::String)=new(Int(UnitErrorId), line, value)
+end
+Base.showerror(io::IO, e::UnitError) = print(io, "Line $(e.line): Unit input should be 0, or 1. Input was $(e.value)")
+
+# FoundationTypeError is thrown when user enters invalid number for foundation in input file
+struct FoundationTypeError <: Exception
+    id::Int32
+    line::Int32
+    value::String
+    FoundationTypeError(line::Int32, value::String)=new(Int(FoundationTypeErrorId), line, value)
+end
+Base.showerror(io::IO, e::FoundationTypeError) = print(io, "Line $(e.line): Foundation input should be 0 or 1. Input was $(e.value)")
+
+# Anytime a variable that was supposed to be floating point number has trouble parsing
+struct FloatConvertError <: Exception
+    id::Int32
+    line::Int32
+    var::String
+    value::String
+    FloatConvertError(line::Int32, var::String, value::String) = new(Int(FloatConvertErrorId), line, var, value)
+end
+Base.showerror(io::IO, e::FloatConvertError) = print(io, "Line $(e.line): $(e.var) value should be a valid float value. Trouble parsing input \"$(e.value)\"")
+
+# Anytime a variable that was supposed to be an integer number has trouble parsing
+struct IntConvertError <: Exception
+    id::Int32
+    line::Int32
+    var::String
+    value::String
+    IntConvertError(line::Int32, var::String, value::String) = new(Int(FloatConvertErrorId), line, var, value)
+end
+Base.showerror(io::IO, e::IntConvertError) = print(io, "Line $(e.line): $(e.var) value should be a valid integer value. Trouble parsing input \"$(e.value)\"")
+
+# Anytime a variable that was supposed to be a boolean has trouble parsing
+struct BoolConvertError <: Exception
+    id::Int32
+    line::Int32
+    var::String
+    value::String
+    BoolConvertError(line::Int32, var::String, value::String) = new(Int(BoolConvertErrorId), line, var, value)
+end
+Base.showerror(io::IO, e::BoolConvertError) = print(io, "Line $(e.line): $(e.var) value should be a 0(false) or 1(true). Trouble parsing input \"$(e.value)\"")
+
+# Anytime a dimension variable was negative
+struct DimensionNegativeError <: Exception 
+    id::Int32
+    line::Int32
+    var::String
+    value::String
+    DimensionNegativeError(line::Int32, var::String, value::String) = new(Int(DimensionNegativeErrorId), line, var, value)
+end
+Base.showerror(io::IO, e::DimensionNegativeError) = print(io, "Line $(e.line): $(e.var) value should be positive. Input was \"$(e.value)\"")
+
+# When material index is out of bounds
+struct MaterialIndexOutOfBoundsError <: Exception
+    id::Int32
+    line::Int32
+    value::String
+    MaterialIndexOutOfBoundsError(line::Int32, value::String) = new(Int(MaterialIndexOutOfBoundsErrorId), line, value)
+end
+Base.showerror(io::IO, e::MaterialIndexOutOfBoundsError) = print(io, "Line $(e.line): Invalid material index \"$(e.value)\"")
+
+struct PropertyError <: Exception
+    id::Int32
+    msg::String
+    PropertyError(msg::String) = new(Int(PropertyErrorId), msg)
+end
+Base.showerror(io::IO, e::PropertyError) = print(io, e.msg)
 ########################################################
 
 # These are variables/objects visible to all modules
 # that include InputParser module
-export Model, Foundation, ErrorID, InputData, ParsingError, SoilNumberError
+export Model, Foundation, ErrorID, GUIData,InputData, ParsingError, SoilNumberError, ModelError
 
 """
     parseCurrentLine(input, items, index)
@@ -53,11 +136,11 @@ export Model, Foundation, ErrorID, InputData, ParsingError, SoilNumberError
 Parses the string and *index*-th index of *input* array. Makes sure there are *items*
 values separated by spaces in the string. 
 """
-function parseCurrentLine(input::Array{String}, items::Int, index::Int)
+function parseCurrentLine(input::Array{String}, items::Int, index::Int, splitString::String=" ")
     currentLine = input[index]
     # Tabs ruin splitting by space
     currentLine = replace(currentLine, "\t" => " ")
-    currentLineData = split(currentLine, " ")
+    currentLineData = split(currentLine, splitString)
     currentLineData = filter(x -> x != "", currentLineData)
     # Check if data is there
     if size(currentLineData)[1] < items
@@ -65,10 +148,6 @@ function parseCurrentLine(input::Array{String}, items::Int, index::Int)
     end
     return currentLineData
 end
-
-# TODO: Search for error handling (throws Exception/ try-catch block)
-# to make InputData constructor more robust. Many Type errors are 
-# possible when converting input file
 
 # struct for InputData (OOP in Julia)
 struct InputData
@@ -808,6 +887,541 @@ struct InputData
         materialNames::Array{String} = ["Material " * string(i) for i in 1:soilLayers]
 
         new(problemName, numProblems, model, foundation, nodalPoints, elements, bottomPointIndex, soilLayers, dx, soilLayerNumber, specificGravity, waterContent, voidRatio, depthGroundWaterTable, equilibriumMoistureProfile, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, swellPressure, swellIndex, compressionIndex, maxPastPressure, pressureDilatometerA, pressureDilatometerB, conePenetrationResistance, appliedPressureAtPoints, elasticModulus, heaveActiveZoneDepth, groundToHeaveDepth, timeAfterConstruction, strainAtPoints, totalDepth, foundationDepth, materialNames)
+    end
+end
+
+struct GUIData
+    # Stage 1
+    problemName::String
+    model::Int32 
+    units::Int32
+    foundation::Int32
+    appliedAt::Int32
+    foundationWidth::Float64
+    foundationLength::Float64
+    appliedPressure::Float64
+    outputIncrements::Bool
+    saturatedAboveWaterTable::Bool
+    # Stage 2
+    materials::Int32
+    materialNames::Array{String}
+    specificGravity::Array{Float64}
+    voidRatio::Array{Float64}
+    waterContent::Array{Float64}
+    # Stage 3
+    totalDepth::Float64
+    depthGroundWaterTable::Float64
+    foundationDepth::Float64
+    subdivisions::Array{Int32}
+    soilLayerNumbers::Array{Int32}
+    bounds::Array{Float64}
+    # Stage 4
+    heaveBeginDepth::Float64
+    heaveActiveDepth::Float64
+    swellPressure::Array{Float64}
+    swellIndex::Array{Float64}
+    compressionIndex::Array{Float64}
+    maxPastPressure::Array{Float64}
+    timeAfterConstruction::Int32
+    elasticModulus::Array{Float64}
+    conePenetration::Array{Float64}
+
+    function GUIData(filePath::String)
+        input = open(filePath) do file
+            readlines(file)
+        end
+
+        # Only allow lines that have non empty space chars
+        input_not_empty = filter(contains(r"[^\s]"), input)
+        # Remove comments
+        input = [] # Reinitialize array of lines
+        for line in input_not_empty
+            # Split at comment
+            line_split = split(line, "#")
+            # Add all data before comment to output
+            push!(input, line_split[1])
+        end
+        # Get rid of empty lines (these lines only contained comments before)
+        input::Array{String} = filter(contains(r"[^\s]"), input)
+        # For some reason, not explicitly typing this caused errors
+
+        # Keep track of last line read
+        lastLineIndex = 0
+        
+        # First line is problem name
+        problemName = input[1]
+        lastLineIndex = 1
+
+        # Read model, units
+        model = 0
+        units = 0
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, 2, lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        try 
+            model = parse(Int32, currentLineData[1])
+        catch e
+            throw(IntConvertError(lastLineIndex+1, "model", currentLineData[1]))
+        end
+        if model > 2 || model < 0
+            throw(ModelError(lastLineIndex+1, currentLineData[1]))
+        end
+        try
+            units = parse(Int32, currentLineData[2])
+        catch e
+            throw(IntConvertError(lastLineIndex+1, "units", currentLineData[2]))
+        end
+        if units > 1 || units < 0
+            throw(UnitError(lastLineIndex+1, currentLineData[1]))
+        end
+        lastLineIndex+=1
+
+        # Read foundation type, width, length 
+        foundationType = 0
+        foundationWidth = 0.0
+        foundationLength = 0.0
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, 3, lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        try
+            foundationType = parse(Int32, currentLineData[1])
+        catch e
+            throw(IntConvertError(lastLineIndex+1,"foundation type",currentLineData[1]))
+        end
+        if foundationType < 0 || foundationType > 1
+            throw(FoundationTypeError(lastLineIndex+1,currentLineData[1]))
+        end
+        try 
+            foundationWidth = parse(Float64, currentLineData[2])
+            foundationLength = parse(Float64, currentLineData[3])
+        catch e
+            throw(FloatConvertError(lastLineIndex+1,"foundation dimension",currentLineData[2] + "," + currentLineData[3]))
+        end
+        if foundationWidth < 0
+            throw(DimensionNegativeError(lastLineIndex+1,"foundation width",currentLineData[2]))
+        end
+        if foundationLength < 0
+            throw(DimensionNegativeError(lastLineIndex+1,"foundation length",currentLineData[3]))
+        end
+        lastLineIndex += 1
+
+        # Read applied pressure and applied at
+        appliedPressure = 0.0
+        appliedAt = 0
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, 2, lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        try 
+            appliedPressure = parse(Float64, currentLineData[1])
+        catch e
+            throw(FloatConvertError(lastLineIndex+1,"applied pressure",currentLineData[1]))
+        end
+        if appliedPressure < 0
+            throw(DimensionNegativeError(lastLineIndex+1,"applied pressure",currentLineData[1]))
+        end
+        try
+            appliedAt = parse(Int32, currentLineData[2])
+        catch e
+            throw(IntConvertError(lastLineIndex+1, "applied at", currentLineData[2]))
+        end
+        if appliedAt < 0
+            appliedAt = 0
+            println("Warning: \"applied at\" value was less than 0, but it was changed to 0")
+        end
+        if appliedAt > 2
+            appliedAt = 2
+            println("Warning: \"applied at\" value was greater than 2, but it was changed to 2")
+        end
+        lastLineIndex += 1
+
+        # Read OutputIncrements and Saturated above water table
+        outputIncrements = false
+        saturatedAboveWaterTable = false
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, 2, lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        try
+            outputIncrements = parse(Bool, currentLineData[1])
+        catch e
+            throw(BoolConvertError(lastLineIndex+1, "output increments", currentLineData[1]))
+        end
+        try
+            saturatedAboveWaterTable = parse(Bool, currentLineData[2])
+        catch e
+            throw(BoolConvertError(lastLineIndex+1, "saturated above water table", currentLineData[2]))
+        end
+        lastLineIndex += 1
+
+        # Read number of materials
+        materials = 0
+        try
+            materials = parse(Int32, input[lastLineIndex+1])
+        catch e
+            throw(IntConvertError(lastLineIndex+1, "number of materials", input[lastLineIndex+1]))
+        end
+        lastLineIndex += 1
+
+        # Read material names, specific gravity, void ratio, water content
+        materialNames = Array{String}(undef, materials)
+        specificGravity = Array{Float64}(undef, materials)
+        voidRatio = Array{Float64}(undef, materials)
+        waterContent = Array{Float64}(undef, materials)
+        for i=1:materials
+            currentLineData = []
+            try
+                currentLineData = parseCurrentLine(input, 5, lastLineIndex+i, ",")
+            catch e
+                throw(e)
+            end
+            m = 0
+            try 
+                m = parse(Int32, currentLineData[1])
+            catch e
+                throw(IntConvertError(lastLineIndex+i, "material index $i",currentLineData[1]))
+            end
+            if m < 1 || m > materials
+                throw(MaterialIndexOutOfBoundsError(lastLineIndex+i, currentLineData[1]))
+            end
+            name = currentLineData[2]
+            sg = 0.0
+            try
+                sg = parse(Float64, currentLineData[3])
+            catch e 
+                throw(FloatConvertError(lastLineIndex+i, "specific gravity of material $i", currentLineData[3]))
+            end
+            if sg < 0
+                throw(PropertyError("Line $(lastLineIndex+i): Specific gravity cannot be negative"))
+            end
+            vr = 0.0
+            try
+                vr = parse(Float64, currentLineData[4])
+            catch e 
+                throw(FloatConvertError(lastLineIndex+i, "void ratio of material $i", currentLineData[4]))
+            end
+            if vr < 0
+                throw(PropertyError("Line $(lastLineIndex+i): Void ratio cannot be negative"))
+            end
+            wc = 0.0
+            try
+                wc = parse(Float64, currentLineData[5])
+            catch e 
+                throw(FloatConvertError(lastLineIndex+i, "water content of material $i", currentLineData[5]))
+            end
+            if wc < 0 || wc > 100
+                throw(PropertyError("Line $(lastLineIndex+i): Water content must be in range [0, 100]"))
+            end
+            
+            materialNames[m] = name
+            specificGravity[m] = sg
+            waterContent[m] = wc
+            voidRatio[m] = vr
+        end
+        lastLineIndex += materials
+
+        # Read Total Depth
+        totalDepth = 0.0
+        try 
+            totalDepth = parse(Float64, input[lastLineIndex+1])
+        catch e
+            throw(FloatConvertError(lastLineIndex+1, "total depth of soil profile", input[lastLineIndex+1]))
+        end
+        if totalDepth <= 0
+            throw(PropertyError("Line $(lastLineIndex+1): Total depth must be greater than 0"))
+        end
+        lastLineIndex += 1
+
+        # Read Depth to Foundation, Depth to Ground Water Table
+        foundationDepth = 0.0
+        depthGroundWaterTable = 0.0
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, 2, lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        try
+            foundationDepth = parse(Float64, currentLineData[1])
+        catch
+            throw(FloatConvertError(lastLineIndex+1, "foundation depth", currentLineData[1]))
+        end
+        if foundationDepth < 0 || foundationDepth > totalDepth
+            throw(PropertyError("Line $(lastLineIndex+1): Foundation Depth must be greater than 0 and less than the total depth"))
+        end
+        try
+            depthGroundWaterTable = parse(Float64, currentLineData[2])
+        catch
+            throw(FloatConvertError(lastLineIndex+1, "depth to ground water table", currentLineData[2]))
+        end
+        if depthGroundWaterTable < 0 || depthGroundWaterTable > totalDepth
+            throw(PropertyError("Line $(lastLineIndex+1): Depth to Ground Water Table must be greater than 0 and less than the total depth"))
+        end
+        lastLineIndex += 1
+
+        # Read bounds (size of bounds: #handles + 2 = #materials-1 + 2 = #materials + 1)
+        bounds = Array{Float64}(undef, materials+1)
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, materials+1, lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        for i=1:materials+1
+            b = 0.0
+            try
+                b = parse(Float64, currentLineData[i])
+            catch e
+                throw(FloatConvertError(lastLineIndex+1, "bounds[$i]", currentLineData[i]))
+            end
+            if i == 0 && b != 0.0
+                throw(PropertyError("Line $(lastLineIndex+1): First entry of bounds must be 0"))
+            end
+            if i == materials+1 && b != totalDepth
+                throw(PropertyError("Line $(lastLineIndex+1): Last entry of bounds must be the total depth"))
+            end
+            bounds[i] = b
+        end
+        lastLineIndex += 1
+
+        # Read soil layer numbers
+        soilLayerNumbers = Array{Int32}(undef, materials)
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, Int64(materials), lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        for i=1:materials
+            n = 0
+            try
+                n = parse(Int32, currentLineData[i])
+            catch e
+                throw(IntConvertError(lastLineIndex+1, "Soil Layer $i Material Number", currentLineData[i]))
+            end
+            if n < 0 || n > materials
+                throw(PropertyError("Line $(lastLineIndex+1): Material for soil layer $i invalid. Index must be greater than 0 and less than number of materials."))
+            end
+            soilLayerNumbers[i] = n
+        end
+        lastLineIndex += 1
+
+        # Read subdivisions
+        subdivisions = Array{Int32}(undef, materials)
+        currentLineData = []
+        try
+            currentLineData = parseCurrentLine(input, Int64(materials), lastLineIndex+1, ",")
+        catch e
+            throw(e)
+        end
+        for i=1:materials
+            n = 0
+            try
+                n = parse(Int32, currentLineData[i])
+            catch e
+                throw(IntConvertError(lastLineIndex+1, "Soil Layer $i Subdivisions", currentLineData[i]))
+            end
+            if n < 2 || n > 50 # TODO: Make MAX_SUBDIVISIONS a constant
+                throw(PropertyError("Line $(lastLineIndex+1): Subdivisions for soil layer $i invalid. Value must be greater than 2 and less than 50."))  # TODO: Repalce text "50" with "$(MAX_SUBDIVISIONS)"
+            end
+            subdivisions[i] = n
+        end
+        lastLineIndex += 1
+
+        # Initialize All Model Specific Data
+        heaveBeginDepth = 0.0
+        heaveActiveDepth = 0.0
+        swellPressure = Array{Float64}(undef, materials)
+        swellIndex = Array{Float64}(undef, materials)
+        compressionIndex = Array{Float64}(undef, materials)
+        maxPastPressure = Array{Float64}(undef, materials)
+        timeAfterConstruction = 0
+        elasticModulus = Array{Float64}(undef, materials)
+        conePenetration = Array{Float64}(undef, materials)
+        # Read Model Specific Data
+        if model == 0 # Consolidation Swell
+            # Read Heave begin depth, Heave active depth
+            currentLineData = []
+            try
+                currentLineData = parseCurrentLine(input, 2, lastLineIndex+1, ",")
+            catch e
+                throw(e)
+            end
+            try
+                heaveBeginDepth = parse(Float64, currentLineData[1])
+            catch e 
+                throw(FloatConvertError(lastLineIndex+1, "heave begin depth", currentLineData[1]))
+            end
+            if heaveBeginDepth < 0 || heaveBeginDepth > totalDepth 
+                throw(PropertyError("Line $(lastLineIndex+1): Heave Begin Depth must be greater than 0 and less than total depth"))
+            end
+            try
+                heaveActiveDepth = parse(Float64, currentLineData[2])
+            catch e 
+                throw(FloatConvertError(lastLineIndex+1, "heave active depth", currentLineData[2]))
+            end
+            if heaveActiveDepth < 0 || heaveActiveDepth > totalDepth 
+                throw(PropertyError("Line $(lastLineIndex+1): Heave Active Depth must be greater than 0 and less than total depth"))
+            end
+            lastLineIndex += 1
+
+            # Read swell pressure, swell index, compression index and max past pressure
+            for i=1:materials
+                currentLineData = []
+                try
+                    currentLineData = parseCurrentLine(input, 5, lastLineIndex+i, ",")
+                catch e
+                    throw(e)
+                end
+                m = 0
+                try 
+                    m = parse(Int32, currentLineData[1])
+                catch e
+                    throw(IntConvertError(lastLineIndex+i, "material index $i",currentLineData[1]))
+                end
+                if m < 1 || m > materials
+                    throw(MaterialIndexOutOfBoundsError(lastLineIndex+i, currentLineData[1]))
+                end
+                sp = 0.0
+                try
+                    sp = parse(Float64, currentLineData[2])
+                catch e 
+                    throw(FloatConvertError(lastLineIndex+i, "swell pressure of material $i", currentLineData[2]))
+                end
+                if sp < 0
+                    throw(PropertyError("Line $(lastLineIndex+i): Swell pressure cannot be negative"))
+                end
+                si = 0.0
+                try
+                    si = parse(Float64, currentLineData[3])
+                catch e 
+                    throw(FloatConvertError(lastLineIndex+i, "swell index of material $i", currentLineData[3]))
+                end
+                if si < 0
+                    throw(PropertyError("Line $(lastLineIndex+i): Swell index cannot be negative"))
+                end
+                ci = 0.0
+                try
+                    ci = parse(Float64, currentLineData[4])
+                catch e 
+                    throw(FloatConvertError(lastLineIndex+i, "compression index of material $i", currentLineData[4]))
+                end
+                if ci < 0
+                    throw(PropertyError("Line $(lastLineIndex+i): Compression index cannot be negative"))
+                end
+                mpp = 0.0
+                try
+                    mpp = parse(Float64, currentLineData[5])
+                catch e 
+                    throw(FloatConvertError(lastLineIndex+i, "max past pressure of material $i", currentLineData[5]))
+                end
+                if mpp < 0
+                    throw(PropertyError("Line $(lastLineIndex+i): Max past pressure cannot be negative"))
+                end
+
+                swellPressure[m] = sp
+                swellIndex[m] = si
+                compressionIndex[m] = ci
+                maxPastPressure[m] = mpp
+            end
+            lastLineIndex += materials
+        elseif model == 1 # Schmertmann
+            # Read Time After Construction
+            try
+                timeAfterConstruction = parse(Int32, input[lastLineIndex+1])
+            catch e 
+                throw(IntConvertError(lastLineIndex+1, "time after construction", input[lastLineIndex+1]))
+            end
+            if timeAfterConstruction < 0
+                throw(PropertyError("Line $(lastLineIndex+1): Time After Construction must be greater than 0"))
+            end
+            lastLineIndex += 1
+
+            # Read cone penetration data
+            for i=1:materials
+                currentLineData = []
+                try
+                    currentLineData = parseCurrentLine(input, 2, lastLineIndex+i, ",")
+                catch e
+                    throw(e)
+                end
+                m = 0
+                try 
+                    m = parse(Int32, currentLineData[1])
+                catch e
+                    throw(IntConvertError(lastLineIndex+i, "material index $i",currentLineData[1]))
+                end
+                if m < 1 || m > materials
+                    throw(MaterialIndexOutOfBoundsError(lastLineIndex+i, currentLineData[1]))
+                end
+                cp = 0.0
+                try
+                    cp = parse(Float64, currentLineData[2])
+                catch e 
+                    throw(FloatConvertError(lastLineIndex+i, "cone penetration of material $i", currentLineData[2]))
+                end
+                if cp < 0
+                    throw(PropertyError("Line $(lastLineIndex+i): Cone penetration resistance cannot be negative"))
+                end
+
+                conePenetration[m] = cp
+            end
+            lastLineIndex += materials
+        else  # SchmertmannElastic
+            # Read Time After Construction
+            try
+                timeAfterConstruction = parse(Int32, input[lastLineIndex+1])
+            catch e 
+                throw(IntConvertError(lastLineIndex+1, "time after construction", input[lastLineIndex+1]))
+            end
+            if timeAfterConstruction < 0
+                throw(PropertyError("Line $(lastLineIndex+1): Time After Construction must be greater than 0"))
+            end
+            lastLineIndex += 1
+
+            # Read elastic modulus data
+            for i=1:materials
+                currentLineData = []
+                try
+                    currentLineData = parseCurrentLine(input, 2, lastLineIndex+i, ",")
+                catch e
+                    throw(e)
+                end
+                m = 0
+                try 
+                    m = parse(Int32, currentLineData[1])
+                catch e
+                    throw(IntConvertError(lastLineIndex+i, "material index $i",currentLineData[1]))
+                end
+                if m < 1 || m > materials
+                    throw(MaterialIndexOutOfBoundsError(lastLineIndex+i, currentLineData[1]))
+                end
+                em = 0.0
+                try
+                    em = parse(Float64, currentLineData[2])
+                catch e 
+                    throw(FloatConvertError(lastLineIndex+i, "elastic modulus of material $i", currentLineData[2]))
+                end
+                if em < 0
+                    throw(PropertyError("Line $(lastLineIndex+i): Elastic modulus cannot be negative"))
+                end
+
+                elasticModulus[m] = em
+            end
+            lastLineIndex += materials
+        end
+
+        return new(problemName, model, units, foundationType, appliedAt, foundationWidth, foundationLength, appliedPressure, outputIncrements, saturatedAboveWaterTable, materials, materialNames, specificGravity, voidRatio, waterContent, totalDepth, depthGroundWaterTable, foundationDepth, subdivisions, soilLayerNumbers, bounds, heaveBeginDepth, heaveActiveDepth, swellPressure, swellIndex, compressionIndex, maxPastPressure, timeAfterConstruction, elasticModulus, conePenetration)
     end
 end
 
