@@ -38,8 +38,10 @@ Rectangle {
     
     // Signal for changing values based on input file
     JuliaSignals {
+        // There was a limit for number of arguments a signal can accept (and the required data far surpassed this limit), so they are all passed into a single array
         signal inputFileAccepted(variant values)
         onInputFileAccepted: {
+            // "Destructure" the array into variables with meaningful names
             var problemName = values[0]
             var model = values[1]
             var foundation = values[2]
@@ -54,7 +56,19 @@ Rectangle {
             var voidRatio = values[11]
             var waterContent = values[12]
             var materials = values[13]
-            // Update fields from input
+            var totalDepth = values[14]
+            var depthToGroundWaterTable = values[15]
+            var foundationDepth = values[16]
+            var bounds = values[17]
+            var subdivisions = values[18]
+            var soilLayerNumbers = values[19]
+            var heaveBeginDepth = values[20]
+            var heaveActiveDepth = values[21]
+            var swellPressure = values[22]
+            var swellIndex = values[23]
+            var compressionIndex = values[24]
+            var maxPastPressure = values[25]
+            // Update fields on this screen from input (the Julia variables get updated automatically in the onValueChanged signal of each Component)
             problemNameInput.text = problemName
             modelDropdown.currentIndex = model
             foundationDropdown.currentIndex = foundation
@@ -63,8 +77,12 @@ Rectangle {
             widthInput.text = foundationWidth
             lengthInput.text = foundationLength
             outputIncrementsCheckbox.checked = outputIncrements
+            props.outputIncrements = outputIncrements
             saturationCheckbox.checked = saturatedAboveWaterTable
+            props.saturatedAboveWaterTable = saturatedAboveWaterTable
             // Update julia variables so other screens are ready
+            
+            // Enter Data Stage 2 variables
             props.materials = materials
             var matNames = []
             for(var i = 0; i < materialNames.length; i++){
@@ -86,6 +104,51 @@ Rectangle {
                 wc = [...wc, waterContent[i]]
             }
             props.waterContent = [...wc]
+
+            // Enter Data Stage 3 variables
+            props.totalDepth = totalDepth
+            props.foundationDepth = foundationDepth
+            props.depthToGroundWaterTable = depthToGroundWaterTable
+            var b = []
+            for(var i = 0; i < bounds.length; i++){
+                b = [...b, bounds[i]]
+            }
+            props.bounds = [...b]
+            var subs = []
+            for(var i = 0; i < subdivisions.length; i++){
+                subs = [...subs, subdivisions[i]]
+            }
+            props.subdivisions = [...subs]
+            var soilLayNum = []
+            for(var i = 0; i < soilLayerNumbers.length; i++){
+                soilLayNum = [...soilLayNum, soilLayerNumbers[i]]
+            }
+            props.soilLayerNumbers = [...soilLayNum]
+
+            // Enter Data Stage 4 (Consolidation/Swell)
+            props.heaveBegin = heaveBeginDepth
+            props.heaveActive = heaveActiveDepth
+            var sp = []
+            for(var i = 0; i < swellPressure.length; i++){
+                sp = [...sp, swellPressure[i]]
+            }
+            props.swellPressure = [...sp]
+            var si = []
+            for(var i = 0; i < swellIndex.length; i++){
+                si = [...si, swellIndex[i]]
+            }
+            props.swellIndex = [...si]
+            var ci = []
+            for(var i = 0; i < compressionIndex.length; i++){
+                ci = [...ci, compressionIndex[i]]
+            }
+            props.compressionIndex = [...ci]
+            var mpp = []
+            for(var i = 0; i < maxPastPressure.length; i++){
+                mpp = [...mpp, maxPastPressure[i]]
+            }
+            props.recompressionIndex = [...mpp]
+
         }
     }
 

@@ -42,17 +42,21 @@ Rectangle {
     property variant filledRI: []
 
     Component.onCompleted: {
-        for(var i = 0; i < props.materials; i++){
-            // Populate arrays that check if forms are filled properly
-            filledSP.push(false)
-            filledSI.push(false)
-            filledCI.push(false)
-            filledRI.push(false)
-            // Initialize Julia arrays to correct number of entries, 0.0 for all
-            props.swellPressure = [...props.swellPressure, 0.0]
-            props.swellIndex = [...props.swellIndex, 0.0]
-            props.compressionIndex = [...props.compressionIndex, 0.0]
-            props.recompressionIndex = [...props.recompressionIndex, 0.0]
+        if(props.inputFileSelected){
+            print("File Selected")
+        }else{
+            for(var i = 0; i < props.materials; i++){
+                // Populate arrays that check if forms are filled properly
+                filledSP.push(false)
+                filledSI.push(false)
+                filledCI.push(false)
+                filledRI.push(false)
+                // Initialize Julia arrays to correct number of entries, 0.0 for all
+                props.swellPressure = [...props.swellPressure, 0.0]
+                props.swellIndex = [...props.swellIndex, 0.0]
+                props.compressionIndex = [...props.compressionIndex, 0.0]
+                props.recompressionIndex = [...props.recompressionIndex, 0.0]
+            }
         }
     }
 
@@ -140,8 +144,8 @@ Rectangle {
                 // Values
                 from: 0
                 to: props.totalDepth
-                first.value: props.totalDepth/4
-                second.value: 3*props.totalDepth/4
+                first.value: (props.inputFileSelected) ?  props.heaveBegin : props.totalDepth/4
+                second.value: (props.inputFileSelected) ?  props.heaveActive : 3*props.totalDepth/4
                 stepSize: 0.025
                 snapMode: RangeSlider.SnapAlways  // TODO: toggle to RangeSlider.NoSnap with a snap to grid option?
 
@@ -329,7 +333,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected) text = props.swellPressure[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true
@@ -418,7 +426,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected) text = props.swellIndex[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true
@@ -494,7 +506,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected) text = props.compressionIndex[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true
@@ -571,7 +587,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected) text = props.recompressionIndex[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true

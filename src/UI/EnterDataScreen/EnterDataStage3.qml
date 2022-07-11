@@ -47,39 +47,57 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        // Initialize subdivisions, soilLayerNums as empty
-        var subs = []
-        var soilNums = []
+        if(props.inputFileSelected){
+            totalDepth = props.totalDepth
+            // Initialize bounds
+            for(var i = 0; i < props.bounds.length; i++){
+                bounds.push(props.bounds[i])
+                if(i === 0 || i === props.bounds.length-1) continue
+                
+                // Calculate handle val
+                var val = props.bounds[i]/props.totalDepth
+                values.push(val)
+                // Create handle component
+                var slider = Qt.createComponent("LayerHandle.qml");
+                var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
+            }
+            print(bounds)
+            calculatedBounds = true
+        }else{
+            // Initialize subdivisions, soilLayerNums as empty
+            var subs = []
+            var soilNums = []
 
-        // Initialize bounds
-        bounds.push(totalDepth)  // Add top bound
-        for(var i = 0; i < props.materials - 1; i++){
-            // Spread handles evenly to begin with
-            var val = 1 - ((i+1) / props.materials)
-            values.push(val)
-            bounds.push(val*totalDepth)
+            // Initialize bounds
+            bounds.push(totalDepth)  // Add top bound
+            for(var i = 0; i < props.materials - 1; i++){
+                // Spread handles evenly to begin with
+                var val = 1 - ((i+1) / props.materials)
+                values.push(val)
+                bounds.push(val*totalDepth)
 
-            // Create handle component
-            var slider = Qt.createComponent("LayerHandle.qml");
-            var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
+                // Create handle component
+                var slider = Qt.createComponent("LayerHandle.qml");
+                var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
 
-            // Initialize subdivisions with value 2 everywhere
+                // Initialize subdivisions with value 2 everywhere
+                subs = [...subs, 2]
+
+                // Initialize soil layer numbers to index
+                soilNums = [...soilNums, i]
+            }
+            bounds.push(0.0) // Add bottom bound
+            props.bounds = [...bounds] // Update julia list of bounds
+            calculatedBounds = true
+            
+            // There is one more subdivision than # of handles, add outside loop
             subs = [...subs, 2]
+            props.subdivisions = [...subs]
 
-            // Initialize soil layer numbers to index
-            soilNums = [...soilNums, i]
+            // There is one more soil layer than # of handles, add outside loop
+            soilNums = [...soilNums, Math.floor(props.materials - 1)] // For some reason without floor() it was a float value???
+            props.soilLayerNumbers = [...soilNums]
         }
-        bounds.push(0.0) // Add bottom bound
-        props.bounds = [...bounds] // Update julia list of bounds
-        calculatedBounds = true
-
-        // There is one more subdivision than # of handles, add outside loop
-        subs = [...subs, 2]
-        props.subdivisions = [...subs]
-
-        // There is one more soil layer than # of handles, add outside loop
-        soilNums = [...soilNums, Math.floor(props.materials - 1)] // For some reason without floor() it was a float value???
-        props.soilLayerNumbers = [...soilNums]
     }
 
     // Title //////////////
@@ -102,7 +120,6 @@ Rectangle {
         from: 0
         to: soilLayerFormBackground.totalDepth
         stepSize: getStepSize()
-        value: soilLayerFormBackground.totalDepth/2
         width: 30 + (55-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         height: mainSliderBackground.height - mainSliderBackground.radius
         orientation: Qt.Vertical
@@ -126,6 +143,11 @@ Rectangle {
 
 
             return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+        }
+
+        Component.onCompleted: {
+            if(props.inputFileSelected) value = props.totalDepth - props.depthToGroundWaterTable
+            else value = soilLayerFormBackground.totalDepth/2
         }
 
         anchors {
@@ -200,7 +222,6 @@ Rectangle {
         from: 0
         to: soilLayerFormBackground.totalDepth
         stepSize: getStepSize()
-        value: 3*soilLayerFormBackground.totalDepth/4
         width: 30 + (55-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         height: mainSliderBackground.height - mainSliderBackground.radius
         orientation: Qt.Vertical
@@ -224,6 +245,11 @@ Rectangle {
 
 
             return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+        }
+
+        Component.onCompleted: {
+            if(props.inputFileSelected) value = props.totalDepth - props.foundationDepth  // Don't forget that the slider value is "upside down"
+            else value = 3*soilLayerFormBackground.totalDepth/4
         }
 
         anchors {
@@ -481,7 +507,6 @@ Rectangle {
 
                         SpinBox {
                             id: subdivisionSpinbox
-                            value: 2
                             editable: true
                             from: 2
                             to: 50 // Should we have max?
@@ -490,6 +515,11 @@ Rectangle {
 
                             height: layerInfoItem.inputHeight
                             width: 75
+
+                            Component.onCompleted: {
+                                if(props.inputFileSelected) value = props.subdivisions[index]
+                                else value = 2
+                            }
 
                             onValueModified: {
                                 var vals = []
@@ -516,6 +546,9 @@ Rectangle {
                             contentItem: TextInput {
                                 z: 2
                                 text: subdivisionSpinbox.textFromValue(subdivisionSpinbox.value, subdivisionSpinbox.locale)
+                                
+                                width: text.width
+                                height: text.height
 
                                 font.pixelSize: subdivisionSpinbox.font.pixelSize
                                 color: "#fff3e4"
@@ -527,10 +560,8 @@ Rectangle {
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
 
                                 anchors {
-                                    bottom: parent.bottom
-                                    bottomMargin: 3
-                                    left: parent.left 
-                                    leftMargin: (subdivisionSpinbox.value > 10) ? parent.width/2 + 6 : parent.width/2 + 3
+                                    verticalCenter: parent.verticalCenter
+                                    horizontalCenter: parent.horizontalCenter
                                 }
                             }
 
@@ -652,9 +683,14 @@ Rectangle {
                 // must be positive
                 bottom: 0
             }
+            property bool valueLoadedFromFile: false
+            Component.onCompleted: {
+                valueLoadedFromFile = true
+                text = props.totalDepth
+            }
             // Change for input handling
             onTextChanged: {
-                if(acceptableInput) {
+                if(acceptableInput && !valueLoadedFromFile) {
                     soilLayerFormBackground.calculatedBounds = false
                     var depth = parseFloat(text)
                     
@@ -680,6 +716,8 @@ Rectangle {
                     soilLayerFormBackground.bounds.push(0.0)
                     props.bounds = [...soilLayerFormBackground.bounds] // Update Julia list of bounds
                     soilLayerFormBackground.calculatedBounds = true
+                }else{
+                    valueLoadedFromFile = false
                 }
             }
             // Placeholder Text

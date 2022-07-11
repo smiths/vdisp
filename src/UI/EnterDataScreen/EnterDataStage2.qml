@@ -361,8 +361,6 @@ Rectangle {
 
         // If we went to a different screen and came back, reload previous entries (or if there is autofill)
         Component.onCompleted: {
-            print(props.materials)
-            print(props.materialNames)
             for(var i = 0; i < props.materials; i++){
                 materialsModel.append({"materialName": props.materialNames[i], "specificGravity": props.specificGravity[i], "voidRatio": props.voidRatio[i], "waterContent": props.waterContent[i]})
             }
