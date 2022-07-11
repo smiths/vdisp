@@ -93,7 +93,7 @@ on(inputFileSelected) do val
         
         # Emit correct signal
         if inputFileWasAccepted
-            @emit inputFileAccepted([guiData.problemName, guiData.model, guiData.foundation, guiData.appliedPressure, guiData.appliedAt, guiData.foundationWidth, guiData.foundationLength, guiData.outputIncrements, guiData.saturatedAboveWaterTable, guiData.materialNames, guiData.specificGravity, guiData.voidRatio, guiData.waterContent, guiData.materials, guiData.totalDepth, guiData.depthGroundWaterTable, guiData.foundationDepth, guiData.bounds, guiData.subdivisions, guiData.soilLayerNumbers, guiData.heaveBeginDepth, guiData.heaveActiveDepth, guiData.swellPressure, guiData.swellIndex, guiData.compressionIndex, guiData.maxPastPressure])
+            @emit inputFileAccepted([guiData.problemName, guiData.model, guiData.foundation, guiData.appliedPressure, guiData.appliedAt, guiData.foundationWidth, guiData.foundationLength, guiData.outputIncrements, guiData.saturatedAboveWaterTable, guiData.materialNames, guiData.specificGravity, guiData.voidRatio, guiData.waterContent, guiData.materials, guiData.totalDepth, guiData.depthGroundWaterTable, guiData.foundationDepth, reverse(guiData.bounds), guiData.subdivisions, guiData.soilLayerNumbers, guiData.heaveBeginDepth, guiData.heaveActiveDepth, guiData.swellPressure, guiData.swellIndex, guiData.compressionIndex, guiData.maxPastPressure])
         else
             println("File $(inputPath) not accepted")
         end
@@ -349,12 +349,8 @@ if size(ARGS)[1] == 2
     dx = Array{Float64}(undef,0)
     for i in 1:materials[]
         global bounds, dx, subdivisions, inputFileSelected
-        index = inputFileSelected[] ? i : materials[] - i + 1
-        if inputFileSelected[]
-            push!(dx, (bounds[index+1]-bounds[index])/subdivisions[i])
-        else
-            push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
-        end
+        index = materials[] - i + 1
+        push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
     end
 
     # Soil layer numbers
