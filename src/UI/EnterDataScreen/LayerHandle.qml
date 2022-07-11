@@ -34,7 +34,7 @@ Item {
         color: "#483434"
 
         Text {
-            property string unitString: (props.units === 0) ? "m" : "ft"
+            property string unitString: (props.units === 0) ? " m" : " ft"
             anchors.centerIn: parent
             color: "#fff3e4"
             font.pixelSize: 13

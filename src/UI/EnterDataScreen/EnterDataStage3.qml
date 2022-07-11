@@ -201,7 +201,7 @@ Rectangle {
                 // Label
                 Text {
                     id: dgwtSliderLabel
-                    property string unitString: (props.units === 0) ? "m" : "ft"
+                    property string unitString: (props.units === 0) ? " m" : " ft"
                     text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2) + unitString
                     color: "#fff3e4"
                     font.pixelSize: dgwtSlider.textSize
@@ -305,7 +305,7 @@ Rectangle {
                 // Label
                 Text {
                     id: foundationDepthSliderLabel
-                    property string unitString: (props.units === 0) ? "m" : "ft"
+                    property string unitString: (props.units === 0) ? " m" : " ft"
                     text: "Depth to Foundation: " + (soilLayerFormBackground.totalDepth - foundationDepthSlider.value).toFixed(2) + unitString
                     color: "#fff3e4"
                     font.pixelSize: foundationDepthSlider.textSize
@@ -732,7 +732,7 @@ Rectangle {
         }
         // Units
         Text{
-            text: (props.units === 0) ? "m" : "ft"
+            text: (props.units === 0) ? " m" : " ft"
             font.pixelSize: 18
             color: "#483434"
             anchors {

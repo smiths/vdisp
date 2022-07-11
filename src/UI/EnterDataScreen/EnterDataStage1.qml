@@ -752,7 +752,7 @@ Rectangle {
             }
             // Units
             Text{
-                text: (props.units === 0) ? "m" : "ft"
+                text: (props.units === 0) ? " m" : " ft"
                 font.pixelSize: 18
                 color: "#483434"
                 anchors {
@@ -815,7 +815,7 @@ Rectangle {
             }
             // Units
             Text{
-                text: (props.units === 0) ? "Pa" : "tsf"
+                text: (props.units === 0) ? " Pa" : " tsf"
                 font.pixelSize: 18
                 color: "#483434"
                 anchors {
@@ -885,7 +885,7 @@ Rectangle {
             }
             // Units
             Text{
-                text: (props.units === 0) ? "m" : "ft"
+                text: (props.units === 0) ? " m" : " ft"
                 font.pixelSize: 18
                 color: "#483434"
                 anchors {

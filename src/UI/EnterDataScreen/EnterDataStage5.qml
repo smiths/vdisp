@@ -273,7 +273,7 @@ Rectangle {
                     }
                     // Units
                     Text{
-                        text: (props.units === 0) ? "MPa" : "tsf"
+                        text: (props.units === 0) ? " MPa" : " tsf"
                         font.pixelSize: schmertmannDataForm.fontSize
                         color: "#483434"
                         anchors {

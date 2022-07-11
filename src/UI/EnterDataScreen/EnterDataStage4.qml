@@ -372,7 +372,7 @@ Rectangle {
                     }
                     // Units
                     Text{
-                        text: (props.units === 0) ? "Pa" : "tsf"
+                        text: (props.units === 0) ? " Pa" : " tsf"
                         font.pixelSize: consolidationSwellDataListEntry.fontSize
                         color: "#483434"
                         anchors {
@@ -627,7 +627,7 @@ Rectangle {
                     }
                     // Units
                     Text{
-                        text: (props.units === 0) ? "Pa" : "tsf"
+                        text: (props.units === 0) ? " Pa" : " tsf"
                         font.pixelSize: consolidationSwellDataListEntry.fontSize
                         color: "#483434"
                         anchors {
