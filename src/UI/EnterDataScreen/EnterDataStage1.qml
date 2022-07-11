@@ -68,6 +68,14 @@ Rectangle {
             var swellIndex = values[23]
             var compressionIndex = values[24]
             var maxPastPressure = values[25]
+            var timeAfterConstruction = values[26]
+            var conePenetration = values[27]
+            var elasticModulus = values[28]
+            var units = values[29]
+            
+            // First switch to given unit system
+            props.units = units
+
             // Update fields on this screen from input (the Julia variables get updated automatically in the onValueChanged signal of each Component)
             problemNameInput.text = problemName
             modelDropdown.currentIndex = model
@@ -149,6 +157,37 @@ Rectangle {
             }
             props.recompressionIndex = [...mpp]
 
+            // Enter Data Stage 5 (Schmertmann)
+            props.timeAfterConstruction = timeAfterConstruction
+            var cp = []
+            for(var i = 0; i < conePenetration.length; i++){
+                cp = [...cp, conePenetration[i]]
+            }
+            props.conePenetration = [...cp]
+
+            // Enter Data Stage 6 (Schmertmann Elastic)
+            var em = []
+            for(var i = 0; i < elasticModulus.length; i++){
+                em = [...em, elasticModulus[i]]
+            }
+            props.elasticModulus = [...em]
+        }
+    }
+
+    Component.onCompleted: {
+        if(props.inputFileSelected){
+            problemNameInput.text = props.problemName
+            modelDropdown.currentIndex = props.model
+            foundationDropdown.currentIndex = props.foundation
+            appliedPressureInput.text = props.appliedPressure
+            appliedDropdown.currentIndex = (props.center) ? 0 : 1
+            widthInput.text = props.foundationWidth
+            lengthInput.text = props.foundationLength
+            outputIncrementsCheckbox.checked = props.outputIncrements
+            saturationCheckbox.checked = props.saturatedAboveWaterTable
+            var path = props.inputFile.split("/")
+            var fileName = path[path.length - 1]
+            inputFromFileContainer.fileName = fileName
         }
     }
 
@@ -226,7 +265,16 @@ Rectangle {
         nameFilters: ["VDisp data files (*.dat)" ]
         onAccepted: {
             props.inputFile = fileUrl.toString()
+
+            // Once a new input file is selected, we need Julia to parse it
+            // and emit signal to QML to update fields. This only happens when 
+            // value of inputFileSelected is changed. If it was already selected 
+            // before and user selects a new one, the value of inputFileSelected
+            // would remain true without the next line, and Julia would never run
+            // the required code. Thus, we force a change in the next line
+            props.inputFileSelected = false   
             props.inputFileSelected = true
+
             // Convert URL to string
             var name = fileUrl.toString()
             // Split URL String at each "/" and extract last piece of data

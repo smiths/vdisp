@@ -33,10 +33,12 @@ Rectangle {
     property int formGap: 20
 
     Component.onCompleted: {
-        for(var i = 0; i < props.materials; i++){
-            filled.push(false)
-            // Initialize elastic modulus values to 0.0
-            props.elasticModulus = [...props.elasticModulus, 0.0]
+        if(!props.inputFileSelected){
+            for(var i = 0; i < props.materials; i++){
+                filled.push(false)
+                // Initialize elastic modulus values to 0.0
+                props.elasticModulus = [...props.elasticModulus, 0.0]
+            }
         }
     }
 
@@ -108,7 +110,7 @@ Rectangle {
             Rectangle{
                 id: timeTextBox
                 width: schmertmannElasticDataForm.inputWidth
-                height: 20
+                height: schmertmannElasticDataForm.inputHeight
                 radius: 5
                 color: "#fff3e4"
 
@@ -131,7 +133,11 @@ Rectangle {
                         // must be atleast 1 year
                         bottom: 1
                     }
-                    // Change for input handling
+                    
+                    Component.onCompleted: {
+                        if(props.inputFileSelected) text = props.timeAfterConstruction
+                    }
+
                     onTextChanged: {
                         if(acceptableInput) props.timeAfterConstruction = parseInt(text)
                     }
@@ -228,7 +234,11 @@ Rectangle {
                             // must be atleast 1 year
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected) text = props.elasticModulus[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Update form filled
