@@ -128,7 +128,7 @@ Base.showerror(io::IO, e::PropertyError) = print(io, e.msg)
 
 # These are variables/objects visible to all modules
 # that include InputParser module
-export Model, Foundation, ErrorID, GUIData,InputData, ParsingError, SoilNumberError, ModelError
+export Model, Foundation, ErrorID, GUIData, InputData, ParsingError, SoilNumberError, ModelError, UnitError, FoundationTypeError, FloatConvertError, IntConvertError, BoolConvertError, DimensionNegativeError, MaterialIndexOutOfBoundsError, PropertyError
 
 """
     parseCurrentLine(input, items, index)
@@ -975,7 +975,7 @@ struct GUIData
             throw(IntConvertError(lastLineIndex+1, "units", currentLineData[2]))
         end
         if units > 1 || units < 0
-            throw(UnitError(lastLineIndex+1, currentLineData[1]))
+            throw(UnitError(lastLineIndex+1, currentLineData[2]))
         end
         lastLineIndex+=1
 
@@ -999,12 +999,16 @@ struct GUIData
         end
         try 
             foundationWidth = parse(Float64, currentLineData[2])
-            foundationLength = parse(Float64, currentLineData[3])
         catch e
-            throw(FloatConvertError(lastLineIndex+1,"foundation dimension",currentLineData[2] + "," + currentLineData[3]))
+            throw(FloatConvertError(lastLineIndex+1,"foundation width",currentLineData[2]))
         end
         if foundationWidth < 0
             throw(DimensionNegativeError(lastLineIndex+1,"foundation width",currentLineData[2]))
+        end
+        try 
+            foundationLength = parse(Float64, currentLineData[3])
+        catch e
+            throw(FloatConvertError(lastLineIndex+1,"foundation length",currentLineData[3]))
         end
         if foundationLength < 0
             throw(DimensionNegativeError(lastLineIndex+1,"foundation length",currentLineData[3]))

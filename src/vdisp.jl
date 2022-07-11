@@ -82,18 +82,49 @@ on(inputFileSelected) do val
         # Parse input file
         guiData = 0
         inputFileWasAccepted = false
+        message = ""
         try
             guiData = GUIData(inputPath)
             inputFileWasAccepted = true
         catch e
-            println("Not accepted")
+            println(e)
+            args = []
+            f = []
+            if isa(e, MethodError)
+                args = e.args
+                f = e.f
+                if string(f) == "Main.vdisp.InputParser.ModelError"
+                    message = "Line $(args[1]): Model input should be 0, 1 or 2. Input was $(args[2])"
+                elseif string(f) == "Main.vdisp.InputParser.UnitError"
+                    message = "Line $(args[1]): Unit input should be 0, or 1. Input was $(args[2])"
+                elseif string(f) == "Main.vdisp.InputParser.FoundationTypeError"
+                    message = "Line $(args[1]): Foundation input should be 0 or 1. Input was $(args[2])"
+                elseif string(f) == "Main.vdisp.InputParser.FloatConvertError"
+                    message = "Line $(args[1]): $(args[2]) value should be a valid float value. Trouble parsing input \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.IntConvertError"
+                    message = "Line $(args[1]): $(args[2]) value should be a valid integer value. Trouble parsing input \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.BoolConvertError"
+                    message = "Line $(args[1]): $(args[2]) value should be a 0(false) or 1(true). Trouble parsing input \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.DimensionNegativeError"
+                    message = "Line $(args[1]): $(args[2]) value should be positive. Input was \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.MaterialIndexOutOfBoundsError"
+                    message = "Line $(args[1]): Invalid material index \"$(args[2])\""
+                elseif string(f) == "Main.vdisp.InputParser.PropertyError"
+                    message = args[1]
+                else
+                    message = "Unexpected error occured while parsing input file"
+                end
+            else
+                message = "Unexpected error occured while parsing input file"
+            end
+            inputFileWasAccepted = false
         end
         
         # Emit correct signal
         if inputFileWasAccepted
             @emit inputFileAccepted([guiData.problemName, guiData.model, guiData.foundation, guiData.appliedPressure, guiData.appliedAt, guiData.foundationWidth, guiData.foundationLength, guiData.outputIncrements, guiData.saturatedAboveWaterTable, guiData.materialNames, guiData.specificGravity, guiData.voidRatio, guiData.waterContent, guiData.materials, guiData.totalDepth, guiData.depthGroundWaterTable, guiData.foundationDepth, reverse(guiData.bounds), guiData.subdivisions, guiData.soilLayerNumbers, guiData.heaveBeginDepth, guiData.heaveActiveDepth, guiData.swellPressure, guiData.swellIndex, guiData.compressionIndex, guiData.maxPastPressure, guiData.timeAfterConstruction, guiData.conePenetration, guiData.elasticModulus, guiData.units])
         else
-            println("File $(inputPath) not accepted")
+            @emit inputFileRejected(message)
         end
     end
 end

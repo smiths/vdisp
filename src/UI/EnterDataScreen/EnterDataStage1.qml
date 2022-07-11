@@ -88,6 +88,10 @@ Rectangle {
             props.outputIncrements = outputIncrements
             saturationCheckbox.checked = saturatedAboveWaterTable
             props.saturatedAboveWaterTable = saturatedAboveWaterTable
+            inputFromFileDelete.width = inputFromFileContainer.height/2
+            var path = props.inputFile.split("/")
+            var fileName = path[path.length - 1]
+            inputFromFileText.text = fileName
             // Update julia variables so other screens are ready
             
             // Enter Data Stage 2 variables
@@ -172,6 +176,16 @@ Rectangle {
             }
             props.elasticModulus = [...em]
         }
+
+        signal inputFileRejected(variant message)
+        onInputFileRejected: {
+            props.inputFileSelected = false
+            inputFromFileText.text = "Input From File"
+            inputFromFileDelete.width = 0
+            
+            inputFileRejectedDialog.message = message
+            inputFileRejectedDialog.open()
+        }
     }
 
     Component.onCompleted: {
@@ -253,6 +267,8 @@ Rectangle {
             anchors.fill: parent
             onClicked: {
                 props.inputFileSelected = false
+                inputFromFileText.text = "Input From File"
+                inputFromFileDelete.width = 0
                 // Update form to empty
             }
         }
@@ -284,6 +300,88 @@ Rectangle {
             inputFromFileContainer.fileName = fileName
         }
     }
+    Popup {
+        id: inputFileRejectedDialog
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape // | Popup.CloseOnPressOutsideParent
+
+        width: popupPadding + inputFileRejectedDialogContainer.width
+        height: popupPadding + inputFileRejectedDialogContainer.height
+
+        anchors.centerIn: parent
+
+        property string message: ""
+        property int gap: 10
+        property int popupPadding: 40
+
+        background: Rectangle {
+            color: "#483434"
+            radius: 10
+        }
+
+        contentItem: Item {
+            id: inputFileRejectedDialogContainer
+            
+            width: inputFileRejectedDialogText.width 
+            height: inputFileRejectedDialogTitle.height + inputFileRejectedDialogText.height + inputFileRejectedDialogButton.height + 2*inputFileRejectedDialog.gap
+            
+            anchors.centerIn: parent
+            
+            // Title
+            Text{
+                id: inputFileRejectedDialogTitle
+                font.pixelSize: 25
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                }
+                text: "Error: Bad Input File"
+            }
+
+            // Message
+            Text{
+                id: inputFileRejectedDialogText
+                font.pixelSize: 18
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: inputFileRejectedDialogTitle.bottom
+                    topMargin: inputFileRejectedDialog.gap
+                }
+                text: inputFileRejectedDialog.message
+            }
+
+            // Close Button
+            Rectangle {
+                id: inputFileRejectedDialogButton
+                width: 100
+                height: 20
+                radius: 5
+                color: "#fff3e4"
+
+                Text{
+                    text: "Ok"
+                    font.pixelSize: 15
+                    color: "#483434"
+                    anchors.centerIn: parent
+                }
+
+                anchors{
+                    top: inputFileRejectedDialogText.bottom
+                    topMargin: inputFileRejectedDialog.gap
+                    horizontalCenter: parent.horizontalCenter
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: inputFileRejectedDialog.close()
+                }
+            }
+        }
+    }
+    
     ////////////////////////
     
     // Title
