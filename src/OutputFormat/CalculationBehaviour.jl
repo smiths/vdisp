@@ -350,8 +350,8 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
-        out *= "Settlment Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlment (ft)"],tf = tf_markdown)
+        out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
+        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlement (ft)"],tf = tf_markdown)
         out *= "\n"
     end
 
@@ -481,8 +481,8 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
-        out *= "Settlment Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlment (ft)"],tf = tf_markdown)
+        out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
+        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlement (ft)"],tf = tf_markdown)
         out *= "\n"
     end
 
@@ -692,9 +692,9 @@ end
 @doc raw"""
     schmertmannApproximation(behaviour, elasticModulusGiven, PP)
 
-Calculates settlement at each depth increment, ``\rho_i``, and sums it up to calculate total settlment, ``\rho``.
+Calculates settlement at each depth increment, ``\rho_i``, and sums it up to calculate total settlement, ``\rho``.
 If `elasticModulus == true`, input file must have elastic moduli, ``E_{si}``, for each soil layer. Else, input file must 
-have cone penetration resistance data, ``q_{ci}``, for each soil layer. Returns a 2D array of settlment values with each row 
+have cone penetration resistance data, ``q_{ci}``, for each soil layer. Returns a 2D array of settlement values with each row 
 containing the element number, the depth of the layer, and it's settlement.
 
 # Calculations
@@ -721,7 +721,7 @@ This subroutine calculates total settlement using the **Schmertmann Approximatio
 
 ``C_1``: correction to account for strain relief from embedment
 
-``C_t``: correction for time dependant inrease in settlment 
+``C_t``: correction for time dependant inrease in settlement 
 
 ``\sigma_{od}'``: effective stress at bottom of foundation
 
@@ -811,9 +811,9 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
         Δz = behaviour.dx[material]
         Δp = Qnet
 
-        # Settlment of layer i 
+        # Settlement of layer i 
         Δh_i = -C1 * Ct * Δp * Δz * Iz  / Esi
-        # Add settlemnt of layer i to total settlment, Δh
+        # Add settlemnt of layer i to total settlement, Δh
         Δh += Δh_i
 
         if behaviour.outputIncrements
