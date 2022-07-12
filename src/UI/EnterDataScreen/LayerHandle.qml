@@ -73,6 +73,11 @@ Item {
         y: pill.y - height - 10
         x: root.width/2 - width/2
 
+        onOpened: {
+            print(root.value)
+            changeValuePopupInput.text = (root.value * props.totalDepth).toFixed(3)
+        }
+
         background: Rectangle {
             color: "#483434"
             radius: 10
@@ -116,10 +121,6 @@ Item {
                         validator: DoubleValidator{
                             bottom: soilLayerFormBackground.minLayerSize
                             top: props.totalDepth - soilLayerFormBackground.minLayerSize
-                        }
-
-                        Component.onCompleted: {
-                            text = (root.value * props.totalDepth).toFixed(3)
                         }
 
                         property string placeholderText: "Enter Value..."
