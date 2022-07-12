@@ -15,7 +15,8 @@ Rectangle {
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
     property string nextScreen: "EnterDataStage2.qml"
-    
+    property bool highlightErrors: false
+
     radius: 20
     color: "#6B4F4F"
     anchors {
@@ -423,6 +424,18 @@ Rectangle {
                 left: formTop.horizontalCenter
                 leftMargin: formTop.labelGap / 2
             }
+
+            // Error highlighting
+            Rectangle {
+                visible: (enterDataFormBackground.highlightErrors && (!problemNameInput.acceptableInput || !problemNameInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
+
             TextInput {
                 id: problemNameInput
                 width: parent.width - 10
@@ -717,6 +730,18 @@ Rectangle {
                 left: widthLabel.right
                 leftMargin: formMiddle.labelGap
             }
+
+            // Error highlighting
+            Rectangle {
+                visible: (enterDataFormBackground.highlightErrors && (!widthInput.acceptableInput || !widthInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
+
             TextInput {
                 id: widthInput
                 font.pixelSize: 18
@@ -785,6 +810,18 @@ Rectangle {
                 right: formMiddle.horizontalCenter
                 rightMargin: formMiddle.itemGap / 2
             }
+
+            // Error highlighting
+            Rectangle {
+                visible: (enterDataFormBackground.highlightErrors && (!appliedPressureInput.acceptableInput || !appliedPressureInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
+
             TextInput {
                 id: appliedPressureInput
                 width: text ? text.width : appliedPressurePlaceholder.width
@@ -844,6 +881,18 @@ Rectangle {
             height: formMiddle.itemHeight
             color: "#fff3e4"
             radius: 5
+
+            // Error highlighting
+            Rectangle {
+                visible: (enterDataFormBackground.highlightErrors && (!lengthInput.acceptableInput || !lengthInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
+
             anchors {
                 left: lengthLabel.right
                 leftMargin: formMiddle.labelGap
@@ -1169,6 +1218,8 @@ Rectangle {
             onClicked: {
                 if(enterDataFormBackground.formFilled)
                     enterDataStackView.push(enterDataFormBackground.nextScreen)
+                else
+                    enterDataFormBackground.highlightErrors = true
             }
         }
         Text {

@@ -31,6 +31,7 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool highlightErrors: false
     property bool selectedOutputFile: false
     
     
@@ -42,9 +43,7 @@ Rectangle {
     property variant filledRI: []
 
     Component.onCompleted: {
-        if(props.inputFileSelected){
-            print("File Selected")
-        }else{
+        if(!props.inputFileSelected){
             for(var i = 0; i < props.materials; i++){
                 // Populate arrays that check if forms are filled properly
                 filledSP.push(false)
@@ -82,7 +81,7 @@ Rectangle {
     }
     Text {
         id: consolidationSwellSubtitle
-        text: "Consolidation Swell"
+        text: "Consolidation/Swell"
         font.pixelSize: 15
         color: "#fff3e4"
         anchors {
@@ -317,6 +316,17 @@ Rectangle {
                         leftMargin: consolidationSwellDataListEntry.labelGap
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!spTextInput.acceptableInput || !spTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: spTextInput
                         width: text ? text.width : spTextInputPlaceholder.width
@@ -410,6 +420,17 @@ Rectangle {
                         leftMargin: consolidationSwellDataListEntry.labelGap
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!siTextInput.acceptableInput || !siTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: siTextInput
                         width: parent.width - 10
@@ -488,6 +509,17 @@ Rectangle {
                         verticalCenter: consolidationSwellDataListEntry.verticalCenter
                         left: consolidationSwellDataListEntryCILabel.right
                         leftMargin: consolidationSwellDataListEntry.labelGap
+                    }
+
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!ciTextInput.acceptableInput || !ciTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
                     }
 
                     TextInput {
@@ -569,6 +601,17 @@ Rectangle {
                         verticalCenter: consolidationSwellDataListEntry.verticalCenter
                         left: consolidationSwellDataListEntryRILabel.right
                         leftMargin: consolidationSwellDataListEntry.labelGap
+                    }
+
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!riTextInput.acceptableInput || !riTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
                     }
 
                     TextInput {
@@ -657,6 +700,18 @@ Rectangle {
             top: consolidationSwellDataContainer.bottom
             topMargin: 20
         }
+
+        // Error highlighting
+        Rectangle {
+            visible: (consolidationSwellDataBackground.highlightErrors && !consolidationSwellDataBackground.selectedOutputFile)
+            opacity: 0.8
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+            radius: 5
+        }
+
         Item {
             id: selectOutputButtonContainer
             
@@ -738,6 +793,8 @@ Rectangle {
                     // mainLoader.source = "" (switch to next screen when it's designed)
                     props.finishedInput = true
                     Qt.quit()
+                }else{
+                    consolidationSwellDataBackground.highlightErrors = true
                 }
             }
         }

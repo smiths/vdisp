@@ -23,6 +23,8 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool highlightErrors: false
+    property int latestMaterialIndex: 1
     property string nextScreen: "EnterDataStage3.qml"
 
     property int topFormMargin: 30 + (55-30) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
@@ -141,7 +143,16 @@ Rectangle {
                 left: sgLabel.right
                 leftMargin: parent.labelGap
             }
-
+            // Error highlighting
+            Rectangle {
+                visible: (materialPropertiesFormBackground.highlightErrors && (!sgTextInput.acceptableInput || !sgTextInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
             TextInput {
                 id: sgTextInput
                 width: parent.width - 10
@@ -198,7 +209,16 @@ Rectangle {
                 left: vrLabel.right
                 leftMargin: parent.labelGap
             }
-
+            // Error highlighting
+            Rectangle {
+                visible: (materialPropertiesFormBackground.highlightErrors && (!vrTextInput.acceptableInput || !vrTextInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
             TextInput {
                 id: vrTextInput
                 width: parent.width - 10
@@ -255,7 +275,16 @@ Rectangle {
                 left: wcLabel.right
                 leftMargin: parent.labelGap
             }
-
+            // Error highlighting
+            Rectangle {
+                visible: (materialPropertiesFormBackground.highlightErrors && (!wcTextInput.acceptableInput || !wcTextInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
             TextInput {
                 id: wcTextInput
                 width: text ? text.width : wcTextInputPlaceholder.width
@@ -315,7 +344,13 @@ Rectangle {
                 onClicked: {
                     //if(topForm.ready) {
                     if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
-                        var name = qsTr("Material " + (materialsModel.count + 1))
+                        // Don't highlight errors until user tries to enter another material
+                        materialPropertiesFormBackground.highlightErrors = false
+
+                        // Latest material name
+                        var name = qsTr("Material " + (materialPropertiesFormBackground.latestMaterialIndex))
+                        materialPropertiesFormBackground.latestMaterialIndex += 1
+
                         // Update UI
                         materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
                         // Update Julia lists
@@ -328,6 +363,8 @@ Rectangle {
                         sgTextInput.text = ""
                         vrTextInput.text = ""
                         wcTextInput.text = ""
+                    }else{
+                        materialPropertiesFormBackground.highlightErrors = true
                     }
                 }
             }

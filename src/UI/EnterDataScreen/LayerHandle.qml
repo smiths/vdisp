@@ -74,7 +74,6 @@ Item {
         x: root.width/2 - width/2
 
         onOpened: {
-            print(root.value)
             changeValuePopupInput.text = (root.value * props.totalDepth).toFixed(3)
         }
 

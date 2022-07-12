@@ -25,7 +25,8 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
-    
+    property bool highlightErrors: false
+
     property bool selectedOutputFile: false
     property variant filled: []
     property int forceUpdateInt: 2
@@ -118,6 +119,17 @@ Rectangle {
                     left: timeLabel.right
                     leftMargin: schmertmannElasticDataForm.labelGap
                     verticalCenter: parent.verticalCenter
+                }
+
+                // Error highlighting
+                Rectangle {
+                    visible: (schmertmannElasticDataBackground.highlightErrors && (!timeTextInput.acceptableInput || !timeTextInput.text))
+                    opacity: 0.8
+                    anchors.fill: parent
+                    color: "transparent"
+                    border.color: "red"
+                    border.width: 1
+                    radius: 5
                 }
 
                 TextInput {
@@ -218,6 +230,17 @@ Rectangle {
                         verticalCenter: elasticModLabel.verticalCenter
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (schmertmannElasticDataBackground.highlightErrors && (!elasticModInput.acceptableInput || !elasticModInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: elasticModInput
                         width: text ? text.width : elasticModInputPlaceholder.width
@@ -302,6 +325,16 @@ Rectangle {
             top: schmertmannElasticDataForm.bottom
             topMargin: 20
         }
+        // Error highlighting
+        Rectangle {
+            visible: (schmertmannElasticDataBackground.highlightErrors && !schmertmannElasticDataBackground.selectedOutputFile)
+            opacity: 0.8
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+            radius: 5
+        }
         Item {
             id: selectOutputButtonContainer
             
@@ -383,6 +416,8 @@ Rectangle {
                     // mainLoader.source = "" (switch to next screen when it's designed)
                     props.finishedInput = true
                     Qt.quit()
+                }else{
+                    schmertmannElasticDataBackground.highlightErrors = true
                 }
             }
         }

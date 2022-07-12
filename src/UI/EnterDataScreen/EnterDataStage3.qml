@@ -19,11 +19,12 @@ Rectangle {
     }
 
     function isFilled(){
-        return (calculatedBounds) ? isProperBounds() : false
+        return (calculatedBounds) ? isProperBounds() && depthInput.text && depthInput.acceptableInput : false
     }
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool highlightErrors: false
     // If model = 0, next screen will be EnterDataStage4, model =1, EnterDataStage5, etc...
     property string nextScreen: "EnterDataStage" + (4 + props.model) + ".qml"
 
@@ -666,6 +667,16 @@ Rectangle {
             leftMargin: 3
             verticalCenter: depthLabel.verticalCenter
         }
+        // Error highlighting
+        Rectangle {
+            visible: (soilLayerFormBackground.highlightErrors && (!depthInput.acceptableInput || !depthInput.text))
+            opacity: 0.8
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+            radius: 5
+        }
         TextInput {
             id: depthInput
             width: text ? text.width : depthInputPlaceholder.width
@@ -758,8 +769,18 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                if(soilLayerFormBackground.formFilled)
+                if(soilLayerFormBackground.formFilled){
                     enterDataStackView.push(soilLayerFormBackground.nextScreen)
+                }else{
+                    soilLayerFormBackground.highlightErrors = true
+                    // If the only problem is layer handles
+                    if(depthInput.text && depthInput.acceptableInput){
+                        // Give user a popup alert about which layer(s) are the problem
+                        var unitsString = (props.units === 0) ? "m" : "ft"
+                        layerErrorPopup.message = "One or more layers have height less than <b>MIN_LAYER_HEIGHT</b>(" + soilLayerFormBackground.minLayerSize.toFixed(3) + unitsString + ")"
+                        layerErrorPopup.open()
+                    }
+                }
             }
         }
         Text {
@@ -785,4 +806,86 @@ Rectangle {
         }
     }
     //////////////////////
+
+    Popup {
+        id: layerErrorPopup
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape // | Popup.CloseOnPressOutsideParent
+
+        width: popupPadding + layerErrorPopupContainer.width
+        height: popupPadding + layerErrorPopupContainer.height
+
+        anchors.centerIn: parent
+
+        property string message: ""
+        property int gap: 10
+        property int popupPadding: 40
+
+        background: Rectangle {
+            color: "#483434"
+            radius: 10
+        }
+
+        contentItem: Item {
+            id: layerErrorPopupContainer
+            
+            width: layerErrorPopupText.width 
+            height: layerErrorPopupTitle.height + layerErrorPopupText.height + layerErrorPopupButton.height + 2*layerErrorPopup.gap
+            
+            anchors.centerIn: parent
+            
+            // Title
+            Text{
+                id: layerErrorPopupTitle
+                font.pixelSize: 25
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                }
+                text: "Error: Invalid Layer Height"
+            }
+
+            // Message
+            Text{
+                id: layerErrorPopupText
+                font.pixelSize: 18
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: layerErrorPopupTitle.bottom
+                    topMargin: layerErrorPopup.gap
+                }
+                text: layerErrorPopup.message
+            }
+
+            // Close Button
+            Rectangle {
+                id: layerErrorPopupButton
+                width: 100
+                height: 20
+                radius: 5
+                color: "#fff3e4"
+
+                Text{
+                    text: "Ok"
+                    font.pixelSize: 15
+                    color: "#483434"
+                    anchors.centerIn: parent
+                }
+
+                anchors{
+                    top: layerErrorPopupText.bottom
+                    topMargin: layerErrorPopup.gap
+                    horizontalCenter: parent.horizontalCenter
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: layerErrorPopup.close()
+                }
+            }
+        }
+    }
 }
