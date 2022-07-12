@@ -61,7 +61,6 @@ Rectangle {
                 var slider = Qt.createComponent("LayerHandle.qml");
                 var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
             }
-            print(bounds)
             calculatedBounds = true
         }else{
             // Initialize subdivisions, soilLayerNums as empty

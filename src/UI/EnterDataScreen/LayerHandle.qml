@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Item {
@@ -55,9 +56,133 @@ Item {
         }
        
         onPositionChanged:  if(drag.active) setPixels(pill.y + 0.5 * pill.height) // drag pill
-        onClicked: setPixels(mouse.y) // tap tray
+        onClicked: changeValuePopup.open()
     }
    
+    // Change value popup
+    Popup {
+        id: changeValuePopup
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose // Only close when valid value has been entered
+
+        width: 0.7*pill.width
+        height: 40
+
+        // Only absolute positioning was allowed
+        y: pill.y - height - 10
+        x: root.width/2 - width/2
+
+        onOpened: {
+            print(root.value)
+            changeValuePopupInput.text = (root.value * props.totalDepth).toFixed(3)
+        }
+
+        background: Rectangle {
+            color: "#483434"
+            radius: 10
+        }
+
+        contentItem: Item {
+            id: changeValuePopupContainer
+
+            width: changeValuePopupTextbox.width + gap + changeValuePopupEnter.width
+            height: changeValuePopupTextbox.height
+            
+            x: changeValuePopup.width/2 - width/2
+            y: changeValuePopup.height/2 - height/2
+
+            property int gap: 10
+
+            Item{
+                anchors.centerIn: parent
+                width: changeValuePopupTextbox.width + parent.gap + changeValuePopupEnter.width
+                height: changeValuePopupTextbox.height
+                
+                // Input
+                Rectangle {
+                    id: changeValuePopupTextbox
+                    color: "#fff3e4"
+                    radius: 5
+
+                    width: 120
+                    height: 20
+
+                    TextInput {
+                        id: changeValuePopupInput
+                        font.pixelSize: 18
+                        color: "#483434"
+
+                        width: text ? text.width : changeValuePopupPlaceholder.width
+                        x: 5
+                        
+                        selectByMouse: true
+                        clip: true
+                        validator: DoubleValidator{
+                            bottom: soilLayerFormBackground.minLayerSize
+                            top: props.totalDepth - soilLayerFormBackground.minLayerSize
+                        }
+
+                        property string placeholderText: "Enter Value..."
+                        Text{
+                            id: changeValuePopupPlaceholder
+                            text: changeValuePopupInput.placeholderText
+                            font.pixelSize: 18
+                            color: "#483434"
+                            visible: !changeValuePopupInput.text
+                        }
+                    }
+
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? " m" : " ft"
+                        font.pixelSize: 18
+                        color: "#483434"
+                        anchors {
+                            left: changeValuePopupInput.right
+                            leftMargin: 1
+                        }
+                        visible: changeValuePopupInput.text
+                    }
+                }
+
+                // Enter
+                Rectangle {
+                    id: changeValuePopupEnter
+                    width: 50
+                    height: 20
+                    color: (changeValuePopupInput.text && changeValuePopupInput.acceptableInput) ? "#fff3e4" : "#9d8f84"
+                    radius: 5
+                    anchors{
+                        verticalCenter: parent.verticalCenter
+                        left: changeValuePopupTextbox.right
+                        leftMargin: changeValuePopupContainer.gap
+                    }
+                    Text {
+                        text: "Enter"
+                        color: "#483434"
+                        font.pixelSize: 15
+                        anchors.centerIn: parent
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            if(changeValuePopupInput.text && changeValuePopupInput.acceptableInput){
+                                var value = parseFloat(changeValuePopupInput.text) / props.totalDepth
+                                updateValue(value)
+                                changeValuePopup.close()
+                            }
+                        }
+                    }
+                }
+
+                // TODO: Allow Submission By Clicking Enter
+            }
+        }
+    }
+    
+
     function setPixels(pixels) {
         // Calculate value
         var value = (maximum - minimum) / (root.height - pill.height) * (pixels - pill.height / 2) + minimum // value from pixels
@@ -68,9 +193,13 @@ Item {
         var delta = (value*100)%(step*100)
         value = ((value*100)-delta)/100
 
+        updateValue(value)
+    }
+
+    function updateValue(value){ 
         // Update handle value
         root.value = Math.min(Math.max(minimum, value))
-       
+
         // Update property in soilLayerFormBackground
         if(props.inputFileSelected)
             soilLayerFormBackground.values[index-1] = Math.min(Math.max(minimum, value))
@@ -87,7 +216,7 @@ Item {
         props.bounds = [...soilLayerFormBackground.bounds]  // Update Julia list of bounds
         soilLayerFormBackground.calculatedBounds = true
 
-        // Broadcast clicked signal
+        // Broadcast clicked signal (Get rid of this maybe, not really used?)
         clicked(Math.min(Math.max(minimum, value), maximum), index) 
     }
 }
