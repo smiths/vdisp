@@ -34,7 +34,7 @@ Rectangle {
     property int formGap: 20
 
     Component.onCompleted: {
-        if(!props.inputFileSelected){
+        if(!props.inputFileSelected || props.modelChanged){
             for(var i = 0; i < props.materials; i++){
                 filled.push(false)
                 // Initialize cone penetration values to 0.0
@@ -147,7 +147,7 @@ Rectangle {
                     }
                     
                     Component.onCompleted: {
-                        if(props.inputFileSelected) text = props.timeAfterConstruction
+                        if(props.inputFileSelected && !props.modelChanged) text = props.timeAfterConstruction
                     }
 
                     onTextChanged: {
@@ -259,7 +259,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected) text = props.conePenetration[index]
+                            if(props.inputFileSelected && !props.modelChanged) text = props.conePenetration[index]
                         }
 
                         onTextChanged: {

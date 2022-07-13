@@ -493,6 +493,7 @@ Rectangle {
                     loaded = true
                 }else{
                     props.model = currentIndex
+                    if(props.inputFileSelected) props.modelChanged = true
                 }
             }
             // Text of dropdown list

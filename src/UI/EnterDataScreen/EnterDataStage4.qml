@@ -43,7 +43,8 @@ Rectangle {
     property variant filledRI: []
 
     Component.onCompleted: {
-        if(!props.inputFileSelected){
+        // If no file was selected, or model from input file was changed, fill default values
+        if(!props.inputFileSelected || props.modelChanged){
             for(var i = 0; i < props.materials; i++){
                 // Populate arrays that check if forms are filled properly
                 filledSP.push(false)
@@ -143,8 +144,8 @@ Rectangle {
                 // Values
                 from: 0
                 to: props.totalDepth
-                first.value: (props.inputFileSelected) ?  props.heaveBegin : props.totalDepth/4
-                second.value: (props.inputFileSelected) ?  props.heaveActive : 3*props.totalDepth/4
+                first.value: (props.inputFileSelected && !props.modelChanged) ?  props.heaveBegin : props.totalDepth/4
+                second.value: (props.inputFileSelected && !props.modelChanged) ?  props.heaveActive : 3*props.totalDepth/4
                 stepSize: 0.025
                 snapMode: RangeSlider.SnapAlways  // TODO: toggle to RangeSlider.NoSnap with a snap to grid option?
 
@@ -345,7 +346,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected) text = props.swellPressure[index]
+                            if(props.inputFileSelected && !props.modelChanged) text = props.swellPressure[index]
                         }
 
                         onTextChanged: {
@@ -449,7 +450,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected) text = props.swellIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged) text = props.swellIndex[index]
                         }
 
                         onTextChanged: {
@@ -540,7 +541,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected) text = props.compressionIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged) text = props.compressionIndex[index]
                         }
 
                         onTextChanged: {
@@ -632,7 +633,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected) text = props.recompressionIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged) text = props.recompressionIndex[index]
                         }
 
                         onTextChanged: {

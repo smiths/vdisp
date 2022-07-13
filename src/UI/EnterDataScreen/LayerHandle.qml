@@ -200,7 +200,7 @@ Item {
         root.value = Math.min(Math.max(minimum, value))
 
         // Update property in soilLayerFormBackground
-        if(props.inputFileSelected)
+        if(props.inputFileSelected && !props.materialCountChanged)
             soilLayerFormBackground.values[index-1] = Math.min(Math.max(minimum, value))
         else
             soilLayerFormBackground.values[index] = Math.min(Math.max(minimum, value))

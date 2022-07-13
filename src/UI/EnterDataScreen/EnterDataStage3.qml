@@ -48,7 +48,8 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        if(props.inputFileSelected){
+        // If we had input file, and materials are still the same
+        if(props.inputFileSelected && !props.materialCountChanged){
             totalDepth = props.totalDepth
             // Initialize bounds
             for(var i = 0; i < props.bounds.length; i++){
@@ -63,10 +64,12 @@ Rectangle {
                 var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
             }
             calculatedBounds = true
-        }else{
+        }else{ // Else, if a material was added or deleted, or there was no input file
             // Initialize subdivisions, soilLayerNums as empty
             var subs = []
             var soilNums = []
+
+            totalDepth = props.totalDepth
 
             // Initialize bounds
             bounds.push(totalDepth)  // Add top bound
@@ -517,8 +520,11 @@ Rectangle {
                             width: 75
 
                             Component.onCompleted: {
-                                if(props.inputFileSelected) value = props.subdivisions[index]
-                                else value = 2
+                                if(props.inputFileSelected && !props.materialCountChanged) {
+                                    value = props.subdivisions[index]
+                                }else{
+                                    value = 2
+                                }
                             }
 
                             onValueModified: {
@@ -702,17 +708,22 @@ Rectangle {
             onTextChanged: {
                 if(acceptableInput && !valueLoadedFromFile) {
                     soilLayerFormBackground.calculatedBounds = false
-                    var depth = parseFloat(text)
                     
+                    var depth = parseFloat(text)
+                    var oldDepth = soilLayerFormBackground.totalDepth
+                    var oldSliderValueFoundation = foundationDepthSlider.value
+                    var oldSliderValueDGWT = dgwtSlider.value
+
+
                     // Update Total Depth Value
                     soilLayerFormBackground.totalDepth = depth
                     
                     // Update Julia property
                     props.totalDepth = depth
-                    
-                    // Update Julia slider values 
-                    props.foundationDepth = (props.totalDepth - foundationDepthSlider.value)
-                    props.depthToGroundWaterTable = (props.totalDepth - dgwtSlider.value)
+
+                    // Update slider values (updates Julia values automatically)
+                    foundationDepthSlider.value = ((oldSliderValueFoundation/oldDepth)*depth)
+                    dgwtSlider.value = ((oldSliderValueDGWT/oldDepth)*depth)
                     
                     // Update heave begin and active depth
                     props.heaveBegin = depth/4

@@ -346,7 +346,7 @@ Rectangle {
                     if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
                         // Don't highlight errors until user tries to enter another material
                         materialPropertiesFormBackground.highlightErrors = false
-
+                        
                         // Latest material name
                         var name = qsTr("Material " + (materialPropertiesFormBackground.latestMaterialIndex))
                         materialPropertiesFormBackground.latestMaterialIndex += 1
@@ -355,6 +355,7 @@ Rectangle {
                         materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
                         // Update Julia lists
                         props.materials = props.materials+1
+                        props.materialCountChanged = true
                         props.materialNames = [...props.materialNames,name]
                         props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
                         props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
@@ -569,6 +570,7 @@ Rectangle {
                             materialsModel.remove(index)
                             // Update Julia variables
                             props.materials = props.materials - 1
+                            props.materialCountChanged = true
                             
                             var nameList = []
                             for(var i = 0; i < materialsModel.count; i++){
