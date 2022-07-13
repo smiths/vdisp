@@ -38,12 +38,13 @@ Item {
         id: nextArrow
         width: height 
         height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-        source: "../Assets/next.png"
+        source: "../Assets/back.png"
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right 
             rightMargin: 5
         }
+        rotation: 180
         MouseArea {
             anchors.fill: parent
             onClicked: {
@@ -56,6 +57,8 @@ Item {
                     }
                     // Else, go to next stage of data entry
                     enterDataStackView.push(enterDataStackView.currentItem.nextScreen)
+                }else{
+                    enterDataStackView.currentItem.highlightErrors = true
                 }
             }
         }
