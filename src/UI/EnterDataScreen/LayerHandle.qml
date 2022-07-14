@@ -111,6 +111,11 @@ Item {
                         id: changeValuePopupInput
                         font.pixelSize: 18
                         color: "#483434"
+                        focus: true
+
+                        Component.onCompleted: {
+                            forceActiveFocus()
+                        }
 
                         width: text ? text.width : changeValuePopupPlaceholder.width
                         x: 5
@@ -129,6 +134,21 @@ Item {
                             font.pixelSize: 18
                             color: "#483434"
                             visible: !changeValuePopupInput.text
+                        }
+
+                        Keys.onEnterPressed: {
+                            if(changeValuePopupInput.text && changeValuePopupInput.acceptableInput){
+                                var value = parseFloat(changeValuePopupInput.text) / props.totalDepth
+                                updateValue(value)
+                                changeValuePopup.close()
+                            }
+                        }
+                        Keys.onReturnPressed: {
+                            if(changeValuePopupInput.text && changeValuePopupInput.acceptableInput){
+                                var value = parseFloat(changeValuePopupInput.text) / props.totalDepth
+                                updateValue(value)
+                                changeValuePopup.close()
+                            }
                         }
                     }
 
@@ -175,8 +195,6 @@ Item {
                         }
                     }
                 }
-
-                // TODO: Allow Submission By Clicking Enter
             }
         }
     }

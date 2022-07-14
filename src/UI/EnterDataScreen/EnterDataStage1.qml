@@ -241,7 +241,7 @@ Rectangle {
             id: inputFromFileText
             text: (props.inputFileSelected) ? inputFromFileContainer.fileName : "Input From File"
             font.pixelSize: 12 + 7 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-            color: "#EED6C4"
+            color: parent.activeFocus ? "#fff3e4" : "#EED6C4"
 
             anchors {
                 left: inputFromFileImage.right
@@ -450,6 +450,15 @@ Rectangle {
                     left: parent.left 
                     leftMargin: 5
                 }
+
+                focus: true
+
+                Component.onCompleted: {
+                    forceActiveFocus()
+                }
+
+                KeyNavigation.tab: appliedPressureInput
+                KeyNavigation.down: appliedPressureInput
                 
                 selectByMouse: true
                 clip: true
@@ -762,6 +771,11 @@ Rectangle {
                     left: parent.left 
                     leftMargin: 5
                 }
+
+                KeyNavigation.up: problemNameInput
+                KeyNavigation.left: appliedPressureInput
+                KeyNavigation.tab: lengthInput
+                KeyNavigation.down: lengthInput
                 
                 selectByMouse: true
                 clip: true
@@ -842,6 +856,12 @@ Rectangle {
                     left: parent.left 
                     leftMargin: 5
                 }
+
+                KeyNavigation.up: problemNameInput
+                KeyNavigation.left: problemNameInput
+                KeyNavigation.tab: widthInput
+                KeyNavigation.down: widthInput
+                KeyNavigation.right: widthInput
                 
                 selectByMouse: true
                 clip: true
@@ -943,6 +963,13 @@ Rectangle {
                     visible: !lengthInput.text
                 }
             }
+
+            KeyNavigation.tab: continueButton
+            KeyNavigation.down: continueButton
+            KeyNavigation.right: continueButton
+            KeyNavigation.up: widthInput
+            KeyNavigation.left: widthInput
+
             // Units
             Text{
                 text: (props.units === 0) ? " m" : " ft"
@@ -1218,7 +1245,28 @@ Rectangle {
         width: parent.width/6
         height: 25
         radius: 12
+        focus: true
         color: (parent.formFilled) ? "#fff3e4" : "#9d8f84"
+        border.color: (activeFocus) ? "#483434" : "transparent"
+
+        KeyNavigation.up: lengthInput
+        KeyNavigation.tab: problemNameInput
+
+        Keys.onReturnPressed: {
+            // Same as onClicked
+            if(enterDataFormBackground.formFilled)
+                    enterDataStackView.push(enterDataFormBackground.nextScreen)
+            else
+                enterDataFormBackground.highlightErrors = true
+        }
+        Keys.onEnterPressed: {
+            // Same as onClicked
+            if(enterDataFormBackground.formFilled)
+                    enterDataStackView.push(enterDataFormBackground.nextScreen)
+            else
+                enterDataFormBackground.highlightErrors = true
+        }
+
         anchors {
             bottom: parent.bottom
             bottomMargin: 20
@@ -1236,6 +1284,7 @@ Rectangle {
         Text {
             id: continueButtonText
             text: "Continue"
+            color: "#483434"
             font.pixelSize: 13
             anchors {
                 verticalCenter: continueButtonIcon.verticalCenter
