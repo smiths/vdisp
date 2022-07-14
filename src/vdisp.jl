@@ -13,7 +13,7 @@ using Observables
 
 export readInputFile
 
-PRINT_DEBUG = true
+PRINT_DEBUG = false
 
 # Julia variables
 materialNames = Array{String}(undef,0)

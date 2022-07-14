@@ -215,7 +215,7 @@ Rectangle {
         property int gap: 4   
         property int offset: 10    
         width: inputFromFileImage.width + inputFromFileText.width + gap
-        height: 20
+        height: 20 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
 
         anchors{
             left: parent.left
@@ -240,7 +240,7 @@ Rectangle {
         Text {
             id: inputFromFileText
             text: (props.inputFileSelected) ? inputFromFileContainer.fileName : "Input From File"
-            font.pixelSize: 12
+            font.pixelSize: 12 + 7 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
             color: "#EED6C4"
 
             anchors {
@@ -258,12 +258,16 @@ Rectangle {
     Image{
         id: inputFromFileDelete
         source: "../Assets/exit.png"
-        width: (props.inputFileSelected) ? inputFromFileContainer.height/2 : 0 
-        height: width
+        visible: props.inputFileSelected
         anchors {
             left: inputFromFileContainer.right
-            leftMargin: inputFromFileContainer.gap
-            verticalCenter: inputFromFileContainer.verticalCenter
+            leftMargin: inputFromFileContainer.gap*1.5
+            right: inputFromFileContainer.right
+            rightMargin: -(inputFromFileContainer.gap*1.5 + inputFromFileDelete.height)
+            top: inputFromFileContainer.top
+            topMargin: inputFromFileContainer.height/4
+            bottom: inputFromFileContainer.bottom
+            bottomMargin: inputFromFileContainer.height/4
         }
         MouseArea {
             anchors.fill: parent
