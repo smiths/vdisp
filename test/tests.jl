@@ -13,6 +13,7 @@ function consolidationSwellTest(outputData)
     inputData = outputData.inputData
 
     @test inputData.problemName == "    FOOTING IN EXPANSIVE SOIL"
+    @test inputData.units == 1
     @test inputData.nodalPoints == 17
     @test inputData.bottomPointIndex == 7
     @test inputData.soilLayers == 2

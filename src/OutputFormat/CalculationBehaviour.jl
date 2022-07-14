@@ -9,7 +9,6 @@ export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, Leona
 
 # For now these will be hardcoded into here, later they will
 # be part of a module of constants
-GAMMA_W = 0.03125
 OUTPUT_EFFECTIVE_STRESS = false
 
 ### CalculationOutputBehaviour interface ##############
@@ -52,8 +51,9 @@ struct ConsolidationSwellCalculationBehaviour <: CalculationOutputBehaviour
     maxPastPressure::Array{Float64}
     outputIncrements::Bool
     elements::Int
+    units::Int
 
-    ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6],calcValues[1],calcValues[2],calcValues[3],calcValues[4],calcValues[5],calcValues[6],calcValues[7], calcValues[8])
+    ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6],calcValues[1],calcValues[2],calcValues[3],calcValues[4],calcValues[5],calcValues[6],calcValues[7], calcValues[8], calcValues[9])
 end
 function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     # getValue does the calculations
@@ -74,22 +74,24 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
         out *= "\n"
     end
 
+    depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
+
     if behaviour.outputIncrements
         if size(heaveAboveFoundationTable)[1] > 0
             out *= "Heave Distribution Above Foundation: \n"
-            out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
             out *= "Heave Distribution Below Foundation: \n"
-            out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth (ft)", "Delta Heave (ft)", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
         else
             out *= "Not enough increments to show tables\n\n"
         end
     end
 
-    out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * string(Δh1) * "ft\n"
-    out *= "Subsoil Movement: " * string(Δh2) * "ft\n"
-    out *= "Total Heave: " * string(Δh) * "ft\n"
+    out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * string(Δh1) * "$(depthUnit)\n"
+    out *= "Subsoil Movement: " * string(Δh2) * "$(depthUnit)\n"
+    out *= "Total Heave: " * string(Δh) * "$(depthUnit)\n"
 
     return out
 end
@@ -325,8 +327,9 @@ struct SchmertmannCalculationBehaviour <: CalculationOutputBehaviour
     timeAfterConstruction::Int
     conePenetrationResistance::Array{Float64}
     outputIncrements::Bool
+    units::Int
 
-    SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4])
+    SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5])
 end
 function getOutput(behaviour::SchmertmannCalculationBehaviour)
     # getValue does the calculations
@@ -347,15 +350,17 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
         out *= "\n"
     end
 
+    depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
+
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
         out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlement (ft)"],tf = tf_markdown)
+        out *= pretty_table(String, settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end
 
-    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "ft\n"
+    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "$(depthUnit)\n"
 
     return out
 end
@@ -456,8 +461,9 @@ struct SchmertmannElasticCalculationBehaviour <: CalculationOutputBehaviour
     conePenetrationResistance::Array{Float64}
     outputIncrements::Bool
     elasticModulus::Array{Float64}
+    units::Int
 
-    SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5])
+    SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5], calcValues[6])
 end
 function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     # getValue does the calculations
@@ -478,15 +484,17 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
         out *= "\n"
     end
 
+    depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
+
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
         out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth (ft)", "Settlement (ft)"],tf = tf_markdown)
+        out *= pretty_table(String, settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end
 
-    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "ft\n"
+    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "$(depthUnit)\n"
 
     return out
 end
@@ -548,6 +556,9 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
     P = Array{Float64}(undef,behaviour.nodalPoints)
     PP = Array{Float64}(undef,behaviour.nodalPoints)
     
+    # Unit weight of water (0.03125 tcf = 62.4 pcf or 9810 N/m^3 = 0.981kN/m^3)
+    GAMMA_W = (behaviour.units == Int(InputParser.Imperial)) ? 0.03125 : 0.9810
+
     # Initial values
     P[1] = 0.0
     PP[1] = 0.0 
@@ -573,7 +584,7 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
 
         Δx += behaviour.dx[material]
     end
-
+    
     # Not sure why we have to do this, or theory behind it
     if behaviour.model == "ConsolidationSwell" && behaviour.equilibriumMoistureProfile
         # MO = DGWT/DX, but cannot be bigger than NNP
@@ -762,6 +773,10 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
     Δh1 = 0.0
     # Net Applied Footing Pressure
     Qnet = behaviour.appliedPressure - PP[behaviour.bottomPointIndex]
+
+    # TODO: Find a better way for dealing with negative Qnet
+    Qnet = max(Qnet, 0) # Ensures Qnet is always non-negative
+
     # Foundation Depth and Index
     foundationMaterial = behaviour.soilLayerNumber[behaviour.bottomPointIndex]
     foundationDepth = 0

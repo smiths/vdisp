@@ -80,6 +80,7 @@ Rectangle {
             // Update fields on this screen from input (the Julia variables get updated automatically in the onValueChanged signal of each Component)
             problemNameInput.text = problemName
             modelDropdown.currentIndex = model
+            modelDropdown.loadedFromFile = false // So we keep track of when model loads from file into ComboBox
             foundationDropdown.currentIndex = foundation
             appliedPressureInput.text = appliedPressure
             appliedDropdown.currentIndex = appliedAt
@@ -487,13 +488,18 @@ Rectangle {
             font.pixelSize: 18
             
             property bool loaded: false
+            property bool loadedFromFile: false
             onCurrentIndexChanged: {
                 if(!loaded){
                     // The ComboBox loading also emits current index change signal
                     loaded = true
                 }else{
                     props.model = currentIndex
-                    if(props.inputFileSelected) props.modelChanged = true
+                    if(props.inputFileSelected && loadedFromFile) {
+                        props.modelChanged = true
+                    }else{
+                        loadedFromFile = true // Prevents updating "modelChanged" first time we load the model from input
+                    }
                 }
             }
             // Text of dropdown list
