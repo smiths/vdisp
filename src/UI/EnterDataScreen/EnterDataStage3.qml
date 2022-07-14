@@ -36,7 +36,7 @@ Rectangle {
     property variant values: []
     property double totalDepth: 10.0
     property variant bounds: []
-    property double minLayerSize: 0.1 * totalDepth
+    property double minLayerSize: (props.units === 0) ? 0.0254 : 1/12  // Minimum layer sizes: 2.54cm/1inch
     property bool calculatedBounds: false
 
     radius: 20
@@ -696,8 +696,8 @@ Rectangle {
             selectByMouse: true
             clip: true
             validator: DoubleValidator{
-                // must be positive
-                bottom: 0
+                // must be greater than a minimum size
+                bottom: props.materials * soilLayerFormBackground.minLayerSize
             }
             property bool valueLoadedFromFile: false
             Component.onCompleted: {

@@ -57,7 +57,24 @@ Rectangle {
         width: parent.width/6
         height: 25
         radius: 12
+        focus: true
         color: (parent.formFilled) ? "#fff3e4" : "#9d8f84"
+        border.color: (activeFocus) ? "#483434" : "transparent"
+
+        KeyNavigation.up: addBtn
+        KeyNavigation.tab: sgTextInput
+
+        Keys.onEnterPressed: {
+            // Same as onClicked
+            if(materialPropertiesFormBackground.formFilled)
+                    enterDataStackView.push(materialPropertiesFormBackground.nextScreen)
+        }
+        Keys.onReturnPressed: {
+            // Same as onClicked
+            if(materialPropertiesFormBackground.formFilled)
+                    enterDataStackView.push(materialPropertiesFormBackground.nextScreen)
+        }
+
         anchors {
             bottom: parent.bottom
             bottomMargin: 20
@@ -73,6 +90,7 @@ Rectangle {
         Text {
             id: continueButtonText
             text: "Continue"
+            color: "#483434"
             font.pixelSize: 13
             anchors {
                 verticalCenter: continueButtonIcon.verticalCenter
@@ -163,6 +181,13 @@ Rectangle {
                     leftMargin: 5
                     verticalCenter: parent.verticalCenter
                 }
+
+                Component.onCompleted: {
+                    forceActiveFocus()
+                }
+
+                KeyNavigation.tab: vrTextInput
+                KeyNavigation.right: vrTextInput
                 
                 selectByMouse: true
                 clip: true
@@ -229,6 +254,10 @@ Rectangle {
                     leftMargin: 5
                     verticalCenter: parent.verticalCenter
                 }
+
+                KeyNavigation.tab: wcTextInput
+                KeyNavigation.right: wcTextInput
+                KeyNavigation.left: sgTextInput
                 
                 selectByMouse: true
                 clip: true
@@ -296,6 +325,10 @@ Rectangle {
                     verticalCenter: parent.verticalCenter
                 }
                 
+                KeyNavigation.tab: addBtn
+                KeyNavigation.right: addBtn
+                KeyNavigation.left: vrTextInput
+
                 selectByMouse: true
                 clip: true
                 validator: DoubleValidator{
@@ -331,7 +364,9 @@ Rectangle {
             id: addBtn
             width: 20 + (25-20) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
             height: width
-            source: "../Assets/add.png"
+            focus: true
+            property string fileExt: activeFocus ? "-selected" : ""
+            source: "../Assets/add" + fileExt + ".png"
             anchors {
                 left: wcTextbox.right
                 leftMargin: topForm.labelGap
@@ -339,10 +374,68 @@ Rectangle {
                 verticalCenter: parent.verticalCenter
             }
 
+            KeyNavigation.left: wcTextInput
+            KeyNavigation.tab: sgTextInput
+            KeyNavigation.down: continueButton
+
+            Keys.onReturnPressed: {
+                // Same as onClicked
+                if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
+                    // Don't highlight errors until user tries to enter another material
+                    materialPropertiesFormBackground.highlightErrors = false
+                    
+                    // Latest material name
+                    var name = qsTr("Material " + (materialPropertiesFormBackground.latestMaterialIndex))
+                    materialPropertiesFormBackground.latestMaterialIndex += 1
+
+                    // Update UI
+                    materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
+                    // Update Julia lists
+                    props.materials = props.materials+1
+                    props.materialCountChanged = true
+                    props.materialNames = [...props.materialNames,name]
+                    props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
+                    props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
+                    props.waterContent = [...props.waterContent, parseFloat(wcTextInput.text)]
+                    // Clear fields
+                    sgTextInput.text = ""
+                    vrTextInput.text = ""
+                    wcTextInput.text = ""
+                }else{
+                    materialPropertiesFormBackground.highlightErrors = true
+                }
+            }
+            Keys.onEnterPressed: {
+                // Same as onClicked
+                if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
+                    // Don't highlight errors until user tries to enter another material
+                    materialPropertiesFormBackground.highlightErrors = false
+                    
+                    // Latest material name
+                    var name = qsTr("Material " + (materialPropertiesFormBackground.latestMaterialIndex))
+                    materialPropertiesFormBackground.latestMaterialIndex += 1
+
+                    // Update UI
+                    materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
+                    // Update Julia lists
+                    props.materials = props.materials+1
+                    props.materialCountChanged = true
+                    props.materialNames = [...props.materialNames,name]
+                    props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
+                    props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
+                    props.waterContent = [...props.waterContent, parseFloat(wcTextInput.text)]
+                    // Clear fields
+                    sgTextInput.text = ""
+                    vrTextInput.text = ""
+                    wcTextInput.text = ""
+                }else{
+                    materialPropertiesFormBackground.highlightErrors = true
+                }
+            }
+
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    //if(topForm.ready) {
                     if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
                         // Don't highlight errors until user tries to enter another material
                         materialPropertiesFormBackground.highlightErrors = false
