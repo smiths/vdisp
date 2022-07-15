@@ -33,6 +33,7 @@ Rectangle {
     property bool formFilled: isFilled()
     property bool highlightErrors: false
     property bool selectedOutputFile: false
+    property string nextScreen: "../OutputScreen/ConsolidationSwellOutputScreen.qml" 
     
     
     property int formGap: 20
@@ -791,9 +792,8 @@ Rectangle {
             anchors.fill: parent
             onClicked: {
                 if(consolidationSwellDataBackground.formFilled){
-                    // mainLoader.source = "" (switch to next screen when it's designed)
-                    props.finishedInput = true
-                    Qt.quit()
+                    mainLoader.source = consolidationSwellDataBackground.nextScreen
+                    props.createOutputData = true
                 }else{
                     consolidationSwellDataBackground.highlightErrors = true
                 }

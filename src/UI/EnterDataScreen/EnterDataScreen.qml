@@ -52,8 +52,12 @@ Item {
                 if(enterDataStackView.currentItem.formFilled){
                     // If we are at 4th stage, move on to output
                     if(enterDataStackView.depth > 3) {
-                        Qt.quit()
-                        props.finishedInput = true
+                        if(enterDataStackView.currentItem.nextScreen){
+                            mainLoader.source = enterDataStackView.currentItem.nextScreen
+                        }else{
+                            Qt.quit()
+                            props.finishedInput = true
+                        }
                     }
                     // Else, go to next stage of data entry
                     enterDataStackView.push(enterDataStackView.currentItem.nextScreen)

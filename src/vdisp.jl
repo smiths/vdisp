@@ -133,7 +133,6 @@ end
 # Units
 units = Observable(Int(InputParser.Imperial))
 
-
 # Update QML variables
 setProblemName = on(problemName) do val
     if PRINT_DEBUG
@@ -346,47 +345,31 @@ setElasticMod = on(elasticModulusQML) do val
     global elasticModulus = copy(em)
 end
 
-# Don't load or run anything for tests
-if size(ARGS)[1] == 2
-    path = (size(ARGS)[1] == 2) ? "./src/UI/main.qml" : "../src/UI/main.qml"
-    
-    # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged))
-    
-    # Run the app
-    exec()
 
-    # After app is done executing
-
-    # Exit if form is not filled
-    if !finishedInput[]
-        println("Form not filled. Exiting app....")
-        exit()
-    end
-
+function createOutputDataFromGUI()
     global materialNames, specificGravity, voidRatio, waterContent, subdivisions, bounds, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, elasticModulus, conePenetration
-
+    
     println("Converting Data")
 
     # Calculate elements and nodal points
     elements = 0
     for i in subdivisions
-        global elements += i
+        elements += i
     end
     nodalPoints = elements + 1
 
     # Calculate dx
     dx = Array{Float64}(undef,0)
     for i in 1:materials[]
-        global bounds, dx, subdivisions, inputFileSelected
         index = materials[] - i + 1
         push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
     end
 
+    outputDataProgress[] = 10
+
     # Soil layer numbers
     soilLayerNums = Array{Int32}(undef,0)
     for i in 1:materials[]
-        global subdivisions, soilLayerNumbers, soilLayerNums
         for j in 1:subdivisions[i]
             # In the input file, soil layer number index starts at 1, in GUI it starts at 0
             if inputFileSelected[]
@@ -397,13 +380,14 @@ if size(ARGS)[1] == 2
         end
     end
 
+    outputDataProgress[] = 30
+
     # Foundation index, layer
     depth = 0
     foundationIndex = 0
     foundationLayer = 1
     increment = 0
     while depth < foundationDepth[]
-        global depth, foundationIndex, foundationLayer, increment, subdivisions
         depth += dx[foundationLayer]
         foundationIndex += 1
         increment += 1
@@ -412,6 +396,8 @@ if size(ARGS)[1] == 2
             increment = 0
         end
     end
+
+    outputDataProgress[] = 45
 
     # Converting from dropdown menu index to value
     modelConversion = [0, 2, 4] # Consolidation Swell NOPT = 0, Schmertmann NOPT = 2, Schemrtmann Elastic NOPT = 4
@@ -431,6 +417,59 @@ if size(ARGS)[1] == 2
 
     println("OutputData created")
 
+    outputDataProgress[] = 100
+
+    return outData
+end
+# Output 
+outputData = Observable([])
+createOutputData = Observable(false)
+on(createOutputData) do val
+    if val
+        outData = createOutputDataFromGUI()
+        inData = outData.inputData
+        outputParams = []
+        if Int(inData.model) == 0
+            P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = OutputFormat.performGetCalculationValue(outData)
+            
+            # When passing a 2D array into QML, it becomes 1D array so we need to know the number of rows
+            heaveAboveFoundationTableRows = size(heaveAboveFoundationTable)[1]
+            heaveBelowFoundationTableRows = size(heaveBelowFoundationTable)[1]
+            
+            append!(outputParams, [inData.problemName, P, PP, heaveAboveFoundationTable, heaveAboveFoundationTableRows, heaveBelowFoundationTable, heaveBelowFoundationTableRows, Δh1, Δh2, Δh])
+        end
+        global outputData[] = outputParams
+    end
+end
+outputDataCreated = Observable(false)
+outputDataProgress = Observable(0.0)
+on(outputDataProgress) do val 
+    if val == 100
+        outputDataCreated[] = true
+    end
+end
+
+# Don't load or run anything for tests
+if size(ARGS)[1] == 2
+    path = (size(ARGS)[1] == 2) ? "./src/UI/main.qml" : "../src/UI/main.qml"
+    
+    # Load file main.qml
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "outputDataProgress" => outputDataProgress, "createOutputData" => createOutputData, "outputData"=>outputData))
+    
+    # Run the app
+    exec()
+
+    # After app is done executing
+
+    # Exit if form is not filled
+    if !finishedInput[]
+        println("Form not filled. Exiting app....")
+        exit()
+    end
+
+    # Create OutputData
+    outData = createOutputDataFromGUI()
+    
     # Remove "file://" from beginning of path
     outputPath = outputFileQML[][7:end]
     # defaultFile = "./src/.data/output_data.dat"
