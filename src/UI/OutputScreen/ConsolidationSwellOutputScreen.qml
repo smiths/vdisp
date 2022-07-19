@@ -8,28 +8,6 @@ Rectangle {
     color: "#483434"
     anchors.fill: parent
 
-    // Calculating Data Progress Bar
-    CustomProgressBar {
-        id: loadingProgressBar
-        minimum: 0
-        maximum: 100
-        value: props.outputDataProgress
-        visible: !props.outputDataCreated
-        anchors.centerIn: parent
-    }
-    Text {
-        id: progressText
-        visible: !props.outputDataCreated
-        text: "Calculating Values: " + loadingProgressBar.value + "%" 
-        color: "#fff3e4"
-        font.pixelSize: 25
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: loadingProgressBar.bottom
-            topMargin: 10
-        }
-    }
-
     property int titleMargin: 10 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
     property int subtitleMargin: 3 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
     property int tableMargin: 1 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)

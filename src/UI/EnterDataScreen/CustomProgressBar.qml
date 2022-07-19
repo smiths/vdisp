@@ -1,5 +1,9 @@
 import QtQuick 2.0
 
+/*
+    No use for this currently, maybe will add to EnterDataStage4,5,6
+*/
+
 Rectangle { // background
     id: root
 
