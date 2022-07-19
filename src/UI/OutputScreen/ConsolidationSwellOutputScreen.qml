@@ -775,7 +775,7 @@ Rectangle {
     }
     Popup {
         id: fileDownloadingPopup
-        width: fileDownloadingPopupText.width + gap*2
+        width: fileDownloadingPopupText.width + gap*3 + fileDownloadingPopupImage.width
         height: 30
         closePolicy: Popup.NoAutoClose // Only close from timer
 
@@ -800,6 +800,26 @@ Rectangle {
                     left: parent.left
                     leftMargin: fileDownloadingPopup.gap
                     verticalCenter: parent.verticalCenter
+                }
+            }
+
+            Image {
+                id: fileDownloadingPopupImage
+                source: "../Assets/spinner.png"
+                height: 20
+                width: 20
+
+                anchors {
+                    left: fileDownloadingPopupText.right
+                    leftMargin: fileDownloadingPopup.gap
+                    verticalCenter: fileDownloadingPopupText.verticalCenter
+                }
+
+                RotationAnimator on rotation {
+                    from: 0;
+                    to: 360;
+                    duration: 1000
+                    running: true
                 }
             }
         }
