@@ -436,7 +436,20 @@ on(createOutputData) do val
             heaveAboveFoundationTableRows = size(heaveAboveFoundationTable)[1]
             heaveBelowFoundationTableRows = size(heaveBelowFoundationTable)[1]
             
-            append!(outputParams, [inData.problemName, P, PP, heaveAboveFoundationTable, heaveAboveFoundationTableRows, heaveBelowFoundationTable, heaveBelowFoundationTableRows, Δh1, Δh2, Δh])
+            # Calculate effective stresses of each layer
+            effective_stresses = [0.0 for i in 1:inData.soilLayers]
+            for i in 1:inData.elements 
+                effective_stresses[inData.soilLayerNumber[i]] += P[i]
+            end
+
+            # Calculate foundation stresses of each layer
+            total_stresses = [0.0 for i in 1:inData.soilLayers]
+            for i in 1:inData.elements
+                total_stresses[inData.soilLayerNumber[i]] += PP[i]
+            end
+            foundation_stresses = [total_stresses[i] - effective_stresses[i] for i in 1:inData.soilLayers]
+
+            append!(outputParams, [inData.problemName, P, PP, heaveAboveFoundationTable, heaveAboveFoundationTableRows, heaveBelowFoundationTable, heaveBelowFoundationTableRows, Δh1, Δh2, Δh, effective_stresses, total_stresses, foundation_stresses])
         end
         global outputData[] = outputParams
     end

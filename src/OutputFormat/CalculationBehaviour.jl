@@ -188,9 +188,9 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
             compressionIndex = behaviour.compressionIndex[material]
             maxPastPressure = behaviour.maxPastPressure[material]
             
-            term1 = swellPressure / pressure
-            term2 = swellPressure / maxPastPressure
-            term3 = maxPastPressure / pressure
+            term1 = max(swellPressure / pressure, 0)
+            term2 = max(swellPressure / maxPastPressure)
+            term3 = max(maxPastPressure / pressure)
 
             finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
@@ -221,9 +221,9 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         compressionIndex = behaviour.compressionIndex[material]
         maxPastPressure = behaviour.maxPastPressure[material]
         
-        term1 = swellPressure / pressure
-        term2 = swellPressure / maxPastPressure
-        term3 = maxPastPressure / pressure
+        term1 = max(swellPressure / pressure, 0)
+        term2 = max(swellPressure / maxPastPressure)
+        term3 = max(maxPastPressure / pressure)
 
         finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
         Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
