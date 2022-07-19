@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
-import QtQuick.Dialogs 1.0
+// import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -26,13 +26,14 @@ Rectangle {
 
     function isFilled(){
         // should there be a min difference between heave begin and heave active depth
-        return selectedOutputFile && (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
+        //return selectedOutputFile && (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
+        return (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
     }
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
     property bool highlightErrors: false
-    property bool selectedOutputFile: false
+    // property bool selectedOutputFile: false
     property string nextScreen: "../OutputScreen/ConsolidationSwellOutputScreen.qml" 
     
     
@@ -689,92 +690,6 @@ Rectangle {
         //////////////////////
     }
     ////////////////////////////////
-
-    // Select Output Location /////
-    Rectangle {
-        id: selectOutputButton
-        color: "#fff3e4"
-        radius: 5
-        width: selectOutputButtonContainer.width + 10
-        height: selectOutputButtonContainer.height + 5
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: consolidationSwellDataContainer.bottom
-            topMargin: 20
-        }
-
-        // Error highlighting
-        Rectangle {
-            visible: (consolidationSwellDataBackground.highlightErrors && !consolidationSwellDataBackground.selectedOutputFile)
-            opacity: 0.8
-            anchors.fill: parent
-            color: "transparent"
-            border.color: "red"
-            border.width: 1
-            radius: 5
-        }
-
-        Item {
-            id: selectOutputButtonContainer
-            
-            height: selectOutputButtonIcon.height
-            width: selectOutputButtonText.width + gap + selectOutputButtonIcon.width
-
-            anchors.centerIn: parent
-
-            property int gap: 10
-            property string fileName: ""
-
-            Text{
-                id: selectOutputButtonText
-                text: (consolidationSwellDataBackground.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Select Output File"
-                color: "#483434"
-                font.pixelSize: 15
-                anchors{
-                    left: parent.left
-                    verticalCenter: selectOutputButtonIcon.verticalCenter
-                }
-            }
-            Image {
-                id: selectOutputButtonIcon
-                source: (consolidationSwellDataBackground.selectedOutputFile) ? "../Assets/fileAccept.png" : "../Assets/fileUpload.png"
-                width: 20
-                height: 20
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: selectOutputButtonText.right
-                    leftMargin: selectOutputButtonContainer.gap
-                }
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: fileDialog.open()
-        }
-    }
-    FileDialog {
-        id: fileDialog
-        title: "Please select output file"
-        selectMultiple: false
-        selectExisting: false
-        folder: shortcuts.home
-        nameFilters: ["VDisp data files (*.dat)" ]
-        onAccepted: {
-            consolidationSwellDataBackground.selectedOutputFile = true
-            props.outputFile = fileUrl.toString()
-            // Convert URL to string
-            var name = fileUrl.toString()
-            // Split URL String at each "/" and extract last piece of data
-            var path = name.split("/")
-            var fileName = path[path.length - 1]
-            // Update fileName property
-            selectOutputButtonContainer.fileName = fileName
-        }
-        onRejected: {
-            consolidationSwellDataBackground.selectedOutputFile = false
-        }
-    }
-    ///////////////////////////////
 
     // Continue Button ///
     Rectangle {

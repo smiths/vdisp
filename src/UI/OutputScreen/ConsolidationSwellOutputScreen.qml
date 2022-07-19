@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -691,4 +692,127 @@ Rectangle {
         }
     }
     //////////////////////////////
+
+    // Save Output /////
+    Rectangle {
+        id: selectOutputButton
+        color: "#6B4F4F"
+        border.color: "#fff3e4"
+        radius: 5
+        width: selectOutputButtonContainer.width + 10
+        height: selectOutputButtonContainer.height + 5
+        anchors {
+            right: parent.right
+            rightMargin: 10
+            bottom: parent.bottom
+            bottomMargin: 10
+        }
+
+        Item {
+            id: selectOutputButtonContainer
+            
+            height: selectOutputButtonIcon.height
+            width: selectOutputButtonText.width + gap + selectOutputButtonIcon.width
+
+            anchors.centerIn: parent
+
+            property int gap: 10
+            property string fileName: ""
+            property bool selectedOutputFile: false
+
+            Text{
+                id: selectOutputButtonText
+                text: (selectOutputButtonContainer.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Save Output"
+                color: "#fff3e4"
+                font.pixelSize: 15
+                anchors{
+                    left: parent.left
+                    verticalCenter: selectOutputButtonIcon.verticalCenter
+                }
+            }
+            Image {
+                id: selectOutputButtonIcon
+                source: (selectOutputButtonContainer.selectedOutputFile) ? "../Assets/fileAccept.png" : "../Assets/download.png"
+                width: 20
+                height: 20
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: selectOutputButtonText.right
+                    leftMargin: selectOutputButtonContainer.gap
+                }
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: fileDialog.open()
+        }
+    }
+    FileDialog {
+        id: fileDialog
+        title: "Please select output file"
+        selectMultiple: false
+        selectExisting: false
+        folder: shortcuts.home
+        nameFilters: ["VDisp data files (*.dat)" ]
+        onAccepted: {
+            selectOutputButtonContainer.selectedOutputFile = true
+            props.outputFile = fileUrl.toString()
+            // Convert URL to string
+            var name = fileUrl.toString()
+            // Split URL String at each "/" and extract last piece of data
+            var path = name.split("/")
+            var fileName = path[path.length - 1]
+            // Update fileName property
+            selectOutputButtonContainer.fileName = fileName
+            
+            // UI elements for download prompt
+            selectOutputTimer.start()
+            fileDownloadingPopup.open()
+        }
+        onRejected: {
+            selectOutputButtonContainer.selectedOutputFile = false
+        }
+    }
+    Popup {
+        id: fileDownloadingPopup
+        width: fileDownloadingPopupText.width + gap*2
+        height: 30
+        closePolicy: Popup.NoAutoClose // Only close from timer
+
+        background: Rectangle{
+            color: "#6B4F4F"
+        }
+
+        property int gap: 5
+
+        x: 0
+        y:  vdispWindow.height - fileDownloadingPopup.height
+
+        contentItem: Item{
+            anchors.fill: parent
+
+            Text{
+                id: fileDownloadingPopupText
+                text: "Saving file: " + selectOutputButtonContainer.fileName
+                color: "#fff3e4"
+                font.pixelSize: 18
+                anchors {
+                    left: parent.left
+                    leftMargin: fileDownloadingPopup.gap
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+        }
+    }
+    Timer {
+        id: selectOutputTimer
+        interval: 2000 // 2s
+        running: false
+        repeat: false
+        onTriggered: {
+            selectOutputButtonContainer.selectedOutputFile = false
+            fileDownloadingPopup.close()
+        }
+    }
+    ///////////////////////////////
 }

@@ -68,9 +68,9 @@ timeAfterConstruction = Observable(1)
 conePenetrationQML = Observable([])
 # Enter Data Stage 5 (Elastic Modulus)
 elasticModulusQML = Observable([])
+
 # Misc
 finishedInput = Observable(false)
-outputFileQML = Observable("")
 inputFile = Observable("")
 inputFileSelected = Observable(false)
 on(inputFileSelected) do val
@@ -130,7 +130,6 @@ on(inputFileSelected) do val
         end
     end
 end
-# Units
 units = Observable(Int(InputParser.Imperial))
 
 # Update QML variables
@@ -345,7 +344,7 @@ setElasticMod = on(elasticModulusQML) do val
     global elasticModulus = copy(em)
 end
 
-
+# Output functions
 function createOutputDataFromGUI()
     global materialNames, specificGravity, voidRatio, waterContent, subdivisions, bounds, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, elasticModulus, conePenetration
     
@@ -421,7 +420,23 @@ function createOutputDataFromGUI()
 
     return outData
 end
+
+"""
+    writeGUIDataToFile(path, outData)
+
+`writeGUIDataToFile()` takes in a String, `path`, which represents a relative
+file path and writes the contents of `writeDefaultOutput(path, outData)` to file at `path`
+"""
+writeGUIDataToFile(path::String, outData = createOutputDataFromGUI()) = writeDefaultOutput(outData, path)
+
+pathFromVar(str::String) = str[7:end]
+
 # Output 
+outputFileQML = Observable("")
+on(outputFileQML) do val
+    # Every time user selects output file, save to file
+    writeGUIDataToFile(pathFromVar(val))
+end
 outputData = Observable([])
 createOutputData = Observable(false)
 on(createOutputData) do val
@@ -462,6 +477,7 @@ on(outputDataProgress) do val
     end
 end
 
+
 # Don't load or run anything for tests
 if size(ARGS)[1] == 2
     path = (size(ARGS)[1] == 2) ? "./src/UI/main.qml" : "../src/UI/main.qml"
@@ -480,14 +496,8 @@ if size(ARGS)[1] == 2
         exit()
     end
 
-    # Create OutputData
-    outData = createOutputDataFromGUI()
-    
-    # Remove "file://" from beginning of path
-    outputPath = outputFileQML[][7:end]
     # defaultFile = "./src/.data/output_data.dat"
-    
-    writeDefaultOutput(outData, outputPath)
+    writeGUIDataToFile(pathFromVar(outputFileQML[]))
 end
 
 """
