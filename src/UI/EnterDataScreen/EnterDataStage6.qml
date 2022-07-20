@@ -25,7 +25,8 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
-    
+    property bool highlightErrors: false
+
     property bool selectedOutputFile: false
     property variant filled: []
     property int forceUpdateInt: 2
@@ -33,10 +34,12 @@ Rectangle {
     property int formGap: 20
 
     Component.onCompleted: {
-        for(var i = 0; i < props.materials; i++){
-            filled.push(false)
-            // Initialize elastic modulus values to 0.0
-            props.elasticModulus = [...props.elasticModulus, 0.0]
+        if(!props.inputFileSelected || props.modelChanged){
+            for(var i = 0; i < props.materials; i++){
+                filled.push(false)
+                // Initialize elastic modulus values to 0.0
+                props.elasticModulus = [...props.elasticModulus, 0.0]
+            }
         }
     }
 
@@ -108,7 +111,7 @@ Rectangle {
             Rectangle{
                 id: timeTextBox
                 width: schmertmannElasticDataForm.inputWidth
-                height: 20
+                height: schmertmannElasticDataForm.inputHeight
                 radius: 5
                 color: "#fff3e4"
 
@@ -116,6 +119,17 @@ Rectangle {
                     left: timeLabel.right
                     leftMargin: schmertmannElasticDataForm.labelGap
                     verticalCenter: parent.verticalCenter
+                }
+
+                // Error highlighting
+                Rectangle {
+                    visible: (schmertmannElasticDataBackground.highlightErrors && (!timeTextInput.acceptableInput || !timeTextInput.text))
+                    opacity: 0.8
+                    anchors.fill: parent
+                    color: "transparent"
+                    border.color: "red"
+                    border.width: 1
+                    radius: 5
                 }
 
                 TextInput {
@@ -131,7 +145,11 @@ Rectangle {
                         // must be atleast 1 year
                         bottom: 1
                     }
-                    // Change for input handling
+                    
+                    Component.onCompleted: {
+                        if(props.inputFileSelected && !props.modelChanged) text = props.timeAfterConstruction
+                    }
+
                     onTextChanged: {
                         if(acceptableInput) props.timeAfterConstruction = parseInt(text)
                     }
@@ -212,12 +230,26 @@ Rectangle {
                         verticalCenter: elasticModLabel.verticalCenter
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (schmertmannElasticDataBackground.highlightErrors && (!elasticModInput.acceptableInput || !elasticModInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: elasticModInput
-                        width: parent.width - 10
+                        width: text ? text.width : elasticModInputPlaceholder.width
                         font.pixelSize: schmertmannElasticDataForm.fontSize
                         color: "#483434"
-                        anchors.centerIn: parent
+                        anchors{
+                            left: parent.left
+                            leftMargin: 5
+                        }
 
                         selectByMouse: true
                         clip: true
@@ -225,7 +257,11 @@ Rectangle {
                             // must be atleast 1 year
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected && !props.modelChanged) text = props.elasticModulus[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Update form filled
@@ -251,11 +287,23 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "Enter Value..."
                         Text {
+                            id: elasticModInputPlaceholder
                             text: elasticModInput.placeholderText
                             font.pixelSize: schmertmannElasticDataForm.fontSize
                             color: "#483434"
                             visible: !elasticModInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? " MPa" : " tsf"
+                        font.pixelSize: schmertmannElasticDataForm.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: elasticModInput.right
+                            leftMargin: 1
+                        }
+                        visible: elasticModInput.text
                     }
                 }
                 ////////////////////////////////
@@ -277,6 +325,16 @@ Rectangle {
             top: schmertmannElasticDataForm.bottom
             topMargin: 20
         }
+        // Error highlighting
+        Rectangle {
+            visible: (schmertmannElasticDataBackground.highlightErrors && !schmertmannElasticDataBackground.selectedOutputFile)
+            opacity: 0.8
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+            radius: 5
+        }
         Item {
             id: selectOutputButtonContainer
             
@@ -286,10 +344,11 @@ Rectangle {
             anchors.centerIn: parent
 
             property int gap: 10
+            property string fileName: ""
 
             Text{
                 id: selectOutputButtonText
-                text: "Select Output File"
+                text: (schmertmannElasticDataBackground.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Select Output File"
                 color: "#483434"
                 font.pixelSize: 15
                 anchors{
@@ -324,6 +383,13 @@ Rectangle {
         onAccepted: {
             schmertmannElasticDataBackground.selectedOutputFile = true
             props.outputFile = fileUrl.toString()
+            // Convert URL to string
+            var name = fileUrl.toString()
+            // Split URL String at each "/" and extract last piece of data
+            var path = name.split("/")
+            var fileName = path[path.length - 1]
+            // Update fileName property
+            selectOutputButtonContainer.fileName = fileName
         }
         onRejected: {
             schmertmannElasticDataBackground.selectedOutputFile = false
@@ -350,6 +416,8 @@ Rectangle {
                     // mainLoader.source = "" (switch to next screen when it's designed)
                     props.finishedInput = true
                     Qt.quit()
+                }else{
+                    schmertmannElasticDataBackground.highlightErrors = true
                 }
             }
         }

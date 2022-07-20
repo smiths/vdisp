@@ -25,6 +25,7 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool highlightErrors: false
     
     property bool selectedOutputFile: false
     property variant filled: []
@@ -33,10 +34,12 @@ Rectangle {
     property int formGap: 20
 
     Component.onCompleted: {
-        for(var i = 0; i < props.materials; i++){
-            filled.push(false)
-            // Initialize cone penetration values to 0.0
-            props.conePenetration = [...props.conePenetration, 0.0]
+        if(!props.inputFileSelected || props.modelChanged){
+            for(var i = 0; i < props.materials; i++){
+                filled.push(false)
+                // Initialize cone penetration values to 0.0
+                props.conePenetration = [...props.conePenetration, 0.0]
+            }
         }
     }
 
@@ -108,7 +111,7 @@ Rectangle {
             Rectangle{
                 id: timeTextBox
                 width: schmertmannDataForm.inputWidth
-                height: 20
+                height: schmertmannDataForm.inputHeight
                 radius: 5
                 color: "#fff3e4"
 
@@ -116,6 +119,17 @@ Rectangle {
                     left: timeLabel.right
                     leftMargin: schmertmannDataForm.labelGap
                     verticalCenter: parent.verticalCenter
+                }
+
+                // Error highlighting
+                Rectangle {
+                    visible: (schmertmannDataBackground.highlightErrors && (!timeTextInput.acceptableInput || !timeTextInput.text))
+                    opacity: 0.8
+                    anchors.fill: parent
+                    color: "transparent"
+                    border.color: "red"
+                    border.width: 1
+                    radius: 5
                 }
 
                 TextInput {
@@ -131,7 +145,11 @@ Rectangle {
                         // must be atleast 1 year
                         bottom: 1
                     }
-                    // Change for input handling
+                    
+                    Component.onCompleted: {
+                        if(props.inputFileSelected && !props.modelChanged) text = props.timeAfterConstruction
+                    }
+
                     onTextChanged: {
                         if(acceptableInput) props.timeAfterConstruction = parseInt(text)
                     }
@@ -212,12 +230,26 @@ Rectangle {
                         verticalCenter: conePenLabel.verticalCenter
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (schmertmannDataBackground.highlightErrors && (!conePenInput.acceptableInput || !conePenInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: conePenInput
-                        width: parent.width - 10
+                        width: text ? text.width : conePenInputPlaceholder.width
                         font.pixelSize: schmertmannDataForm.fontSize
                         color: "#483434"
-                        anchors.centerIn: parent
+                        anchors {
+                            left: parent.left 
+                            leftMargin: 5
+                        }
 
                         selectByMouse: true
                         clip: true
@@ -225,7 +257,11 @@ Rectangle {
                             // must be atleast 1 year
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected && !props.modelChanged) text = props.conePenetration[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Update form filled
@@ -251,11 +287,23 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "Enter Value..."
                         Text {
+                            id: conePenInputPlaceholder
                             text: conePenInput.placeholderText
                             font.pixelSize: schmertmannDataForm.fontSize
                             color: "#483434"
                             visible: !conePenInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? " MPa" : " tsf"
+                        font.pixelSize: schmertmannDataForm.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: conePenInput.right
+                            leftMargin: 1
+                        }
+                        visible: conePenInput.text
                     }
                 }
                 ////////////////////////////////
@@ -277,6 +325,16 @@ Rectangle {
             top: schmertmannDataForm.bottom
             topMargin: 20
         }
+        // Error highlighting
+        Rectangle {
+            visible: (schmertmannDataBackground.highlightErrors && !schmertmannDataBackground.selectedOutputFile)
+            opacity: 0.8
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+            radius: 5
+        }
         Item {
             id: selectOutputButtonContainer
             
@@ -286,10 +344,11 @@ Rectangle {
             anchors.centerIn: parent
 
             property int gap: 10
+            property string fileName: ""
 
             Text{
                 id: selectOutputButtonText
-                text: "Select Output File"
+                text: (schmertmannDataBackground.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Select Output File"
                 color: "#483434"
                 font.pixelSize: 15
                 anchors{
@@ -324,6 +383,13 @@ Rectangle {
         onAccepted: {
             schmertmannDataBackground.selectedOutputFile = true
             props.outputFile = fileUrl.toString()
+            // Convert URL to string
+            var name = fileUrl.toString()
+            // Split URL String at each "/" and extract last piece of data
+            var path = name.split("/")
+            var fileName = path[path.length - 1]
+            // Update fileName property
+            selectOutputButtonContainer.fileName = fileName
         }
         onRejected: {
             schmertmannDataBackground.selectedOutputFile = false
@@ -351,6 +417,8 @@ Rectangle {
                     // mainLoader.source = "" (switch to next screen when it's designed)
                     props.finishedInput = true
                     Qt.quit()
+                }else{
+                    schmertmannDataBackground.highlightErrors = true
                 }
             }
         }

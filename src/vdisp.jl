@@ -48,6 +48,7 @@ specificGravityQML = Observable([])
 voidRatioQML = Observable([])
 waterContentQML = Observable([])
 # Enter Data Stage 3
+materialCountChanged = Observable(false)  # If we use input file, but alter number of materials, screen 3 breaks
 boundsQML = Observable([])
 subdivisionsQML = Observable([])
 totalDepth = Observable(10.0)
@@ -55,6 +56,7 @@ soilLayerNumbersQML = Observable([])
 depthToGroundWaterTable = Observable(5.0)
 foundationDepth = Observable(2.5)
 # Enter Data Stage 4 (Consolidation Swell)
+modelChanged = Observable(false) # If we use input file, but change model, screen 4/5/6 breaks
 heaveBegin = Observable(2.5)
 heaveActive = Observable(7.5)
 swellPressureQML = Observable([])
@@ -69,6 +71,68 @@ elasticModulusQML = Observable([])
 # Misc
 finishedInput = Observable(false)
 outputFileQML = Observable("")
+inputFile = Observable("")
+inputFileSelected = Observable(false)
+on(inputFileSelected) do val
+    global inputFile
+
+    # Only start process of auto fill if inputFileSelected was changed to true
+    if val
+        # Remove "file://" from inputFile 
+        inputPath = inputFile[][7:end]
+
+        # Parse input file
+        guiData = 0
+        inputFileWasAccepted = false
+        message = ""
+        try
+            guiData = GUIData(inputPath)
+            inputFileWasAccepted = true
+        catch e
+            println(e)
+            args = []
+            f = []
+            if isa(e, MethodError)
+                args = e.args
+                f = e.f
+                if string(f) == "Main.vdisp.InputParser.ModelError"
+                    message = "Line $(args[1]): Model input should be 0, 1 or 2. Input was $(args[2])"
+                elseif string(f) == "Main.vdisp.InputParser.UnitError"
+                    message = "Line $(args[1]): Unit input should be 0, or 1. Input was $(args[2])"
+                elseif string(f) == "Main.vdisp.InputParser.FoundationTypeError"
+                    message = "Line $(args[1]): Foundation input should be 0 or 1. Input was $(args[2])"
+                elseif string(f) == "Main.vdisp.InputParser.FloatConvertError"
+                    message = "Line $(args[1]): $(args[2]) value should be a valid float value. Trouble parsing input \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.IntConvertError"
+                    message = "Line $(args[1]): $(args[2]) value should be a valid integer value. Trouble parsing input \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.BoolConvertError"
+                    message = "Line $(args[1]): $(args[2]) value should be a 0(false) or 1(true). Trouble parsing input \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.DimensionNegativeError"
+                    message = "Line $(args[1]): $(args[2]) value should be positive. Input was \"$(args[3])\""
+                elseif string(f) == "Main.vdisp.InputParser.MaterialIndexOutOfBoundsError"
+                    message = "Line $(args[1]): Invalid material index \"$(args[2])\""
+                elseif string(f) == "Main.vdisp.InputParser.PropertyError"
+                    message = args[1]
+                else
+                    message = "Unexpected error occured while parsing input file"
+                end
+            else
+                message = "Unexpected error occured while parsing input file"
+            end
+            inputFileWasAccepted = false
+        end
+        
+        # Emit correct signal
+        if inputFileWasAccepted
+            @emit inputFileAccepted([guiData.problemName, guiData.model, guiData.foundation, guiData.appliedPressure, guiData.appliedAt, guiData.foundationWidth, guiData.foundationLength, guiData.outputIncrements, guiData.saturatedAboveWaterTable, guiData.materialNames, guiData.specificGravity, guiData.voidRatio, guiData.waterContent, guiData.materials, guiData.totalDepth, guiData.depthGroundWaterTable, guiData.foundationDepth, reverse(guiData.bounds), guiData.subdivisions, guiData.soilLayerNumbers, guiData.heaveBeginDepth, guiData.heaveActiveDepth, guiData.swellPressure, guiData.swellIndex, guiData.compressionIndex, guiData.maxPastPressure, guiData.timeAfterConstruction, guiData.conePenetration, guiData.elasticModulus, guiData.units])
+        else
+            @emit inputFileRejected(message)
+        end
+    end
+end
+# Units
+units = Observable(Int(InputParser.Imperial))
+
 
 # Update QML variables
 setProblemName = on(problemName) do val
@@ -287,7 +351,7 @@ if size(ARGS)[1] == 2
     path = (size(ARGS)[1] == 2) ? "./src/UI/main.qml" : "../src/UI/main.qml"
     
     # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML))
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged))
     
     # Run the app
     exec()
@@ -314,7 +378,7 @@ if size(ARGS)[1] == 2
     # Calculate dx
     dx = Array{Float64}(undef,0)
     for i in 1:materials[]
-        global bounds, dx, subdivisions
+        global bounds, dx, subdivisions, inputFileSelected
         index = materials[] - i + 1
         push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
     end
@@ -324,7 +388,12 @@ if size(ARGS)[1] == 2
     for i in 1:materials[]
         global subdivisions, soilLayerNumbers, soilLayerNums
         for j in 1:subdivisions[i]
-            push!(soilLayerNums, soilLayerNumbers[i]+1)
+            # In the input file, soil layer number index starts at 1, in GUI it starts at 0
+            if inputFileSelected[]
+                push!(soilLayerNums, soilLayerNumbers[i])
+            else
+                push!(soilLayerNums, soilLayerNumbers[i]+1)
+            end
         end
     end
 
@@ -353,11 +422,11 @@ if size(ARGS)[1] == 2
     # Creating OutputData Object
     outData = 0
     if model[] == 0
-        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, swellPressure, swellIndex, compressionIndex, recompressionIndex, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[])
+        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, swellPressure, swellIndex, compressionIndex, recompressionIndex, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], Int32(units[]))
     elseif model[] == 1
-        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, conePenetration, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], Int32(timeAfterConstruction[]))
+        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, conePenetration, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], Int32(timeAfterConstruction[]), Int32(units[]))
     else
-        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], elasticModulus, Int32(timeAfterConstruction[]))
+        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], elasticModulus, Int32(timeAfterConstruction[]), Int32(units[]))
     end
 
     println("OutputData created")

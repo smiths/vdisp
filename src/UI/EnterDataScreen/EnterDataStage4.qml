@@ -31,6 +31,7 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool highlightErrors: false
     property bool selectedOutputFile: false
     
     
@@ -42,17 +43,20 @@ Rectangle {
     property variant filledRI: []
 
     Component.onCompleted: {
-        for(var i = 0; i < props.materials; i++){
-            // Populate arrays that check if forms are filled properly
-            filledSP.push(false)
-            filledSI.push(false)
-            filledCI.push(false)
-            filledRI.push(false)
-            // Initialize Julia arrays to correct number of entries, 0.0 for all
-            props.swellPressure = [...props.swellPressure, 0.0]
-            props.swellIndex = [...props.swellIndex, 0.0]
-            props.compressionIndex = [...props.compressionIndex, 0.0]
-            props.recompressionIndex = [...props.recompressionIndex, 0.0]
+        // If no file was selected, or model from input file was changed, fill default values
+        if(!props.inputFileSelected || props.modelChanged){
+            for(var i = 0; i < props.materials; i++){
+                // Populate arrays that check if forms are filled properly
+                filledSP.push(false)
+                filledSI.push(false)
+                filledCI.push(false)
+                filledRI.push(false)
+                // Initialize Julia arrays to correct number of entries, 0.0 for all
+                props.swellPressure = [...props.swellPressure, 0.0]
+                props.swellIndex = [...props.swellIndex, 0.0]
+                props.compressionIndex = [...props.compressionIndex, 0.0]
+                props.recompressionIndex = [...props.recompressionIndex, 0.0]
+            }
         }
     }
 
@@ -78,7 +82,7 @@ Rectangle {
     }
     Text {
         id: consolidationSwellSubtitle
-        text: "Consolidation Swell"
+        text: "Consolidation/Swell"
         font.pixelSize: 15
         color: "#fff3e4"
         anchors {
@@ -140,8 +144,8 @@ Rectangle {
                 // Values
                 from: 0
                 to: props.totalDepth
-                first.value: props.totalDepth/4
-                second.value: 3*props.totalDepth/4
+                first.value: (props.inputFileSelected && !props.modelChanged) ?  props.heaveBegin : props.totalDepth/4
+                second.value: (props.inputFileSelected && !props.modelChanged) ?  props.heaveActive : 3*props.totalDepth/4
                 stepSize: 0.025
                 snapMode: RangeSlider.SnapAlways  // TODO: toggle to RangeSlider.NoSnap with a snap to grid option?
 
@@ -261,7 +265,7 @@ Rectangle {
                 property int inputWidth: 35 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
                 property int inputGap: 10
                 property int labelGap: 5
-                property int fontSize: 10 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+                property int fontSize: 12 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
 
                 width: consolidationSwellDataListEntryMaterialLabel.width + consolidationSwellDataListEntrySPLabel.width + consolidationSwellDataListEntrySILabel.width + consolidationSwellDataListEntryCILabel.width + consolidationSwellDataListEntryRILabel.width + 4*inputWidth + 4*inputGap + 4*labelGap
                 height: 35
@@ -306,15 +310,27 @@ Rectangle {
                     height: 20
                     color: "#fff3e4"
                     radius: 4
+                    clip: true
                     anchors {
                         verticalCenter: consolidationSwellDataListEntry.verticalCenter
                         left: consolidationSwellDataListEntrySPLabel.right
                         leftMargin: consolidationSwellDataListEntry.labelGap
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!spTextInput.acceptableInput || !spTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: spTextInput
-                        width: parent.width - 10
+                        width: text ? text.width : spTextInputPlaceholder.width
                         font.pixelSize: consolidationSwellDataListEntry.fontSize
                         color: "#483434"
                         anchors {
@@ -328,7 +344,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected && !props.modelChanged) text = props.swellPressure[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true
@@ -354,11 +374,24 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "--.--"
                         Text {
+                            id: spTextInputPlaceholder
                             text: spTextInput.placeholderText
                             font.pixelSize: consolidationSwellDataListEntry.fontSize
                             color: "#483434"
                             visible: !spTextInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? " Pa" : " tsf"
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: spTextInput.right
+                            leftMargin: 1
+                            verticalCenter: parent.verticalCenter
+                        }
+                        visible: spTextInput.text
                     }
                 }
                 //////////////////////////////////////
@@ -388,6 +421,17 @@ Rectangle {
                         leftMargin: consolidationSwellDataListEntry.labelGap
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!siTextInput.acceptableInput || !siTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: siTextInput
                         width: parent.width - 10
@@ -404,7 +448,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected && !props.modelChanged) text = props.swellIndex[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true
@@ -464,6 +512,17 @@ Rectangle {
                         leftMargin: consolidationSwellDataListEntry.labelGap
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!ciTextInput.acceptableInput || !ciTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: ciTextInput
                         width: parent.width - 10
@@ -480,7 +539,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected && !props.modelChanged) text = props.compressionIndex[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true
@@ -515,10 +578,10 @@ Rectangle {
                 }
                 //////////////////////////////////////
 
-                // Recompression Index ///////////
+                // Max Past Pressure ///////////
                 Text {
                     id: consolidationSwellDataListEntryRILabel
-                    text: "Recompression Index: "
+                    text: "Max Past Pressure: "
                     color: "#fff3e4"
                     font.pixelSize: consolidationSwellDataListEntry.fontSize
                     anchors {
@@ -530,6 +593,7 @@ Rectangle {
 
                 Rectangle {
                     id: riTextbox
+                    clip: true
                     width: consolidationSwellDataListEntry.inputWidth
                     height: 20
                     color: "#fff3e4"
@@ -540,9 +604,20 @@ Rectangle {
                         leftMargin: consolidationSwellDataListEntry.labelGap
                     }
 
+                    // Error highlighting
+                    Rectangle {
+                        visible: (consolidationSwellDataBackground.highlightErrors && (!riTextInput.acceptableInput || !riTextInput.text))
+                        opacity: 0.8
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.color: "red"
+                        border.width: 1
+                        radius: 5
+                    }
+
                     TextInput {
                         id: riTextInput
-                        width: parent.width - 10
+                        width: text ? text.width : riTextInputPlaceholder.width
                         font.pixelSize: consolidationSwellDataListEntry.fontSize
                         color: "#483434"
                         anchors {
@@ -556,7 +631,11 @@ Rectangle {
                         validator: DoubleValidator {
                             bottom: 0
                         }
-                        // Change for input handling
+
+                        Component.onCompleted: {
+                            if(props.inputFileSelected && !props.modelChanged) text = props.recompressionIndex[index]
+                        }
+
                         onTextChanged: {
                             if(acceptableInput){
                                 // Set filled to true
@@ -583,11 +662,24 @@ Rectangle {
                         // Placeholder Text
                         property string placeholderText: "--.--"
                         Text {
+                            id: riTextInputPlaceholder
                             text: riTextInput.placeholderText
                             font.pixelSize: consolidationSwellDataListEntry.fontSize
                             color: "#483434"
                             visible: !riTextInput.text
                         }
+                    }
+                    // Units
+                    Text{
+                        text: (props.units === 0) ? " Pa" : " tsf"
+                        font.pixelSize: consolidationSwellDataListEntry.fontSize
+                        color: "#483434"
+                        anchors {
+                            left: riTextInput.right
+                            leftMargin: 1
+                            verticalCenter: parent.verticalCenter
+                        }
+                        visible: riTextInput.text
                     }
                 }
                 //////////////////////////////////////              
@@ -609,6 +701,18 @@ Rectangle {
             top: consolidationSwellDataContainer.bottom
             topMargin: 20
         }
+
+        // Error highlighting
+        Rectangle {
+            visible: (consolidationSwellDataBackground.highlightErrors && !consolidationSwellDataBackground.selectedOutputFile)
+            opacity: 0.8
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+            radius: 5
+        }
+
         Item {
             id: selectOutputButtonContainer
             
@@ -618,10 +722,11 @@ Rectangle {
             anchors.centerIn: parent
 
             property int gap: 10
+            property string fileName: ""
 
             Text{
                 id: selectOutputButtonText
-                text: "Select Output File"
+                text: (consolidationSwellDataBackground.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Select Output File"
                 color: "#483434"
                 font.pixelSize: 15
                 anchors{
@@ -656,6 +761,13 @@ Rectangle {
         onAccepted: {
             consolidationSwellDataBackground.selectedOutputFile = true
             props.outputFile = fileUrl.toString()
+            // Convert URL to string
+            var name = fileUrl.toString()
+            // Split URL String at each "/" and extract last piece of data
+            var path = name.split("/")
+            var fileName = path[path.length - 1]
+            // Update fileName property
+            selectOutputButtonContainer.fileName = fileName
         }
         onRejected: {
             consolidationSwellDataBackground.selectedOutputFile = false
@@ -682,6 +794,8 @@ Rectangle {
                     // mainLoader.source = "" (switch to next screen when it's designed)
                     props.finishedInput = true
                     Qt.quit()
+                }else{
+                    consolidationSwellDataBackground.highlightErrors = true
                 }
             }
         }

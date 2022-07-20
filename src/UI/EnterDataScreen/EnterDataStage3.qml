@@ -19,11 +19,12 @@ Rectangle {
     }
 
     function isFilled(){
-        return (calculatedBounds) ? isProperBounds() : false
+        return (calculatedBounds) ? isProperBounds() && depthInput.text && depthInput.acceptableInput : false
     }
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool highlightErrors: false
     // If model = 0, next screen will be EnterDataStage4, model =1, EnterDataStage5, etc...
     property string nextScreen: "EnterDataStage" + (4 + props.model) + ".qml"
 
@@ -35,7 +36,7 @@ Rectangle {
     property variant values: []
     property double totalDepth: 10.0
     property variant bounds: []
-    property double minLayerSize: 0.1 * totalDepth
+    property double minLayerSize: (props.units === 0) ? 0.0254 : 1/12  // Minimum layer sizes: 2.54cm/1inch
     property bool calculatedBounds: false
 
     radius: 20
@@ -47,39 +48,59 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        // Initialize subdivisions, soilLayerNums as empty
-        var subs = []
-        var soilNums = []
+        // If we had input file, and materials are still the same
+        if(props.inputFileSelected && !props.materialCountChanged){
+            totalDepth = props.totalDepth
+            // Initialize bounds
+            for(var i = 0; i < props.bounds.length; i++){
+                bounds.push(props.bounds[i])
+                if(i === 0 || i === props.bounds.length-1) continue
+                
+                // Calculate handle val
+                var val = props.bounds[i]/props.totalDepth
+                values.push(val)
+                // Create handle component
+                var slider = Qt.createComponent("LayerHandle.qml");
+                var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
+            }
+            calculatedBounds = true
+        }else{ // Else, if a material was added or deleted, or there was no input file
+            // Initialize subdivisions, soilLayerNums as empty
+            var subs = []
+            var soilNums = []
 
-        // Initialize bounds
-        bounds.push(totalDepth)  // Add top bound
-        for(var i = 0; i < props.materials - 1; i++){
-            // Spread handles evenly to begin with
-            var val = 1 - ((i+1) / props.materials)
-            values.push(val)
-            bounds.push(val*totalDepth)
+            totalDepth = props.totalDepth
 
-            // Create handle component
-            var slider = Qt.createComponent("LayerHandle.qml");
-            var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
+            // Initialize bounds
+            bounds.push(totalDepth)  // Add top bound
+            for(var i = 0; i < props.materials - 1; i++){
+                // Spread handles evenly to begin with
+                var val = 1 - ((i+1) / props.materials)
+                values.push(val)
+                bounds.push(val*totalDepth)
 
-            // Initialize subdivisions with value 2 everywhere
+                // Create handle component
+                var slider = Qt.createComponent("LayerHandle.qml");
+                var obj = slider.createObject(mainSliderBackground, {index: i, value: val, stepSize: 0.025})
+
+                // Initialize subdivisions with value 2 everywhere
+                subs = [...subs, 2]
+
+                // Initialize soil layer numbers to index
+                soilNums = [...soilNums, i]
+            }
+            bounds.push(0.0) // Add bottom bound
+            props.bounds = [...bounds] // Update julia list of bounds
+            calculatedBounds = true
+            
+            // There is one more subdivision than # of handles, add outside loop
             subs = [...subs, 2]
+            props.subdivisions = [...subs]
 
-            // Initialize soil layer numbers to index
-            soilNums = [...soilNums, i]
+            // There is one more soil layer than # of handles, add outside loop
+            soilNums = [...soilNums, Math.floor(props.materials - 1)] // For some reason without floor() it was a float value???
+            props.soilLayerNumbers = [...soilNums]
         }
-        bounds.push(0.0) // Add bottom bound
-        props.bounds = [...bounds] // Update julia list of bounds
-        calculatedBounds = true
-
-        // There is one more subdivision than # of handles, add outside loop
-        subs = [...subs, 2]
-        props.subdivisions = [...subs]
-
-        // There is one more soil layer than # of handles, add outside loop
-        soilNums = [...soilNums, Math.floor(props.materials - 1)] // For some reason without floor() it was a float value???
-        props.soilLayerNumbers = [...soilNums]
     }
 
     // Title //////////////
@@ -101,13 +122,36 @@ Rectangle {
         id: dgwtSlider
         from: 0
         to: soilLayerFormBackground.totalDepth
-        stepSize: 0.25
-        value: soilLayerFormBackground.totalDepth/2
+        stepSize: getStepSize()
         width: 30 + (55-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         height: mainSliderBackground.height - mainSliderBackground.radius
         orientation: Qt.Vertical
 
         property int textSize: 9 + (14-9) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        
+        function getStepSize() {
+            if(!soilLayerFormBackground.calculatedBounds) 
+                return 0.25
+
+            // Get index of layer handle is currently in
+            var currentLayerIndex = 0
+            var val = soilLayerFormBackground.totalDepth - value
+            while(soilLayerFormBackground.bounds[currentLayerIndex+1] < val)
+                currentLayerIndex+=1
+
+            // Get current layers height
+            var currentLayerHeight = soilLayerFormBackground.bounds[currentLayerIndex+1] - soilLayerFormBackground.bounds[currentLayerIndex]
+            // Get dx
+            var dx = currentLayerHeight / props.subdivisions[currentLayerIndex]
+
+
+            return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+        }
+
+        Component.onCompleted: {
+            if(props.inputFileSelected) value = props.totalDepth - props.depthToGroundWaterTable
+            else value = soilLayerFormBackground.totalDepth/2
+        }
 
         anchors {
             top: mainSliderBackground.top
@@ -132,7 +176,7 @@ Rectangle {
                 id: dgwtSliderHandleRect
                 color: "#70A9FF"
                 width: parent.width
-                height: width
+                height: 5
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: dgwtSlider.visualPosition * (dgwtSlider.availableHeight - height)
             }
@@ -160,7 +204,8 @@ Rectangle {
                 // Label
                 Text {
                     id: dgwtSliderLabel
-                    text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2)
+                    property string unitString: (props.units === 0) ? " m" : " ft"
+                    text: "Depth to Ground\nWater Table: " + (soilLayerFormBackground.totalDepth - dgwtSlider.value).toFixed(2) + unitString
                     color: "#fff3e4"
                     font.pixelSize: dgwtSlider.textSize
                     anchors {
@@ -179,13 +224,36 @@ Rectangle {
         id: foundationDepthSlider
         from: 0
         to: soilLayerFormBackground.totalDepth
-        stepSize: 0.25
-        value: 3*soilLayerFormBackground.totalDepth/4
+        stepSize: getStepSize()
         width: 30 + (55-30) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         height: mainSliderBackground.height - mainSliderBackground.radius
         orientation: Qt.Vertical
 
         property int textSize: 9 + (14-9) * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+
+        function getStepSize() {
+            if(!soilLayerFormBackground.calculatedBounds) 
+                return 0.25
+
+            // Get index of layer handle is currently in
+            var currentLayerIndex = 0
+            var val = soilLayerFormBackground.totalDepth - value
+            while(soilLayerFormBackground.bounds[currentLayerIndex+1] < val)
+                currentLayerIndex+=1
+
+            // Get current layers height
+            var currentLayerHeight = soilLayerFormBackground.bounds[currentLayerIndex+1] - soilLayerFormBackground.bounds[currentLayerIndex]
+            // Get dx
+            var dx = currentLayerHeight / props.subdivisions[currentLayerIndex]
+
+
+            return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+        }
+
+        Component.onCompleted: {
+            if(props.inputFileSelected) value = props.totalDepth - props.foundationDepth  // Don't forget that the slider value is "upside down"
+            else value = 3*soilLayerFormBackground.totalDepth/4
+        }
 
         anchors {
             top: mainSliderBackground.top
@@ -210,7 +278,7 @@ Rectangle {
                 id: foundationDepthSliderHandleRect
                 color: "#fff3e4"
                 width: parent.width
-                height: width
+                height: 5
                 anchors.horizontalCenter: parent.horizontalCenter
                 y: foundationDepthSlider.visualPosition * (foundationDepthSlider.availableHeight - height)
             }
@@ -240,7 +308,8 @@ Rectangle {
                 // Label
                 Text {
                     id: foundationDepthSliderLabel
-                    text: "Depth to Foundation: " + (soilLayerFormBackground.totalDepth - foundationDepthSlider.value).toFixed(2)
+                    property string unitString: (props.units === 0) ? " m" : " ft"
+                    text: "Depth to Foundation: " + (soilLayerFormBackground.totalDepth - foundationDepthSlider.value).toFixed(2) + unitString
                     color: "#fff3e4"
                     font.pixelSize: foundationDepthSlider.textSize
                     anchors {
@@ -333,12 +402,22 @@ Rectangle {
                             width: materialDropdown.width
                             contentItem: Text {
                                 text: modelData
-                                color: "#483434"
+                                color: highlighted ? "#6B4F4F" : "#483434"
                                 font: materialDropdown.font
                                 elide: Text.ElideRight
                                 verticalAlignment: Text.AlignVCenter
                             }
                             highlighted: materialDropdown.highlightedIndex === index
+                            
+                            Rectangle {
+                                visible: highlighted
+                                anchors.fill: parent
+                                color : "#fff3e4"
+                                border.width: 2
+                                border.color: "#483434"
+                                radius: 2
+                            }
+                            
                             required property int index
                             required property var modelData
                         }
@@ -360,7 +439,7 @@ Rectangle {
                                 context.lineTo(width / 2, height);
                                 context.closePath();
                                 // Color of arrow
-                                context.fillStyle = materialDropdown.pressed ? "#e8e4e4" : "#483434";
+                                context.fillStyle = "#483434";
                                 context.fill();
                             }
                         }
@@ -368,7 +447,7 @@ Rectangle {
                         contentItem: Text {
                             text: materialDropdown.displayText
                             font: materialDropdown.font
-                            color: materialDropdown.pressed ? "#989494" : "#483434"
+                            color: "#483434"
                             verticalAlignment: Text.AlignVCenter
                             // elide: Text.ElideRight
                             anchors {
@@ -388,17 +467,18 @@ Rectangle {
                             y: materialDropdown.height - 1
                             width: materialDropdown.width
                             implicitHeight: contentItem.implicitHeight
-                            padding: 1
+                            padding: 0
                             contentItem: ListView {
                                 clip: true
                                 implicitHeight: contentHeight
                                 model: materialDropdown.popup.visible ? materialDropdown.delegateModel : null
                                 currentIndex: materialDropdown.highlightedIndex
-                                ScrollIndicator.vertical: ScrollIndicator { }
                             }
                             background: Rectangle {
                                 color: "#fff3e4"
                                 radius: 2
+                                border.width: 2
+                                border.color: "#483434"
                             }
                         }
                     }
@@ -430,7 +510,6 @@ Rectangle {
 
                         SpinBox {
                             id: subdivisionSpinbox
-                            value: 2
                             editable: true
                             from: 2
                             to: 50 // Should we have max?
@@ -439,6 +518,14 @@ Rectangle {
 
                             height: layerInfoItem.inputHeight
                             width: 75
+
+                            Component.onCompleted: {
+                                if(props.inputFileSelected && !props.materialCountChanged) {
+                                    value = props.subdivisions[index]
+                                }else{
+                                    value = 2
+                                }
+                            }
 
                             onValueModified: {
                                 var vals = []
@@ -465,6 +552,9 @@ Rectangle {
                             contentItem: TextInput {
                                 z: 2
                                 text: subdivisionSpinbox.textFromValue(subdivisionSpinbox.value, subdivisionSpinbox.locale)
+                                
+                                width: text.width
+                                height: text.height
 
                                 font.pixelSize: subdivisionSpinbox.font.pixelSize
                                 color: "#fff3e4"
@@ -476,10 +566,8 @@ Rectangle {
                                 inputMethodHints: Qt.ImhFormattedNumbersOnly
 
                                 anchors {
-                                    bottom: parent.bottom
-                                    bottomMargin: 3
-                                    left: parent.left 
-                                    leftMargin: (subdivisionSpinbox.value > 10) ? parent.width/2 + 6 : parent.width/2 + 3
+                                    verticalCenter: parent.verticalCenter
+                                    horizontalCenter: parent.horizontalCenter
                                 }
                             }
 
@@ -532,7 +620,7 @@ Rectangle {
                 }
                 ///////////////////////
 
-                // Subdivion Markers //
+                // Subdivision Markers //
                 Repeater {
                     id: subdivisionMarkers
                     model: subdivisionSpinbox.value-1
@@ -585,34 +673,57 @@ Rectangle {
             leftMargin: 3
             verticalCenter: depthLabel.verticalCenter
         }
+        // Error highlighting
+        Rectangle {
+            visible: (soilLayerFormBackground.highlightErrors && (!depthInput.acceptableInput || !depthInput.text))
+            opacity: 0.8
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "red"
+            border.width: 1
+            radius: 5
+        }
         TextInput {
             id: depthInput
-            width: parent.width - 10
+            width: text ? text.width : depthInputPlaceholder.width
             font.pixelSize: 18
             color: "#483434"
-            anchors.centerIn: parent
+            anchors{
+                left: parent.left
+                leftMargin: 5
+            }
             
             selectByMouse: true
             clip: true
             validator: DoubleValidator{
-                // must be positive
-                bottom: 0
+                // must be greater than a minimum size
+                bottom: props.materials * soilLayerFormBackground.minLayerSize
+            }
+            property bool valueLoadedFromFile: false
+            Component.onCompleted: {
+                valueLoadedFromFile = true
+                text = props.totalDepth
             }
             // Change for input handling
             onTextChanged: {
-                if(acceptableInput) {
+                if(acceptableInput && !valueLoadedFromFile) {
                     soilLayerFormBackground.calculatedBounds = false
-                    var depth = parseFloat(text)
                     
+                    var depth = parseFloat(text)
+                    var oldDepth = soilLayerFormBackground.totalDepth
+                    var oldSliderValueFoundation = foundationDepthSlider.value
+                    var oldSliderValueDGWT = dgwtSlider.value
+
+
                     // Update Total Depth Value
                     soilLayerFormBackground.totalDepth = depth
                     
                     // Update Julia property
                     props.totalDepth = depth
-                    
-                    // Update Julia slider values 
-                    props.foundationDepth = (props.totalDepth - foundationDepthSlider.value)
-                    props.depthToGroundWaterTable = (props.totalDepth - dgwtSlider.value)
+
+                    // Update slider values (updates Julia values automatically)
+                    foundationDepthSlider.value = ((oldSliderValueFoundation/oldDepth)*depth)
+                    dgwtSlider.value = ((oldSliderValueDGWT/oldDepth)*depth)
                     
                     // Update heave begin and active depth
                     props.heaveBegin = depth/4
@@ -626,16 +737,30 @@ Rectangle {
                     soilLayerFormBackground.bounds.push(0.0)
                     props.bounds = [...soilLayerFormBackground.bounds] // Update Julia list of bounds
                     soilLayerFormBackground.calculatedBounds = true
+                }else{
+                    valueLoadedFromFile = false
                 }
             }
             // Placeholder Text
             property string placeholderText: "Enter Depth..."
             Text {
+                id: depthInputPlaceholder
                 text: depthInput.placeholderText
                 font.pixelSize: 18
                 color: "#483434"
                 visible: !depthInput.text
             }
+        }
+        // Units
+        Text{
+            text: (props.units === 0) ? " m" : " ft"
+            font.pixelSize: 18
+            color: "#483434"
+            anchors {
+                left: depthInput.right
+                leftMargin: 1
+            }
+            visible: depthInput.text
         }
     }
     //////////////////////////////
@@ -655,8 +780,18 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                if(soilLayerFormBackground.formFilled)
+                if(soilLayerFormBackground.formFilled){
                     enterDataStackView.push(soilLayerFormBackground.nextScreen)
+                }else{
+                    soilLayerFormBackground.highlightErrors = true
+                    // If the only problem is layer handles
+                    if(depthInput.text && depthInput.acceptableInput){
+                        // Give user a popup alert about which layer(s) are the problem
+                        var unitsString = (props.units === 0) ? "m" : "ft"
+                        layerErrorPopup.message = "One or more layers have height less than <b>MIN_LAYER_HEIGHT</b>(" + soilLayerFormBackground.minLayerSize.toFixed(3) + unitsString + ")"
+                        layerErrorPopup.open()
+                    }
+                }
             }
         }
         Text {
@@ -682,4 +817,86 @@ Rectangle {
         }
     }
     //////////////////////
+
+    Popup {
+        id: layerErrorPopup
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape // | Popup.CloseOnPressOutsideParent
+
+        width: popupPadding + layerErrorPopupContainer.width
+        height: popupPadding + layerErrorPopupContainer.height
+
+        anchors.centerIn: parent
+
+        property string message: ""
+        property int gap: 10
+        property int popupPadding: 40
+
+        background: Rectangle {
+            color: "#483434"
+            radius: 10
+        }
+
+        contentItem: Item {
+            id: layerErrorPopupContainer
+            
+            width: layerErrorPopupText.width 
+            height: layerErrorPopupTitle.height + layerErrorPopupText.height + layerErrorPopupButton.height + 2*layerErrorPopup.gap
+            
+            anchors.centerIn: parent
+            
+            // Title
+            Text{
+                id: layerErrorPopupTitle
+                font.pixelSize: 25
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                }
+                text: "Error: Invalid Layer Height"
+            }
+
+            // Message
+            Text{
+                id: layerErrorPopupText
+                font.pixelSize: 18
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: layerErrorPopupTitle.bottom
+                    topMargin: layerErrorPopup.gap
+                }
+                text: layerErrorPopup.message
+            }
+
+            // Close Button
+            Rectangle {
+                id: layerErrorPopupButton
+                width: 100
+                height: 20
+                radius: 5
+                color: "#fff3e4"
+
+                Text{
+                    text: "Ok"
+                    font.pixelSize: 15
+                    color: "#483434"
+                    anchors.centerIn: parent
+                }
+
+                anchors{
+                    top: layerErrorPopupText.bottom
+                    topMargin: layerErrorPopup.gap
+                    horizontalCenter: parent.horizontalCenter
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: layerErrorPopup.close()
+                }
+            }
+        }
+    }
 }

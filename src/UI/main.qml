@@ -8,8 +8,8 @@ Window {
     height: 600
     minimumWidth: 800
     minimumHeight: 600
-    maximumWidth: 1200
-    maximumHeight: 900
+    maximumWidth: 1920
+    maximumHeight: 1080
     visible: true
     title: qsTr("VDisp")
 

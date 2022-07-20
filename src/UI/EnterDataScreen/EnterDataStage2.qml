@@ -23,6 +23,8 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property bool highlightErrors: false
+    property int latestMaterialIndex: 1
     property string nextScreen: "EnterDataStage3.qml"
 
     property int topFormMargin: 30 + (55-30) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
@@ -55,7 +57,24 @@ Rectangle {
         width: parent.width/6
         height: 25
         radius: 12
+        focus: true
         color: (parent.formFilled) ? "#fff3e4" : "#9d8f84"
+        border.color: (activeFocus) ? "#483434" : "transparent"
+
+        KeyNavigation.up: addBtn
+        KeyNavigation.tab: sgTextInput
+
+        Keys.onEnterPressed: {
+            // Same as onClicked
+            if(materialPropertiesFormBackground.formFilled)
+                    enterDataStackView.push(materialPropertiesFormBackground.nextScreen)
+        }
+        Keys.onReturnPressed: {
+            // Same as onClicked
+            if(materialPropertiesFormBackground.formFilled)
+                    enterDataStackView.push(materialPropertiesFormBackground.nextScreen)
+        }
+
         anchors {
             bottom: parent.bottom
             bottomMargin: 20
@@ -71,6 +90,7 @@ Rectangle {
         Text {
             id: continueButtonText
             text: "Continue"
+            color: "#483434"
             font.pixelSize: 13
             anchors {
                 verticalCenter: continueButtonIcon.verticalCenter
@@ -108,7 +128,7 @@ Rectangle {
         }
 
         function isReady() {
-            return sgTextInput.text  && sgTextInput.acceptableInput && vrTextInput.text && vrTextInput.acceptableInput
+            return sgTextInput.text  && sgTextInput.acceptableInput && vrTextInput.text && vrTextInput.acceptableInput && wcTextInput.text && wcTextInput.acceptableInput
         }
         property bool ready: isReady()
 
@@ -141,7 +161,16 @@ Rectangle {
                 left: sgLabel.right
                 leftMargin: parent.labelGap
             }
-
+            // Error highlighting
+            Rectangle {
+                visible: (materialPropertiesFormBackground.highlightErrors && (!sgTextInput.acceptableInput || !sgTextInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
             TextInput {
                 id: sgTextInput
                 width: parent.width - 10
@@ -152,6 +181,13 @@ Rectangle {
                     leftMargin: 5
                     verticalCenter: parent.verticalCenter
                 }
+
+                Component.onCompleted: {
+                    forceActiveFocus()
+                }
+
+                KeyNavigation.tab: vrTextInput
+                KeyNavigation.right: vrTextInput
                 
                 selectByMouse: true
                 clip: true
@@ -198,7 +234,16 @@ Rectangle {
                 left: vrLabel.right
                 leftMargin: parent.labelGap
             }
-
+            // Error highlighting
+            Rectangle {
+                visible: (materialPropertiesFormBackground.highlightErrors && (!vrTextInput.acceptableInput || !vrTextInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
             TextInput {
                 id: vrTextInput
                 width: parent.width - 10
@@ -209,6 +254,10 @@ Rectangle {
                     leftMargin: 5
                     verticalCenter: parent.verticalCenter
                 }
+
+                KeyNavigation.tab: wcTextInput
+                KeyNavigation.right: wcTextInput
+                KeyNavigation.left: sgTextInput
                 
                 selectByMouse: true
                 clip: true
@@ -244,78 +293,172 @@ Rectangle {
                 verticalCenter: parent.verticalCenter
             }
         }
-        Slider {
-            id: wcSlider
-            value: 50
-            from: 0
-            to: 100
-            stepSize: 0.5
-            
-            width: topForm.inputWidth
-
+        Rectangle {
+            id: wcTextbox
+            width: parent.inputWidth
+            height: 20
+            color: "#fff3e4"
+            radius: 4
             anchors {
+                verticalCenter: parent.verticalCenter
                 left: wcLabel.right
                 leftMargin: parent.labelGap
-                verticalCenter: parent.verticalCenter
             }
-
-            // Object that depicts background of slider
-            background: Rectangle {
-                width: wcSlider.availableWidth
-                height: 3
-                radius: 2
+            // Error highlighting
+            Rectangle {
+                visible: (materialPropertiesFormBackground.highlightErrors && (!wcTextInput.acceptableInput || !wcTextInput.text))
+                opacity: 0.8
+                anchors.fill: parent
+                color: "transparent"
+                border.color: "red"
+                border.width: 1
+                radius: 5
+            }
+            TextInput {
+                id: wcTextInput
+                width: text ? text.width : wcTextInputPlaceholder.width
+                font.pixelSize: topForm.textSize
                 color: "#483434"
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            handle: Rectangle {
-                color: "#fff3e4"
-                implicitWidth: 24
-                implicitHeight: 24
-                radius: width/2
-                anchors.verticalCenter: parent.verticalCenter
-                x: wcSlider.visualPosition * (wcSlider.availableWidth - width)
+                anchors {
+                    left: parent.left 
+                    leftMargin: 5
+                    verticalCenter: parent.verticalCenter
+                }
                 
+                KeyNavigation.tab: addBtn
+                KeyNavigation.right: addBtn
+                KeyNavigation.left: vrTextInput
+
+                selectByMouse: true
+                clip: true
+                validator: DoubleValidator{
+                    bottom: 0
+                    top: 100
+                }
+                // Placeholder Text
+                property string placeholderText: "Enter Value..."
                 Text {
-                    anchors.centerIn: parent
+                    id: wcTextInputPlaceholder
+                    text: wcTextInput.placeholderText
+                    font.pixelSize: topForm.textSize
                     color: "#483434"
-                    font.pixelSize: topForm.textSize - 5
-                    text: wcSlider.value
+                    visible: !wcTextInput.text
                 }
             }
+            // Units
+            Text{
+                text: "%"
+                font.pixelSize: 18
+                color: "#483434"
+                anchors {
+                    left: wcTextInput.right
+                    leftMargin: 1
+                }
+                visible: wcTextInput.text
+            }
         }
+        /////////////////////////
 
         // Add button
         Image {
             id: addBtn
             width: 20 + (25-20) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
             height: width
-            source: "../Assets/add.png"
+            focus: true
+            property string fileExt: activeFocus ? "-selected" : ""
+            source: "../Assets/add" + fileExt + ".png"
             anchors {
-                left: wcSlider.right
-                leftMargin: topForm.labelGap - 5
+                left: wcTextbox.right
+                leftMargin: topForm.labelGap
                 rightMargin: topForm.sideGap
                 verticalCenter: parent.verticalCenter
+            }
+
+            KeyNavigation.left: wcTextInput
+            KeyNavigation.tab: sgTextInput
+            KeyNavigation.down: continueButton
+
+            Keys.onReturnPressed: {
+                // Same as onClicked
+                if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
+                    // Don't highlight errors until user tries to enter another material
+                    materialPropertiesFormBackground.highlightErrors = false
+                    
+                    // Latest material name
+                    var name = qsTr("Material " + (materialPropertiesFormBackground.latestMaterialIndex))
+                    materialPropertiesFormBackground.latestMaterialIndex += 1
+
+                    // Update UI
+                    materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
+                    // Update Julia lists
+                    props.materials = props.materials+1
+                    props.materialCountChanged = true
+                    props.materialNames = [...props.materialNames,name]
+                    props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
+                    props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
+                    props.waterContent = [...props.waterContent, parseFloat(wcTextInput.text)]
+                    // Clear fields
+                    sgTextInput.text = ""
+                    vrTextInput.text = ""
+                    wcTextInput.text = ""
+                }else{
+                    materialPropertiesFormBackground.highlightErrors = true
+                }
+            }
+            Keys.onEnterPressed: {
+                // Same as onClicked
+                if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
+                    // Don't highlight errors until user tries to enter another material
+                    materialPropertiesFormBackground.highlightErrors = false
+                    
+                    // Latest material name
+                    var name = qsTr("Material " + (materialPropertiesFormBackground.latestMaterialIndex))
+                    materialPropertiesFormBackground.latestMaterialIndex += 1
+
+                    // Update UI
+                    materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
+                    // Update Julia lists
+                    props.materials = props.materials+1
+                    props.materialCountChanged = true
+                    props.materialNames = [...props.materialNames,name]
+                    props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
+                    props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
+                    props.waterContent = [...props.waterContent, parseFloat(wcTextInput.text)]
+                    // Clear fields
+                    sgTextInput.text = ""
+                    vrTextInput.text = ""
+                    wcTextInput.text = ""
+                }else{
+                    materialPropertiesFormBackground.highlightErrors = true
+                }
             }
 
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    //if(topForm.ready) {
                     if(topForm.ready && materialsModel.count < materialsList.maxMaterials){
-                        var name = qsTr("Material " + (materialsModel.count + 1))
+                        // Don't highlight errors until user tries to enter another material
+                        materialPropertiesFormBackground.highlightErrors = false
+                        
+                        // Latest material name
+                        var name = qsTr("Material " + (materialPropertiesFormBackground.latestMaterialIndex))
+                        materialPropertiesFormBackground.latestMaterialIndex += 1
+
                         // Update UI
-                        materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": wcSlider.value})
+                        materialsModel.append({"materialName": name, "specificGravity": parseFloat(sgTextInput.text), "voidRatio": parseFloat(vrTextInput.text), "waterContent": parseFloat(wcTextInput.text)})
                         // Update Julia lists
                         props.materials = props.materials+1
+                        props.materialCountChanged = true
                         props.materialNames = [...props.materialNames,name]
                         props.specificGravity =[...props.specificGravity, parseFloat(sgTextInput.text)]
                         props.voidRatio = [...props.voidRatio, parseFloat(vrTextInput.text)]
-                        props.waterContent = [...props.waterContent, wcSlider.value]
+                        props.waterContent = [...props.waterContent, parseFloat(wcTextInput.text)]
                         // Clear fields
                         sgTextInput.text = ""
                         vrTextInput.text = ""
-                        wcSlider.value = 50.0
+                        wcTextInput.text = ""
+                    }else{
+                        materialPropertiesFormBackground.highlightErrors = true
                     }
                 }
             }
@@ -347,7 +490,7 @@ Rectangle {
             topMargin: (overcrowded) ? 20 : 0 
         }
 
-        // If we went to a different screen and came back, reload previous entries
+        // If we went to a different screen and came back, reload previous entries (or if there is autofill)
         Component.onCompleted: {
             for(var i = 0; i < props.materials; i++){
                 materialsModel.append({"materialName": props.materialNames[i], "specificGravity": props.specificGravity[i], "voidRatio": props.voidRatio[i], "waterContent": props.waterContent[i]})
@@ -368,43 +511,40 @@ Rectangle {
             
             // Entry ////////////////
             Item {
-                implicitWidth: editImage.width + 2*materialEntry.sideGap + 4*materialEntry.inputGap + 4*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryName.width + deleteEntryBtn.width
+                implicitWidth: 2*materialEntry.sideGap + 4*materialEntry.inputGap + 4*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryNameTextbox.width + deleteEntryBtn.width
                 height: parent.height
                 anchors.horizontalCenter: parent.horizontalCenter
                 
                 // Material Name //
-                TextInput {
-                    id: entryName
-                    text: materialName
-                    font.pixelSize: materialEntry.textSize
+                Rectangle {
+                    id: entryNameTextbox
                     color: "#fff3e4"
-                    maximumLength: 12
+                    width: entryName.width + 10
+                    height: 20
+                    radius: 4
                     anchors {
                         verticalCenter: parent.verticalCenter
                         left: parent.left
                         leftMargin: materialEntry.sideGap
                     }
-                    selectByMouse: true
-                    clip: true
-                    onTextChanged: {
-                        // update Julia lists
-                        materialsModel.get(index).materialName = text
-                        var nameList = []
-                        for(var i = 0; i < materialsModel.count; i++){
-                            nameList.push(materialsModel.get(i).materialName)
+                    TextInput {
+                        id: entryName
+                        text: materialName
+                        font.pixelSize: materialEntry.textSize
+                        color: "#483434"
+                        anchors.centerIn: parent
+                        maximumLength: 12
+                        selectByMouse: true
+                        clip: true
+                        onTextChanged: {
+                            // update Julia lists
+                            materialsModel.get(index).materialName = text
+                            var nameList = []
+                            for(var i = 0; i < materialsModel.count; i++){
+                                nameList.push(materialsModel.get(i).materialName)
+                            }
+                            props.materialNames = [...nameList]
                         }
-                        props.materialNames = [...nameList]
-                    }
-                }
-                Image {
-                    id: editImage
-                    source: "../Assets/pencil.png"
-                    width: materialEntry.textSize - 5
-                    height: width
-                    anchors {
-                        left: entryName.right
-                        leftMargin: materialEntry.labelGap
-                        verticalCenter: entryName.verticalCenter
                     }
                 }
                 //////////////////
@@ -417,7 +557,7 @@ Rectangle {
                     font.pixelSize: materialEntry.textSize
                     anchors {
                         verticalCenter: parent.verticalCenter
-                        left: editImage.right
+                        left: entryNameTextbox.right
                         leftMargin: materialEntry.inputGap
                     }
                 }
@@ -435,7 +575,7 @@ Rectangle {
                     Text {
                         text: specificGravity.toFixed(2)
                         color: "#483434"
-                        font.pixelSize: materialEntry.textSize
+                        font.pixelSize: (parseFloat(specificGravity) > 999) ? materialEntry.textSize - 3 : materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }
@@ -497,9 +637,9 @@ Rectangle {
                         leftMargin: materialEntry.labelGap
                     }
                     Text {
-                        text: waterContent.toFixed(1)
+                        text: waterContent.toFixed(1) + "%"
                         color: "#483434"
-                        font.pixelSize: materialEntry.textSize
+                        font.pixelSize: (parseFloat(waterContent) === 100) ? materialEntry.textSize - 3 : materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }
@@ -508,7 +648,7 @@ Rectangle {
                 // DELETE ////////
                 Image {
                     id: deleteEntryBtn
-                    width: 15
+                    width: 15 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
                     height: width
                     source: "../Assets/delete.png"
                     anchors {
@@ -523,6 +663,7 @@ Rectangle {
                             materialsModel.remove(index)
                             // Update Julia variables
                             props.materials = props.materials - 1
+                            props.materialCountChanged = true
                             
                             var nameList = []
                             for(var i = 0; i < materialsModel.count; i++){
