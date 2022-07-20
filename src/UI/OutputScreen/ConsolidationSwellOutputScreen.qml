@@ -835,4 +835,23 @@ Rectangle {
         }
     }
     ///////////////////////////////
+
+    // Back arrow
+    Image {
+        id: backArrow
+        width: height
+        height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        source: "../Assets/back.png"
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left 
+            leftMargin: 5
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                mainLoader.source = "../EnterDataScreen/EnterDataScreen.qml"
+            }
+        }
+    }
 }

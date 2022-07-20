@@ -708,6 +708,14 @@ Rectangle {
             onClicked: {
                 if(consolidationSwellDataBackground.formFilled){
                     mainLoader.source = consolidationSwellDataBackground.nextScreen
+                    /*
+                       Since we can't directly call a function from Julia (until the bug in CxxWrap.jl and QML.jl is fixed),
+                    I'm forced to create an Observable() variable in Julia and pass it into props. When this variable updates
+                    to true, I will execute the Julia subroutine from the Julia code. 
+                       If user comes back from output screen and updates input, props.createOutputData will already be true, 
+                    thus we have to change it to false, then back to true, just to force an update on the Julia side
+                    */
+                    props.createOutputData = false
                     props.createOutputData = true
                 }else{
                     consolidationSwellDataBackground.highlightErrors = true
