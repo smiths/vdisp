@@ -818,14 +818,15 @@ Rectangle {
     }
     //////////////////////
 
+    // Layer Error Popup
     Popup {
         id: layerErrorPopup
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape // | Popup.CloseOnPressOutsideParent
 
-        width: popupPadding + layerErrorPopupContainer.width
-        height: popupPadding + layerErrorPopupContainer.height
+        width: popupPadding + layerErrorPopupText.width 
+        height: popupPadding + layerErrorPopupTitle.height + layerErrorPopupText.height + layerErrorPopupButton.height + 2*layerErrorPopup.gap
 
         anchors.centerIn: parent
 
@@ -899,4 +900,5 @@ Rectangle {
             }
         }
     }
+    /////////////////////
 }

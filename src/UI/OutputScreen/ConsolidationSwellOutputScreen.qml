@@ -547,8 +547,7 @@ Rectangle {
                 anchors {
                     left: parent.left
                     leftMargin: 2
-                    top: parent.top
-                    topMargin: 2
+                    verticalCenter: foundationStressPopupTitle.verticalCenter
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -601,7 +600,7 @@ Rectangle {
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
 
-        width: vdispWindow.width / 2
+        width: foundationStressPopupTitle.width + foundationStressPopupCloseBtn.width + foundationStressPopupSwitchBtn.width + 70
         height: foundationStressPopupRepeater.height + foundationStressPopupTitle.height + 40
 
         property bool totalStress: false
@@ -615,13 +614,13 @@ Rectangle {
         }
 
         contentItem: Item {
-            width: parent.width 
+            width: foundationStressPopupTitle.width + foundationStressPopupCloseBtn.width + foundationStressPopupSwitchBtn.width + 50
             height: foundationStressPopupRepeater.height + foundationStressPopupTitle.height + 10
             anchors.centerIn: parent
 
             Text {
                 id: foundationStressPopupTitle
-                text: foundationStressPopup.totalStress ? "Total Stress on Soil Layers" : "Stress from Foundation on Each Layer"
+                text: foundationStressPopup.totalStress ? "Effective and Foundation Stresses on Soil Layers" : "Stress from Foundation on Each Layer"
                 font.pixelSize: 20
                 color: "#fff3e4"
                 anchors {
@@ -665,8 +664,7 @@ Rectangle {
                 anchors {
                     left: parent.left
                     leftMargin: 2
-                    top: parent.top
-                    topMargin: 2
+                    verticalCenter: foundationStressPopupTitle.verticalCenter
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -675,14 +673,14 @@ Rectangle {
             }
 
             Image{
+                id: foundationStressPopupSwitchBtn
                 source: "../Assets/layers.png"
                 width: 15
                 height: 15
                 anchors {
                     right: parent.right
                     rightMargin: 2
-                    top: parent.top
-                    topMargin: 2
+                    verticalCenter: foundationStressPopupTitle.verticalCenter
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -693,7 +691,7 @@ Rectangle {
     }
     //////////////////////////////
 
-    // Save Output /////
+    // Save Output ///////////////
     Rectangle {
         id: selectOutputButton
         color: "#6B4F4F"
@@ -836,7 +834,7 @@ Rectangle {
     }
     ///////////////////////////////
 
-    // Back arrow
+    // Back arrow /////////////////
     Image {
         id: backArrow
         width: height
@@ -854,4 +852,5 @@ Rectangle {
             }
         }
     }
+    ///////////////////////////////
 }

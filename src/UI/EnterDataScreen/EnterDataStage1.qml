@@ -312,8 +312,8 @@ Rectangle {
         focus: true
         closePolicy: Popup.CloseOnEscape // | Popup.CloseOnPressOutsideParent
 
-        width: popupPadding + inputFileRejectedDialogContainer.width
-        height: popupPadding + inputFileRejectedDialogContainer.height
+        width: popupPadding + inputFileRejectedDialogText.width 
+        height: popupPadding + inputFileRejectedDialogTitle.height + inputFileRejectedDialogText.height + inputFileRejectedDialogButton.height + 2*inputFileRejectedDialog.gap
 
         anchors.centerIn: parent
 

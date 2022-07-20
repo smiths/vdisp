@@ -451,20 +451,28 @@ on(createOutputData) do val
             heaveAboveFoundationTableRows = size(heaveAboveFoundationTable)[1]
             heaveBelowFoundationTableRows = size(heaveBelowFoundationTable)[1]
             
-            # Calculate effective stresses of each layer
-            effective_stresses = [0.0 for i in 1:inData.soilLayers]
+            # Get effective, foundation, and effective+foundation stresses for each layer
+            # Initialize arrays
+            effectiveStresses = []   
+            totalStresses = []
+            foundationStresses = []
+
+            lastLayer = inData.soilLayerNumber[1]  # Store the layer value of the first sublayer 
+            # Loop through each sublayer
             for i in 1:inData.elements 
-                effective_stresses[inData.soilLayerNumber[i]] += P[i]
+                if inData.soilLayerNumber[i] != lastLayer  # If we encounter a different layer value
+                    push!(effectiveStresses, P[i-1])  # The previous entry in P[] was the effective stress of the bottom sublayer of lastLayer
+                    push!(totalStresses, PP[i-1])
+                    push!(foundationStresses, PP[i-1]-P[i-1])
+                    lastLayer = inData.soilLayerNumber[i]  # Update lastLayer
+                end
             end
+            # Append final layer stresses
+            push!(effectiveStresses, P[end])
+            push!(totalStresses, PP[end])
+            push!(foundationStresses, PP[end]-P[end])
 
-            # Calculate foundation stresses of each layer
-            total_stresses = [0.0 for i in 1:inData.soilLayers]
-            for i in 1:inData.elements
-                total_stresses[inData.soilLayerNumber[i]] += PP[i]
-            end
-            foundation_stresses = [total_stresses[i] - effective_stresses[i] for i in 1:inData.soilLayers]
-
-            append!(outputParams, [inData.problemName, P, PP, heaveAboveFoundationTable, heaveAboveFoundationTableRows, heaveBelowFoundationTable, heaveBelowFoundationTableRows, Δh1, Δh2, Δh, effective_stresses, total_stresses, foundation_stresses])
+            append!(outputParams, [inData.problemName, P, PP, heaveAboveFoundationTable, heaveAboveFoundationTableRows, heaveBelowFoundationTable, heaveBelowFoundationTableRows, Δh1, Δh2, Δh, effectiveStresses, totalStresses, foundationStresses])
         end
         global outputData[] = outputParams
     end
