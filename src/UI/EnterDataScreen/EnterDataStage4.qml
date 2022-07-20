@@ -11,10 +11,6 @@ Rectangle {
     function formIsFilled(){
         // Check that all arrays have correct length
         if(filledSP.length != props.materials || filledSI.length != props.materials || filledCI.length != props.materials || filledRI.length != props.materials) return false
-        print(filledSP)
-        print(filledSI)
-        print(filledCI)
-        print(filledRI)
         // Check that each properties entries are valid
         for(var i = 0; i < props.materials; i++){
             if(!filledSP[i] || !filledSI[i] || !filledCI[i] || !filledRI[i]) return false

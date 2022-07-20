@@ -371,12 +371,6 @@ function createOutputDataFromGUI()
     soilLayerNums = Array{Int32}(undef,0)
     for i in 1:materials[]
         for j in 1:subdivisions[i]
-            # In the input file, soil layer number index starts at 1, in GUI it starts at 0
-            # if inputFileSelected[]
-            #     push!(soilLayerNums, soilLayerNumbers[i])
-            # else
-            #     push!(soilLayerNums, soilLayerNumbers[i]+1)
-            # end
             push!(soilLayerNums, soilLayerNumbers[i])
         end
     end
