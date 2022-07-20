@@ -13,7 +13,10 @@ precompile:
 	julia -e "using Pkg; Pkg.activate(\".\"); Pkg.instantiate()"
 
 run:
-	julia --project=@. src/vdisp.jl "./src/.data/input_data.dat" "./src/.data/output_data.dat"
+	julia --project=@. src/vdisp.jl "run"
+
+debug:
+	julia --project=@. src/vdisp.jl "debug"
 
 test: FORCE
 	cd test && julia --project=@. runtests.jl

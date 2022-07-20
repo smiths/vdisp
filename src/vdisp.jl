@@ -13,7 +13,7 @@ using Observables
 
 export readInputFile
 
-PRINT_DEBUG = true
+PRINT_DEBUG = false
 
 # Julia variables
 materialNames = Array{String}(undef,0)
@@ -483,9 +483,13 @@ end
 
 
 # Don't load or run anything for tests
-if size(ARGS)[1] == 2
-    path = (size(ARGS)[1] == 2) ? "./src/UI/main.qml" : "../src/UI/main.qml"
+if size(ARGS)[1] == 1
+    path = "./src/UI/main.qml"  # Path to main QML file when executing `make` command from `vdisp/` directory 
     
+    if ARGS[1] == "debug"
+        global PRINT_DEBUG = true
+    end
+
     # Load file main.qml
     loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "outputDataProgress" => outputDataProgress, "createOutputData" => createOutputData, "outputData"=>outputData))
     
