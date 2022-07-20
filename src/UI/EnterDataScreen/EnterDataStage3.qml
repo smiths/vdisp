@@ -87,7 +87,7 @@ Rectangle {
                 subs = [...subs, 2]
 
                 // Initialize soil layer numbers to index
-                soilNums = [...soilNums, i]
+                soilNums = [...soilNums, i+1]
             }
             bounds.push(0.0) // Add bottom bound
             props.bounds = [...bounds] // Update julia list of bounds
@@ -98,7 +98,7 @@ Rectangle {
             props.subdivisions = [...subs]
 
             // There is one more soil layer than # of handles, add outside loop
-            soilNums = [...soilNums, Math.floor(props.materials - 1)] // For some reason without floor() it was a float value???
+            soilNums = [...soilNums, Math.floor(props.materials)] // For some reason without floor() it was a float value???
             props.soilLayerNumbers = [...soilNums]
         }
     }
@@ -389,7 +389,7 @@ Rectangle {
                                 var soilNums = []
                                 for(var i = 0; i < props.materials; i++){
                                     if(i === index){
-                                        soilNums = [...soilNums, currentIndex]
+                                        soilNums = [...soilNums, currentIndex+1]
                                     }else{
                                         soilNums = [...soilNums, props.soilLayerNumbers[i]]
                                     }

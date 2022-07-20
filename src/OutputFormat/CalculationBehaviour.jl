@@ -144,14 +144,12 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 
 """
 function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
-    x = behaviour.nodalPoints
-
+    
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
-
+    
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
-
     # Begin main calculations
     Δh1 = 0.0
     # Get Heave begin index

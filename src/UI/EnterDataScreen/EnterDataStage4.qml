@@ -11,13 +11,17 @@ Rectangle {
     function formIsFilled(){
         // Check that all arrays have correct length
         if(filledSP.length != props.materials || filledSI.length != props.materials || filledCI.length != props.materials || filledRI.length != props.materials) return false
+        print(filledSP)
+        print(filledSI)
+        print(filledCI)
+        print(filledRI)
         // Check that each properties entries are valid
         for(var i = 0; i < props.materials; i++){
             if(!filledSP[i] || !filledSI[i] || !filledCI[i] || !filledRI[i]) return false
         }
         return true
     }
-
+    
     function forceUpdate(){
         var temp = props.heaveActive
         props.heaveActive = 12
@@ -46,7 +50,15 @@ Rectangle {
 
     Component.onCompleted: {
         // If no file was selected, or model from input file was changed, fill default values
-        if(!props.inputFileSelected || props.modelChanged){
+        if(!props.inputFileSelected || props.modelChanged || props.materialCountChanged){
+            props.swellPressure = []
+            props.swellIndex = []
+            props.compressionIndex = []
+            props.recompressionIndex = []
+            filledSP = []
+            filledSI = []
+            filledCI = []
+            filledRI = []
             for(var i = 0; i < props.materials; i++){
                 // Populate arrays that check if forms are filled properly
                 filledSP.push(false)
@@ -348,7 +360,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.swellPressure[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged) text = props.swellPressure[index]
                         }
 
                         onTextChanged: {
@@ -452,7 +464,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.swellIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged) text = props.swellIndex[index]
                         }
 
                         onTextChanged: {
@@ -543,7 +555,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.compressionIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged) text = props.compressionIndex[index]
                         }
 
                         onTextChanged: {
@@ -635,11 +647,15 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.recompressionIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged){
+                                 text = props.recompressionIndex[index]
+                            }
                         }
 
+                        property bool loaded: false
                         onTextChanged: {
-                            if(acceptableInput){
+                            if(acceptableInput && !loaded){
+                                loaded = true
                                 // Set filled to true
                                 filledRI[index] = true
                                 // Force formFilled to update

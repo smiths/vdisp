@@ -458,7 +458,9 @@ Rectangle {
                         vrTextInput.text = ""
                         wcTextInput.text = ""
                     }else{
-                        materialPropertiesFormBackground.highlightErrors = true
+                        // Only highlight error for unfilled forms, not for material count
+                        if(materialsModel.count < materialsList.maxMaterials) materialPropertiesFormBackground.highlightErrors = true
+                        // TODO: Add popup to alert user they have reached max material count?
                     }
                 }
             }

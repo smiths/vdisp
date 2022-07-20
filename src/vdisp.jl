@@ -13,7 +13,7 @@ using Observables
 
 export readInputFile
 
-PRINT_DEBUG = false
+PRINT_DEBUG = true
 
 # Julia variables
 materialNames = Array{String}(undef,0)
@@ -282,6 +282,7 @@ setSwellPressure = on(swellPressureQML) do val
     if PRINT_DEBUG
         println("\nGot an update for swellPressure: ", val)
     end
+
     sp = Array{Float64}(undef,0)
     for v in val
         push!(sp, QML.value(v))
@@ -371,11 +372,12 @@ function createOutputDataFromGUI()
     for i in 1:materials[]
         for j in 1:subdivisions[i]
             # In the input file, soil layer number index starts at 1, in GUI it starts at 0
-            if inputFileSelected[]
-                push!(soilLayerNums, soilLayerNumbers[i])
-            else
-                push!(soilLayerNums, soilLayerNumbers[i]+1)
-            end
+            # if inputFileSelected[]
+            #     push!(soilLayerNums, soilLayerNumbers[i])
+            # else
+            #     push!(soilLayerNums, soilLayerNumbers[i]+1)
+            # end
+            push!(soilLayerNums, soilLayerNumbers[i])
         end
     end
 
