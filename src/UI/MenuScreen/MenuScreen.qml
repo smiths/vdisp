@@ -193,7 +193,7 @@ Item {
                 height: width
                 
                 property string fileExt: parent.activeFocus ? "-selected" : ""
-                property string folder: vdispWindow.getImageFolder(width, 64, 512)
+                property string folder: vdispWindow.getImageFolder(width, 16, 256)
                 source: "../Assets/" + folder + "/exit" + fileExt + ".png"
             }
 

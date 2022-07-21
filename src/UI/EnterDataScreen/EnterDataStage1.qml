@@ -226,7 +226,9 @@ Rectangle {
 
         Image {
             id: inputFromFileImage
-            source: "../Assets/fileUpload.png"
+
+            property string folder: vdispWindow.getImageFolder(width, 16, 64)
+            source: "../Assets/" + folder + "/fileUpload.png"
 
             width: parent.height
             height: width
@@ -257,8 +259,11 @@ Rectangle {
     }
     Image{
         id: inputFromFileDelete
-        source: "../Assets/exit.png"
         visible: props.inputFileSelected
+        
+        property string folder: vdispWindow.getImageFolder(width, 16, 256)
+        source: "../Assets/" + folder + "/exit.png"
+        
         anchors {
             left: inputFromFileContainer.right
             leftMargin: inputFromFileContainer.gap*1.5
@@ -1294,9 +1299,12 @@ Rectangle {
         }
         Image {
             id: continueButtonIcon
+
             source: "../Assets/continue.png"
+            
             width: 19
             height: 19
+            
             anchors {
                 left: parent.horizontalCenter
                 leftMargin: 20

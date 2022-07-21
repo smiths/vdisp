@@ -32,22 +32,22 @@ Window {
     */
     function getImageFolder(sourceSize, min, max){
         var finalSize = 0
-        if(sourceSize < 20){
+        if(sourceSize < 24){
             /* 
                 Halfway between 16 and 24 is 20. Any icon less than 20px
             in size will get its image from the 16px folder. Follow the same 
             logic to derive values 28, 48, 96, etc... in "else if" statements
             */
             finalSize = 16
-        }else if(sourceSize < 28){
+        }else if(sourceSize < 32){
             finalSize = 24
-        }else if(sourceSize < 48){
+        }else if(sourceSize < 64){
             finalSize = 32
-        }else if(sourceSize < 96){
+        }else if(sourceSize < 128){
             finalSize = 64
-        }else if(sourceSize < 192){
+        }else if(sourceSize < 256){
             finalSize = 128
-        }else if(sourceSize < 384){
+        }else if(sourceSize < 512){
             finalSize = 256
         }else{
             finalSize = 512
