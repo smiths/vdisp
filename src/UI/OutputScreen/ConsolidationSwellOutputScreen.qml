@@ -39,7 +39,6 @@ Rectangle {
         }
     }
 
-
     // Heave Above Foundation ///////////////////
     Text {
         id: heaveAboveFoundationTableTitle
@@ -67,7 +66,7 @@ Rectangle {
             horizontalCenter: parent.horizontalCenter
         }
 
-        // Header Background
+        // Header Background //////////
         Rectangle {
             color: "#5E4545"
             radius: 10
@@ -80,8 +79,9 @@ Rectangle {
                 anchors.bottom: parent.bottom
             }
         }
-        
-        // Body Background
+        //////////////////////////////
+
+        // Body Background ///////////
         Rectangle {
             color: "#6B4F4F"
             radius: 10
@@ -94,23 +94,27 @@ Rectangle {
                 anchors.top: parent.top
             }
         }
+        //////////////////////////////
 
-        // Divider
+        // Divider ///////////////////
         Rectangle{
             color: "#fff3e4"
             width: parent.width
             height: 1.5
             anchors.verticalCenter: heaveAboveFoundationTableHeaderView.bottom
         }
+        //////////////////////////////
 
-        // Border
+        // Border ////////////////////
         Rectangle {
             border.color: "#fff3e4"
             radius: 10
             color: "transparent"
             anchors.fill: parent
         }
+        //////////////////////////////
 
+        // Table Headers /////////////
         Repeater {
             id: heaveAboveFoundationTableHeaderView
             model: 4 
@@ -137,6 +141,9 @@ Rectangle {
                 }
             }
         }
+        //////////////////////////////
+
+        // Table /////////////////////
         ListView {
             id: heaveAboveFoundationTableView
             model: props.outputData[4]  // heaveAboveFoundationRows
@@ -148,6 +155,7 @@ Rectangle {
                 contentItem: Rectangle {
                     implicitWidth: 6
                     opacity: 0.4
+                    visible: heaveAboveFoundationTableView.interactive
                     color: "#fff3e4"
                 }
             }
@@ -202,6 +210,7 @@ Rectangle {
                 }
             }
         }
+        //////////////////////////////
     }
     Text {
         text: "Total Heave Above Foundation: "
@@ -263,7 +272,7 @@ Rectangle {
             horizontalCenter: parent.horizontalCenter
         }
 
-        // Header Background
+        // Header Background //////////
         Rectangle {
             color: "#5E4545"
             radius: 10
@@ -276,8 +285,9 @@ Rectangle {
                 anchors.bottom: parent.bottom
             }
         }
+        //////////////////////////////
         
-        // Body Background
+        // Body Background ////////////
         Rectangle {
             color: "#6B4F4F"
             radius: 10
@@ -290,23 +300,27 @@ Rectangle {
                 anchors.top: parent.top
             }
         }
+        //////////////////////////////
 
-        // Divider
+        // Divider ///////////////////
         Rectangle{
             color: "#fff3e4"
             width: parent.width
             height: 1.5
             anchors.verticalCenter: heaveBelowFoundationTableHeaderView.bottom
         }
+        //////////////////////////////
 
-        // Border
+        // Border ////////////////////
         Rectangle {
             border.color: "#fff3e4"
             radius: 10
             color: "transparent"
             anchors.fill: parent
         }
+        //////////////////////////////
 
+        // Table Headers /////////////
         Repeater {
             id: heaveBelowFoundationTableHeaderView
             model: 4 
@@ -333,6 +347,9 @@ Rectangle {
                 }
             }
         }
+        //////////////////////////////
+        
+        // Table //////////////////////
         ListView {
             id: heaveBelowFoundationTableView
             model: props.outputData[6]  // heaveBelowFoundationRows
@@ -343,6 +360,7 @@ Rectangle {
                 contentItem: Rectangle {
                     implicitWidth: 6
                     opacity: 0.4
+                    visible: heaveBelowFoundationTableView.interactive
                     color: "#fff3e4"
                 }
             }
@@ -396,6 +414,7 @@ Rectangle {
                 }
             }
         }
+        //////////////////////////////
     }
     Text {
         text: "Total Heave Below Foundation: "

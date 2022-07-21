@@ -488,7 +488,7 @@ on(createOutputData) do val
             # Get effective, foundation, and effective+foundation stresses for each layer
             effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
             
-            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh])
+            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh, effectiveStresses, foundationStresses, totalStresses])
         else  # Schmertmann Elastic (Kept this separate incase in the future we want to pass in Elastic Mod vs Cone Pen values)
             P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outData)
             
@@ -498,7 +498,7 @@ on(createOutputData) do val
             # Get effective, foundation, and effective+foundation stresses for each layer
             effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
             
-            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh])
+            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh, effectiveStresses, foundationStresses, totalStresses])
         end
         global outputData[] = outputParams
     end

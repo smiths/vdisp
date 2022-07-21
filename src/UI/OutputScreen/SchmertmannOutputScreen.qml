@@ -230,6 +230,252 @@ Rectangle {
     }
     /////////////////////////////
 
+    // Effective Stress Popup ///
+    Item {
+        id: effectiveStressPopupButton
+        height: effectiveStressPopupButtonRect.height
+        width: 1.5*effectiveStressPopupButtonRect.width
+
+        y: 30
+
+        Rectangle{
+            id: effectiveStressPopupButtonCircle
+            color: "#6B4F4F"
+            width: 55
+            height: 55
+            radius: width/2
+            anchors{
+                verticalCenter: effectiveStressPopupButtonRect.verticalCenter
+                horizontalCenter: effectiveStressPopupButtonRect.right
+            } 
+        }
+        Rectangle {
+            id: effectiveStressPopupButtonRect
+            color: "#6B4F4F"
+            width: 55
+            height: 55
+        }
+        Image {
+            source: "../Assets/layers.png"
+            width: 40
+            height: 40
+            anchors.centerIn: effectiveStressPopupButtonCircle
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: effectiveStressPopup.open()
+        }
+    }
+    Popup {
+        id: effectiveStressPopup
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+
+        width: vdispWindow.width / 2
+        height: effectiveStressPopupRepeater.height + effectiveStressPopupTitle.height + 40
+
+        anchors.centerIn: parent
+
+        background: Rectangle {
+            color: "#6B4F4F"
+            border.color: "#fff3e4"
+            radius: 10
+        }
+
+        contentItem: Item {
+            width: parent.width 
+            height: effectiveStressPopupRepeater.height + effectiveStressPopupTitle.height + 10
+            anchors.centerIn: parent
+
+            Text {
+                id: effectiveStressPopupTitle
+                text: "Effective Stresses of Each Layer"
+                font.pixelSize: 20
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                }
+            }
+
+            Repeater {
+                id: effectiveStressPopupRepeater
+                model: props.materials
+                property int cellHeight: 50
+
+                width: parent.width
+                height: cellHeight * props.materials
+
+                delegate: Rectangle {
+                    width: parent.width
+                    height: effectiveStressPopupRepeater.cellHeight
+
+                    y: effectiveStressPopupTitle.height + 10 + index * effectiveStressPopupRepeater.cellHeight
+
+                    color: (index % 2 == 0) ? "#fff3e4" : "#EED6C4"
+                    
+                    Text {
+                        color: "#483434"
+                        font.pixelSize: 20
+                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        text: (props.outputDataCreated) ? props.materialNames[index] + ": " + props.outputData[7][index].toFixed(3) + unitString: "N/A"
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+
+            Image{
+                source: "../Assets/exit.png"
+                width: 15
+                height: 15
+                anchors {
+                    left: parent.left
+                    leftMargin: 2
+                    verticalCenter: foundationStressPopupTitle.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: effectiveStressPopup.close()
+                }
+            }
+        }
+    }
+    /////////////////////////////
+
+    // Foundation Stress Popup ///
+    Item {
+        id: foundationStressPopupButton
+        height: foundationStressPopupButtonRect.height
+        width: 1.5*foundationStressPopupButtonRect.width
+
+        y: 30 + foundationStressPopupButton.height + 30
+
+        Rectangle{
+            id: foundationStressPopupButtonCircle
+            color: "#6B4F4F"
+            width: 55
+            height: 55
+            radius: width/2
+            anchors{
+                verticalCenter: foundationStressPopupButtonRect.verticalCenter
+                horizontalCenter: foundationStressPopupButtonRect.right
+            } 
+        }
+        Rectangle {
+            id: foundationStressPopupButtonRect
+            color: "#6B4F4F"
+            width: 55
+            height: 55
+        }
+        Image {
+            source: "../Assets/layers.png"
+            width: 40
+            height: 40
+            anchors.centerIn: foundationStressPopupButtonCircle
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: foundationStressPopup.open()
+        }
+    }
+    Popup {
+        id: foundationStressPopup
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+
+        width: foundationStressPopupTitle.width + foundationStressPopupCloseBtn.width + foundationStressPopupSwitchBtn.width + 70
+        height: foundationStressPopupRepeater.height + foundationStressPopupTitle.height + 40
+
+        property bool totalStress: false
+
+        anchors.centerIn: parent
+
+        background: Rectangle {
+            color: "#6B4F4F"
+            border.color: "#fff3e4"
+            radius: 10
+        }
+
+        contentItem: Item {
+            width: foundationStressPopupTitle.width + foundationStressPopupCloseBtn.width + foundationStressPopupSwitchBtn.width + 50
+            height: foundationStressPopupRepeater.height + foundationStressPopupTitle.height + 10
+            anchors.centerIn: parent
+
+            Text {
+                id: foundationStressPopupTitle
+                text: foundationStressPopup.totalStress ? "Effective and Foundation Stresses on Soil Layers" : "Stress from Foundation on Each Layer"
+                font.pixelSize: 20
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                }
+            }
+
+            Repeater {
+                id: foundationStressPopupRepeater
+                model: props.materials
+                property int cellHeight: 50
+
+                width: parent.width
+                height: cellHeight * props.materials
+
+                delegate: Rectangle {
+                    width: parent.width
+                    height: foundationStressPopupRepeater.cellHeight
+
+                    y: foundationStressPopupTitle.height + 10 + index * foundationStressPopupRepeater.cellHeight
+
+                    color: (index % 2 == 0) ? "#fff3e4" : "#EED6C4"
+                    
+                    Text {
+                        color: "#483434"
+                        font.pixelSize: 20
+                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        property string dataString: foundationStressPopup.totalStress ?  props.outputData[9][index].toFixed(3) : props.outputData[8][index].toFixed(3)
+                        text: (props.outputDataCreated) ? props.materialNames[index] + ": " + dataString + unitString: "N/A"
+                        anchors.centerIn: parent
+                    }
+                }
+            }
+
+            Image{
+                id: foundationStressPopupCloseBtn
+                source: "../Assets/exit.png"
+                width: 15
+                height: 15
+                anchors {
+                    left: parent.left
+                    leftMargin: 2
+                    verticalCenter: foundationStressPopupTitle.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: foundationStressPopup.close()
+                }
+            }
+
+            Image{
+                id: foundationStressPopupSwitchBtn
+                source: "../Assets/layers.png"
+                width: 15
+                height: 15
+                anchors {
+                    right: parent.right
+                    rightMargin: 2
+                    verticalCenter: foundationStressPopupTitle.verticalCenter
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: foundationStressPopup.totalStress = !foundationStressPopup.totalStress
+                }
+            }
+        }
+    }
+    //////////////////////////////
+
     // Save Output ///////////////
     Rectangle {
         id: selectOutputButton
