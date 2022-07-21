@@ -28,7 +28,7 @@ Rectangle {
     Text{
         id: outputScreenSubTitle
         visible: props.outputDataCreated
-        text: "Schmertmann"
+        text: "Schmertmann" + (props.model === 2) ? " Elastic" : ""
         color: "#fff3e4"
         font.pixelSize: 15 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         anchors {

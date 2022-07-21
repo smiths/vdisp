@@ -489,8 +489,16 @@ on(createOutputData) do val
             effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
             
             append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh])
-        else
-
+        else  # Schmertmann Elastic (Kept this separate incase in the future we want to pass in Elastic Mod vs Cone Pen values)
+            P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outData)
+            
+            # When passing a 2D array into QML, it becomes 1D array so we need to know the number of rows
+            settlementTableRows = size(settlementTable)[1]
+            
+            # Get effective, foundation, and effective+foundation stresses for each layer
+            effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
+            
+            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh])
         end
         global outputData[] = outputParams
     end

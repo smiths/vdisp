@@ -15,9 +15,8 @@ Rectangle {
         return true
     }
     function isFilled(){
-        return selectedOutputFile && forceUpdateInt === 2 && timeTextInput.text && timeTextInput.acceptableInput && formIsFilled()
+        return forceUpdateInt === 2 && timeTextInput.text && timeTextInput.acceptableInput && formIsFilled()
     }
-
     function forceUpdate(){
         forceUpdateInt = 1
         forceUpdateInt = 2
@@ -25,9 +24,9 @@ Rectangle {
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
+    property string nextScreen: "../OutputScreen/SchmertmannOutputScreen.qml" 
     property bool highlightErrors: false
 
-    property bool selectedOutputFile: false
     property variant filled: []
     property int forceUpdateInt: 2
 
@@ -199,8 +198,8 @@ Rectangle {
                     color: "#fff3e4"
                     font.pixelSize: schmertmannElasticDataForm.fontSize
                     anchors {
-                        verticalCenter: schemrtmannDataListEntry.verticalCenter
-                        left: schemrtmannDataListEntry.left
+                        verticalCenter: schemrtmannElasticDataListEntry.verticalCenter
+                        left: schemrtmannElasticDataListEntry.left
                     }
                 }
                 ////////////////////////////////
@@ -212,7 +211,7 @@ Rectangle {
                     color: "#fff3e4"
                     font.pixelSize: schmertmannElasticDataForm.fontSize
                     anchors {
-                        verticalCenter: schemrtmannDataListEntry.verticalCenter
+                        verticalCenter: schemrtmannElasticDataListEntry.verticalCenter
                         left: materialLabel.right
                         leftMargin: schmertmannElasticDataForm.inputGap
                     }
@@ -313,90 +312,6 @@ Rectangle {
     }
     //////////////////////
 
-    // Select Output Location /////
-    Rectangle {
-        id: selectOutputButton
-        color: "#fff3e4"
-        radius: 5
-        width: selectOutputButtonContainer.width + 10
-        height: selectOutputButtonContainer.height + 5
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: schmertmannElasticDataForm.bottom
-            topMargin: 20
-        }
-        // Error highlighting
-        Rectangle {
-            visible: (schmertmannElasticDataBackground.highlightErrors && !schmertmannElasticDataBackground.selectedOutputFile)
-            opacity: 0.8
-            anchors.fill: parent
-            color: "transparent"
-            border.color: "red"
-            border.width: 1
-            radius: 5
-        }
-        Item {
-            id: selectOutputButtonContainer
-            
-            height: selectOutputButtonIcon.height
-            width: selectOutputButtonText.width + gap + selectOutputButtonIcon.width
-
-            anchors.centerIn: parent
-
-            property int gap: 10
-            property string fileName: ""
-
-            Text{
-                id: selectOutputButtonText
-                text: (schmertmannElasticDataBackground.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Select Output File"
-                color: "#483434"
-                font.pixelSize: 15
-                anchors{
-                    left: parent.left
-                    verticalCenter: selectOutputButtonIcon.verticalCenter
-                }
-            }
-            Image {
-                id: selectOutputButtonIcon
-                source: (schmertmannElasticDataBackground.selectedOutputFile) ? "../Assets/fileAccept.png" : "../Assets/fileUpload.png"
-                width: 20
-                height: 20
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: selectOutputButtonText.right
-                    leftMargin: selectOutputButtonContainer.gap
-                }
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: fileDialog.open()
-        }
-    }
-    FileDialog {
-        id: fileDialog
-        title: "Please select output file"
-        selectMultiple: false
-        selectExisting: false
-        folder: shortcuts.home
-        nameFilters: ["VDisp data files (*.dat)" ]
-        onAccepted: {
-            schmertmannElasticDataBackground.selectedOutputFile = true
-            props.outputFile = fileUrl.toString()
-            // Convert URL to string
-            var name = fileUrl.toString()
-            // Split URL String at each "/" and extract last piece of data
-            var path = name.split("/")
-            var fileName = path[path.length - 1]
-            // Update fileName property
-            selectOutputButtonContainer.fileName = fileName
-        }
-        onRejected: {
-            schmertmannElasticDataBackground.selectedOutputFile = false
-        }
-    }
-    ///////////////////////////////
-
     // Continue Button ///
     Rectangle {
         id: continueButton
@@ -413,9 +328,16 @@ Rectangle {
             anchors.fill: parent
             onClicked: {
                 if(schmertmannElasticDataBackground.formFilled){
-                    // mainLoader.source = "" (switch to next screen when it's designed)
-                    props.finishedInput = true
-                    Qt.quit()
+                    mainLoader.source = schmertmannElasticDataBackground.nextScreen
+                    /*
+                       Since we can't directly call a function from Julia (until the bug in CxxWrap.jl and QML.jl is fixed),
+                    I'm forced to create an Observable() variable in Julia and pass it into props. When this variable updates
+                    to true, I will execute the Julia subroutine from the Julia code. 
+                       If user comes back from output screen and updates input, props.createOutputData will already be true, 
+                    thus we have to change it to false, then back to true, just to force an update on the Julia side
+                    */
+                    props.createOutputData = false
+                    props.createOutputData = true
                 }else{
                     schmertmannElasticDataBackground.highlightErrors = true
                 }

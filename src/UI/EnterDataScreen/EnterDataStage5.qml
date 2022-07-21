@@ -17,7 +17,6 @@ Rectangle {
     function isFilled(){
         return forceUpdateInt === 2 && timeTextInput.text && timeTextInput.acceptableInput && formIsFilled()
     }
-
     function forceUpdate(){
         forceUpdateInt = 1
         forceUpdateInt = 2
