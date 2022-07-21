@@ -64,7 +64,7 @@ Rectangle {
     }
     Text {
         id: schmertmannElasticSubtitle
-        text: "Schmertmann"
+        text: "Schmertmann Elastic"
         font.pixelSize: 15
         color: "#fff3e4"
         anchors {

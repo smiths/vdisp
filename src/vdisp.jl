@@ -395,7 +395,7 @@ function createOutputDataFromGUI()
     outputDataProgress[] = 45
 
     # Converting from dropdown menu index to value
-    modelConversion = [0, 2, 4] # Consolidation Swell NOPT = 0, Schmertmann NOPT = 2, Schemrtmann Elastic NOPT = 4
+    modelConversion = [Int(InputParser.ConsolidationSwell), Int(InputParser.Schmertmann), Int(InputParser.SchmertmannElastic)]
     foundationType = (foundation[] == 0) ? "RectangularSlab" : "LongStripFooting"
 
     println("Data calculated")
