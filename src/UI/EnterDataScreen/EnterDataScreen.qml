@@ -14,14 +14,21 @@ Item {
     // Back arrow
     Image {
         id: backArrow
+        
         width: height
         height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-        source: "../Assets/back.png"
+        
+        property string folder: vdispWindow.getImageFolder(width, 32, 512)
+        source: "../Assets/" + folder + "/next.png"
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left 
             leftMargin: 5
         }
+
+        rotation: 180  // Back arrow just reuses the next arrow icon but flipped
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
@@ -36,15 +43,20 @@ Item {
     // Next arrow
     Image {
         id: nextArrow
+        
         width: height 
         height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-        source: "../Assets/back.png"
+        
+        property string folder: vdispWindow.getImageFolder(width, 32, 512)
+        source: "../Assets/" + folder + "/next.png"
+        
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right 
             rightMargin: 5
         }
-        rotation: 180
+
+        
         MouseArea {
             anchors.fill: parent
             onClicked: {
