@@ -845,5 +845,4 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
     return (settlementTable, Δh)
 end
 
-
 end # module

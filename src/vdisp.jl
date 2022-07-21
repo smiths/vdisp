@@ -425,6 +425,31 @@ file path and writes the contents of `writeDefaultOutput(path, outData)` to file
 """
 writeGUIDataToFile(path::String, outData = createOutputDataFromGUI()) = writeDefaultOutput(outData, path)
 
+function getStressesFromArrays(P, PP, inData)
+    # Get effective, foundation, and effective+foundation stresses for each layer
+    # Initialize arrays
+    effectiveStresses = []   
+    totalStresses = []
+    foundationStresses = []
+
+    lastLayer = inData.soilLayerNumber[1]  # Store the layer value of the first sublayer 
+    # Loop through each sublayer
+    for i in 1:inData.elements 
+        if inData.soilLayerNumber[i] != lastLayer  # If we encounter a different layer value
+            push!(effectiveStresses, P[i-1])  # The previous entry in P[] was the effective stress of the bottom sublayer of lastLayer
+            push!(totalStresses, PP[i-1])
+            push!(foundationStresses, PP[i-1]-P[i-1])
+            lastLayer = inData.soilLayerNumber[i]  # Update lastLayer
+        end
+    end
+    # Append final layer stresses
+    push!(effectiveStresses, P[end])
+    push!(totalStresses, PP[end])
+    push!(foundationStresses, PP[end]-P[end])
+
+    return (effectiveStresses, foundationStresses, totalStresses)
+end
+
 pathFromVar(str::String) = str[7:end]
 
 # Output 
@@ -436,11 +461,14 @@ end
 outputData = Observable([])
 createOutputData = Observable(false)
 on(createOutputData) do val
+    # If createOutputData changes to true
     if val
         outData = createOutputDataFromGUI()
         inData = outData.inputData
         outputParams = []
-        if Int(inData.model) == 0
+        
+        # Consolidation / Swell
+        if Int(inData.model) == Int(InputParser.ConsolidationSwell)
             P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = OutputFormat.performGetCalculationValue(outData)
             
             # When passing a 2D array into QML, it becomes 1D array so we need to know the number of rows
@@ -448,27 +476,21 @@ on(createOutputData) do val
             heaveBelowFoundationTableRows = size(heaveBelowFoundationTable)[1]
             
             # Get effective, foundation, and effective+foundation stresses for each layer
-            # Initialize arrays
-            effectiveStresses = []   
-            totalStresses = []
-            foundationStresses = []
-
-            lastLayer = inData.soilLayerNumber[1]  # Store the layer value of the first sublayer 
-            # Loop through each sublayer
-            for i in 1:inData.elements 
-                if inData.soilLayerNumber[i] != lastLayer  # If we encounter a different layer value
-                    push!(effectiveStresses, P[i-1])  # The previous entry in P[] was the effective stress of the bottom sublayer of lastLayer
-                    push!(totalStresses, PP[i-1])
-                    push!(foundationStresses, PP[i-1]-P[i-1])
-                    lastLayer = inData.soilLayerNumber[i]  # Update lastLayer
-                end
-            end
-            # Append final layer stresses
-            push!(effectiveStresses, P[end])
-            push!(totalStresses, PP[end])
-            push!(foundationStresses, PP[end]-P[end])
-
+            effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
+            
             append!(outputParams, [inData.problemName, P, PP, heaveAboveFoundationTable, heaveAboveFoundationTableRows, heaveBelowFoundationTable, heaveBelowFoundationTableRows, Δh1, Δh2, Δh, effectiveStresses, totalStresses, foundationStresses])
+        elseif Int(inData.model) == Int(InputParser.Schmertmann)  # Schmertmann
+            P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outData)
+            
+            # When passing a 2D array into QML, it becomes 1D array so we need to know the number of rows
+            settlementTableRows = size(settlementTable)[1]
+            
+            # Get effective, foundation, and effective+foundation stresses for each layer
+            effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
+            
+            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh])
+        else
+
         end
         global outputData[] = outputParams
     end
