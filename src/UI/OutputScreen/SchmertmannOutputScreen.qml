@@ -476,6 +476,30 @@ Rectangle {
     }
     //////////////////////////////
 
+    // Plot //////////////////////
+    Rectangle {
+        id: plotBtn
+        color: "#fff3e4"
+        width: 200
+        height: 30
+        radius: 5
+
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            bottom: parent.bottom
+            bottomMargin: 10
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                props.graphData = false
+                props.graphData = true
+            }
+        }
+    }
+    //////////////////////////////
+
     // Save Output ///////////////
     Rectangle {
         id: selectOutputButton

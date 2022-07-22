@@ -10,6 +10,7 @@ using QML
 using Qt5QuickControls_jll
 using Qt5QuickControls2_jll
 using Observables
+using Plots
 
 export readInputFile
 
@@ -510,7 +511,18 @@ on(outputDataProgress) do val
         outputDataCreated[] = true
     end
 end
+graphData = Observable(false)
+on(graphData) do val 
+    if val
+        println("Graphing...")
+        table = outputData[][5]
 
+        depths = table[:,2]
+        settlements = table[:, 3]
+        display(plot(depths, settlements, title="Depth vs Settlement"))
+        print("Done")
+    end
+end
 
 # Don't load or run anything for tests
 if size(ARGS)[1] == 1
@@ -521,7 +533,7 @@ if size(ARGS)[1] == 1
     end
 
     # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "outputDataProgress" => outputDataProgress, "createOutputData" => createOutputData, "outputData"=>outputData))
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "outputDataProgress" => outputDataProgress, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData))
     
     # Run the app
     exec()
