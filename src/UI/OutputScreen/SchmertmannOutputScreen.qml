@@ -28,7 +28,8 @@ Rectangle {
     Text{
         id: outputScreenSubTitle
         visible: props.outputDataCreated
-        text: "Schmertmann" + (props.model === 2) ? " Elastic" : ""
+        property string elasticString: (props.model === 2) ? " Elastic" : ""
+        text: "Schmertmann" + elasticString
         color: "#fff3e4"
         font.pixelSize: 15 + 5 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         anchors {
@@ -649,6 +650,26 @@ Rectangle {
         onTriggered: {
             selectOutputButtonContainer.selectedOutputFile = false
             fileDownloadingPopup.close()
+        }
+    }
+    ///////////////////////////////
+
+    // Back arrow /////////////////
+    Image {
+        id: backArrow
+        width: height
+        height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+        source: "../Assets/back.png"
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left 
+            leftMargin: 5
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                mainLoader.source = "../EnterDataScreen/EnterDataScreen.qml"
+            }
         }
     }
     ///////////////////////////////
