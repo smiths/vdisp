@@ -479,7 +479,7 @@ Rectangle {
     // Plot //////////////////////
     Rectangle {
         id: plotBtn
-        color: "#fff3e4"
+        color: "#6B4F4F"
         width: 200
         height: 30
         radius: 5
@@ -490,9 +490,18 @@ Rectangle {
             bottomMargin: 10
         }
 
+        Text {
+            id: plotBtnText
+            text: "View Plot"
+            color: "#fff3e4"
+            font.pixelSize: 18
+            anchors.centerIn: parent
+        }
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
+                // Force Julia to run graphing code
                 props.graphData = false
                 props.graphData = true
             }

@@ -519,8 +519,20 @@ on(graphData) do val
 
         depths = table[:,2]
         settlements = table[:, 3]
-        display(plot(depths, settlements, title="Depth vs Settlement"))
-        print("Done")
+        distUnits = units === Int(InputParser.Metric) ? "m" : "ft"
+        # pyplot()
+        # pygui(true)
+        display(plot(depths, settlements, 
+        title = "Depth vs Settlement", 
+        xlabel = "Depth ($(distUnits))", ylabel = "Settlement ($(distUnits))", 
+        linecolor = RGBA(1,0.95,0.89,1), 
+        markershape = :circle, 
+        markercolor = RGBA(0.28,0.20,0.20,1), 
+        markerstrokewidth = 0, 
+        background_color = RGBA(0.42,0.31,0.31,1), 
+        foreground_color = RGBA(1,0.95,0.89,1)
+        ))
+        println("Done")
     end
 end
 
