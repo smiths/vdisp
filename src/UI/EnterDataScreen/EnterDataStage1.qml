@@ -96,6 +96,9 @@ Rectangle {
             inputFromFileText.text = fileName
             // Update julia variables so other screens are ready
             
+            props.modelChanged = false
+            props.materialCountChanged = false
+
             // Enter Data Stage 2 variables
             props.materials = materials
             var matNames = []

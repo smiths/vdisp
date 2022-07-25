@@ -625,14 +625,13 @@ Rectangle {
         closePolicy: Popup.NoAutoClose // Only close from timer
 
         background: Rectangle{
-            //color: "#6B4F4F"
             color: "transparent"
         }
 
         property int gap: 5
 
         x: vdispWindow.width/2 - (fileDownloadingPopupText.width + gap + fileDownloadingPopupImage.width)/2
-        y:  vdispWindow.height - fileDownloadingPopup.height
+        y: vdispWindow.height - fileDownloadingPopup.height
 
         contentItem: Item{
             anchors.fill: parent

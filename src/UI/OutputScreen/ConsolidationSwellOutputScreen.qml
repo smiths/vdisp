@@ -858,7 +858,6 @@ Rectangle {
         closePolicy: Popup.NoAutoClose // Only close from timer
 
         background: Rectangle{
-            // color: "#6B4F4F"
             color: "transparent"
         }
 
