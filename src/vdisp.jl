@@ -11,6 +11,7 @@ using Qt5QuickControls_jll
 using Qt5QuickControls2_jll
 using Observables
 using Plots
+using PlotlyJS
 
 export readInputFile
 
@@ -515,23 +516,73 @@ graphData = Observable(false)
 on(graphData) do val 
     if val
         println("Graphing...")
-        table = outputData[][5]
 
-        depths = table[:,2]
-        settlements = table[:, 3]
-        distUnits = units === Int(InputParser.Metric) ? "m" : "ft"
-        # pyplot()
-        # pygui(true)
-        display(plot(depths, settlements, 
-        title = "Depth vs Settlement", 
-        xlabel = "Depth ($(distUnits))", ylabel = "Settlement ($(distUnits))", 
-        linecolor = RGBA(1,0.95,0.89,1), 
-        markershape = :circle, 
-        markercolor = RGBA(0.28,0.20,0.20,1), 
-        markerstrokewidth = 0, 
-        background_color = RGBA(0.42,0.31,0.31,1), 
-        foreground_color = RGBA(1,0.95,0.89,1)
-        ))
+        if model[] == Int(InputParser.ConsolidationSwell)
+            table1 = outputData[][4]
+            table2 = outputData[][6]
+
+            # Prepare Plot Axes
+            depths1 = table1[:,2]
+            depths2 = table2[:,2]
+            heave1 = table1[:,3]
+            heave2 = table2[:,3]
+
+            distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
+
+            p1 = Plots.plot(depths1, heave1,
+            window_title = "VDisp: Heave vs Settlement",
+            title = "Depth vs Heave Above Foundation", 
+            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1))
+        
+            p2 = Plots.plot(depths2, heave2,
+            title = "Depth vs Heave Below Foundation", 
+            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1))
+            
+            p = Plots.plot(p1, p2, layout=(2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+
+            Base.invokelatest(display, p)
+        else
+            table = outputData[][5]
+
+            # Prepare Plot Axes
+            depths = table[:,2]
+            settlements = table[:, 3]
+            
+            # Select Backend
+            # pyplot()
+            # pygui(true)
+            # plotlyjs()
+
+            # Create Plot
+            distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
+            p = Plots.plot(depths, settlements, 
+            window_title = "VDisp: Depth vs Settlement",
+            title = "Depth vs Settlement", 
+            xlabel = "Depth ($(distUnits))", ylabel = "Settlement ($(distUnits))", 
+            label = "Depth of Soil Profile",
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1)
+            )
+
+            Base.invokelatest(display, p)
+        end
+
         println("Done")
     end
 end

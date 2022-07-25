@@ -603,9 +603,9 @@ Rectangle {
             height: 55
         }
         Image {
-            source: "../Assets/layers.png"
-            width: 40
-            height: 40
+            source: "../Assets/64/building.png"
+            width: 35
+            height: 35
             anchors.centerIn: foundationStressPopupButtonCircle
         }
         MouseArea {
@@ -710,6 +710,67 @@ Rectangle {
     }
     //////////////////////////////
 
+    // Plot //////////////////////
+    Rectangle {
+        id: plotBtn
+        color: "#6B4F4F"
+        width: plotBtnContents.width + 20
+        height: plotBtnContents.height + 10
+        radius: 5
+
+        anchors {
+            left: parent.left
+            leftMargin: 15
+            bottom: parent.bottom
+            bottomMargin: 10
+        }
+
+        Item {
+            id: plotBtnContents
+            
+            property int gap: 15
+            width: plotBtnText.width + gap + plotBtnImage.width
+            height: plotBtnImage.height
+
+            anchors.centerIn: plotBtn
+            
+            Text {
+                id: plotBtnText
+                text: "View Plot"
+                color: "#fff3e4"
+                font.pixelSize: 18
+
+                anchors{
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+
+            Image {
+                id: plotBtnImage
+                source: "../Assets/32/lineGraph.png"
+                width: 20
+                height: 20
+
+                anchors {
+                    left: plotBtnText.right
+                    leftMargin: plotBtnContents.gap
+                    verticalCenter: plotBtnText.verticalCenter
+                }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                // Force Julia to run graphing code
+                props.graphData = false
+                props.graphData = true
+            }
+        }
+    }
+    //////////////////////////////
+
     // Save Output ///////////////
     Rectangle {
         id: selectOutputButton
@@ -797,13 +858,14 @@ Rectangle {
         closePolicy: Popup.NoAutoClose // Only close from timer
 
         background: Rectangle{
-            color: "#6B4F4F"
+            // color: "#6B4F4F"
+            color: "transparent"
         }
 
         property int gap: 5
 
-        x: 0
-        y:  vdispWindow.height - fileDownloadingPopup.height
+        x: vdispWindow.width/2 - (fileDownloadingPopupText.width + gap + fileDownloadingPopupImage.width)/2
+        y: vdispWindow.height - fileDownloadingPopup.height
 
         contentItem: Item{
             anchors.fill: parent
