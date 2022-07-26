@@ -1,3 +1,9 @@
+"""
+    getEffectiveStress(), getSurchargePressure(), schmertmannApproximation() and getValue() functions 
+adopt code from original FORTRAN program VDispl, found on p.180 of this document:
+https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf
+"""
+
 module CalculationBehaviour
 
 using PrettyTables
