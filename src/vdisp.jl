@@ -526,13 +526,39 @@ on(graphData) do val
             depths2 = table2[:,2]
             heave1 = table1[:,3]
             heave2 = table2[:,3]
+            # TODO: Change to cumilative
+
+            # Prepare effective stress vs depth data
+            effectiveStress = outputData[][3]
+            
+            # Get material number of each sublayer, and dx of each layer
+            soilSublayerMats = []
+            dx = Array{Float64}(undef, materials[])
+            for i=1:materials[]
+                # Remember bounds array is backwards, thats why we index as materials - i
+                Δx = (bounds[materials[]-(i-1)]-bounds[materials[]-(i-2)])/subdivisions[i]
+                dx[soilLayerNumbers[i]] = round(Δx, digits=4)
+                for j=1:subdivisions[i]
+                    push!(soilSublayerMats, soilLayerNumbers[i])
+                end
+            end
+            
+            # Calculate the depth of each sublayer
+            sublayers = size(soilSublayerMats)[1]
+            allDepths = Array{Float64}(undef, sublayers+1) # Add extra entry for depth 0
+            allDepths[1] = 0.0
+            for i=2:sublayers
+                allDepths[i] = allDepths[i-1] + dx[soilSublayerMats[i]]
+            end
+            allDepths[end] = totalDepth[] 
 
             distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
+            pressureUnits = units[] === Int(InputParser.Metric) ? "Pa" : "tsf"
 
-            p1 = Plots.plot(depths1, heave1,
-            window_title = "VDisp: Heave vs Settlement",
-            title = "Depth vs Heave Above Foundation", 
-            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
+            heave1VsDepth = Plots.plot(heave1, depths1,
+            title = "Heave Contribution Above Foundation vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Heave ($(distUnits))", 
+            yflip = true, xflip = true,
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
             markercolor = RGBA(0.28,0.20,0.20,1), 
@@ -540,9 +566,10 @@ on(graphData) do val
             background_color = RGBA(0.42,0.31,0.31,1), 
             foreground_color = RGBA(1,0.95,0.89,1))
         
-            p2 = Plots.plot(depths2, heave2,
-            title = "Depth vs Heave Below Foundation", 
-            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
+            heave2VsDepth = Plots.plot(heave2, depths2,
+            title = "Heave Contribution Below Foundation vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Heave ($(distUnits))", 
+            yflip = true, xflip = true,
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
             markercolor = RGBA(0.28,0.20,0.20,1), 
@@ -550,27 +577,70 @@ on(graphData) do val
             background_color = RGBA(0.42,0.31,0.31,1), 
             foreground_color = RGBA(1,0.95,0.89,1))
             
-            p = Plots.plot(p1, p2, layout=(2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+            effectiveStressVsDepth = Plots.plot(effectiveStress, allDepths,
+            title = "Effective Stress vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Effective Stress ($(pressureUnits))", 
+            yflip = true, xflip = true,
+            label = "σ': effective stress",
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1)
+            )
+
+            p = Plots.plot(heave1VsDepth, heave2VsDepth, effectiveStressVsDepth, layout=(3,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
 
             Base.invokelatest(display, p)
         else
+            # Get output table
             table = outputData[][5]
 
-            # Prepare Plot Axes
+            # Prepare Settlement vs Depth
             depths = table[:,2]
-            settlements = table[:, 3]
+            incrementalSettlements = table[:, 3]
             
-            # Select Backend
-            # pyplot()
-            # pygui(true)
-            # plotlyjs()
+            # Convert incremental settlement values to cumalitive
+            incrementalSettlementsSize = size(incrementalSettlements)[1]
+            settlements = Array{Float64}(undef, incrementalSettlementsSize)
+            settlements[1] = incrementalSettlements[1]
+            for i=2:incrementalSettlementsSize
+                settlements[i] = settlements[i-1]+incrementalSettlements[i]
+            end
+            
+            # Prepare effective stress vs depth data
+            effectiveStress = outputData[][3]
+            
+            # Get material number of each sublayer, and dx of each layer
+            soilSublayerMats = []
+            dx = Array{Float64}(undef, materials[])
+            for i=1:materials[]
+                # Remember bounds array is backwards, thats why we index as materials - i
+                Δx = (bounds[materials[]-(i-1)]-bounds[materials[]-(i-2)])/subdivisions[i]
+                dx[soilLayerNumbers[i]] = round(Δx, digits=4)
+                for j=1:subdivisions[i]
+                    push!(soilSublayerMats, soilLayerNumbers[i])
+                end
+            end
+            
+            # Calculate the depth of each sublayer
+            sublayers = size(soilSublayerMats)[1]
+            allDepths = Array{Float64}(undef, sublayers+1) # Add extra entry for depth 0
+            allDepths[1] = 0.0
+            for i=2:sublayers
+                allDepths[i] = allDepths[i-1] + dx[soilSublayerMats[i]]
+            end
+            allDepths[end] = totalDepth[]            
 
-            # Create Plot
+            # Create Plots
             distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
-            p = Plots.plot(depths, settlements, 
-            window_title = "VDisp: Depth vs Settlement",
-            title = "Depth vs Settlement", 
-            xlabel = "Depth ($(distUnits))", ylabel = "Settlement ($(distUnits))", 
+            pressureUnits = units[] === Int(InputParser.Metric) ? "Pa" : "tsf"
+            
+            settlementVsDepth = Plots.plot(settlements, depths, 
+            title = "Settlement vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Settlement ($(distUnits))", 
+            yflip = true, xflip = true,
             label = "Depth of Soil Profile",
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
@@ -580,7 +650,22 @@ on(graphData) do val
             foreground_color = RGBA(1,0.95,0.89,1)
             )
 
-            Base.invokelatest(display, p)
+            effectiveStressVsDepth = Plots.plot(effectiveStress, allDepths,
+            title = "Effective Stress vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Effective Stress ($(pressureUnits))", 
+            yflip = true, xflip = true,
+            label = "σ': effective stress",
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1)
+            )
+
+            plt = Plots.plot(settlementVsDepth, effectiveStressVsDepth, layout = (2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+
+            Base.invokelatest(display, plt)
         end
 
         println("Done")

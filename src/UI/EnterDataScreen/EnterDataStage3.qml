@@ -372,7 +372,7 @@ Rectangle {
                     ComboBox {
                         id: materialDropdown
                         model: props.materialNames
-                        currentIndex: index
+                        currentIndex: (props.inputFileSelected && !props.materialCountChanged) ? props.soilLayerNumbers[index]-1 : index
                         anchors {
                             top: parent.top
                             horizontalCenter: parent.horizontalCenter

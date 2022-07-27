@@ -42,7 +42,7 @@ Rectangle {
     // Heave Above Foundation ///////////////////
     Text {
         id: heaveAboveFoundationTableTitle
-        text: "Heave Above Foundation"
+        text: "Heave Contribution Above Foundation"
         font.pixelSize: 20
         color: "#fff3e4"
         anchors {
@@ -213,7 +213,7 @@ Rectangle {
         //////////////////////////////
     }
     Text {
-        text: "Total Heave Above Foundation: "
+        text: "Total Heave Contribution Above Foundation: "
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors{
@@ -248,7 +248,7 @@ Rectangle {
     // Heave Below Foundation ///////////////////
     Text {
         id: heaveBelowFoundationTableTitle
-        text: "Heave Below Foundation"
+        text: "Heave Contribution Below Foundation"
         font.pixelSize: 20
         color: "#fff3e4"
         anchors {
@@ -417,7 +417,7 @@ Rectangle {
         //////////////////////////////
     }
     Text {
-        text: "Total Heave Below Foundation: "
+        text: "Total Heave Contribution Below Foundation: "
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors{
