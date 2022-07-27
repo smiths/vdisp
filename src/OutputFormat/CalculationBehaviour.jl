@@ -1,3 +1,9 @@
+"""
+    getEffectiveStress(), getSurchargePressure(), schmertmannApproximation() and getValue() functions 
+adopt code from original FORTRAN program VDispl, found on p.180 of this document:
+https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf
+"""
+
 module CalculationBehaviour
 
 using PrettyTables
@@ -144,14 +150,12 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 
 """
 function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
-    x = behaviour.nodalPoints
-
+    
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
-
+    
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
-
     # Begin main calculations
     Δh1 = 0.0
     # Get Heave begin index
@@ -188,9 +192,9 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
             compressionIndex = behaviour.compressionIndex[material]
             maxPastPressure = behaviour.maxPastPressure[material]
             
-            term1 = swellPressure / pressure
-            term2 = swellPressure / maxPastPressure
-            term3 = maxPastPressure / pressure
+            term1 = max(swellPressure / pressure, 0)
+            term2 = max(swellPressure / maxPastPressure)
+            term3 = max(maxPastPressure / pressure)
 
             finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
@@ -221,9 +225,9 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         compressionIndex = behaviour.compressionIndex[material]
         maxPastPressure = behaviour.maxPastPressure[material]
         
-        term1 = swellPressure / pressure
-        term2 = swellPressure / maxPastPressure
-        term3 = maxPastPressure / pressure
+        term1 = max(swellPressure / pressure, 0)
+        term2 = max(swellPressure / maxPastPressure)
+        term3 = max(maxPastPressure / pressure)
 
         finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
         Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
@@ -857,6 +861,5 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
 
     return (settlementTable, Δh)
 end
-
 
 end # module

@@ -96,6 +96,9 @@ Rectangle {
             inputFromFileText.text = fileName
             // Update julia variables so other screens are ready
             
+            props.modelChanged = false
+            props.materialCountChanged = false
+
             // Enter Data Stage 2 variables
             props.materials = materials
             var matNames = []
@@ -226,7 +229,9 @@ Rectangle {
 
         Image {
             id: inputFromFileImage
-            source: "../Assets/fileUpload.png"
+
+            property string folder: vdispWindow.getImageFolder(width, 16, 64)
+            source: "../Assets/" + folder + "/fileUpload.png"
 
             width: parent.height
             height: width
@@ -257,8 +262,11 @@ Rectangle {
     }
     Image{
         id: inputFromFileDelete
-        source: "../Assets/exit.png"
         visible: props.inputFileSelected
+        
+        property string folder: vdispWindow.getImageFolder(width, 16, 256)
+        source: "../Assets/" + folder + "/exit.png"
+        
         anchors {
             left: inputFromFileContainer.right
             leftMargin: inputFromFileContainer.gap*1.5
@@ -312,8 +320,8 @@ Rectangle {
         focus: true
         closePolicy: Popup.CloseOnEscape // | Popup.CloseOnPressOutsideParent
 
-        width: popupPadding + inputFileRejectedDialogContainer.width
-        height: popupPadding + inputFileRejectedDialogContainer.height
+        width: popupPadding + inputFileRejectedDialogText.width 
+        height: popupPadding + inputFileRejectedDialogTitle.height + inputFileRejectedDialogText.height + inputFileRejectedDialogButton.height + 2*inputFileRejectedDialog.gap
 
         anchors.centerIn: parent
 
@@ -1294,9 +1302,12 @@ Rectangle {
         }
         Image {
             id: continueButtonIcon
+
             source: "../Assets/continue.png"
+            
             width: 19
             height: 19
+            
             anchors {
                 left: parent.horizontalCenter
                 leftMargin: 20

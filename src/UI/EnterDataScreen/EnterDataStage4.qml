@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
-import QtQuick.Dialogs 1.0
+// import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -17,7 +17,7 @@ Rectangle {
         }
         return true
     }
-
+    
     function forceUpdate(){
         var temp = props.heaveActive
         props.heaveActive = 12
@@ -26,13 +26,15 @@ Rectangle {
 
     function isFilled(){
         // should there be a min difference between heave begin and heave active depth
-        return selectedOutputFile && (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
+        //return selectedOutputFile && (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
+        return (props.heaveActive - props.heaveBegin > 0) && formIsFilled()
     }
 
     // Is this form filled correctly (allowed to go next)
     property bool formFilled: isFilled()
     property bool highlightErrors: false
-    property bool selectedOutputFile: false
+    // property bool selectedOutputFile: false
+    property string nextScreen: "../OutputScreen/ConsolidationSwellOutputScreen.qml" 
     
     
     property int formGap: 20
@@ -44,7 +46,15 @@ Rectangle {
 
     Component.onCompleted: {
         // If no file was selected, or model from input file was changed, fill default values
-        if(!props.inputFileSelected || props.modelChanged){
+        if(!props.inputFileSelected || props.modelChanged || props.materialCountChanged){
+            props.swellPressure = []
+            props.swellIndex = []
+            props.compressionIndex = []
+            props.recompressionIndex = []
+            filledSP = []
+            filledSI = []
+            filledCI = []
+            filledRI = []
             for(var i = 0; i < props.materials; i++){
                 // Populate arrays that check if forms are filled properly
                 filledSP.push(false)
@@ -346,7 +356,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.swellPressure[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged) text = props.swellPressure[index]
                         }
 
                         onTextChanged: {
@@ -450,7 +460,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.swellIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged) text = props.swellIndex[index]
                         }
 
                         onTextChanged: {
@@ -541,7 +551,7 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.compressionIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged) text = props.compressionIndex[index]
                         }
 
                         onTextChanged: {
@@ -633,11 +643,15 @@ Rectangle {
                         }
 
                         Component.onCompleted: {
-                            if(props.inputFileSelected && !props.modelChanged) text = props.recompressionIndex[index]
+                            if(props.inputFileSelected && !props.modelChanged && !props.materialCountChanged){
+                                 text = props.recompressionIndex[index]
+                            }
                         }
 
+                        property bool loaded: false
                         onTextChanged: {
-                            if(acceptableInput){
+                            if(acceptableInput && !loaded){
+                                loaded = true
                                 // Set filled to true
                                 filledRI[index] = true
                                 // Force formFilled to update
@@ -689,92 +703,6 @@ Rectangle {
     }
     ////////////////////////////////
 
-    // Select Output Location /////
-    Rectangle {
-        id: selectOutputButton
-        color: "#fff3e4"
-        radius: 5
-        width: selectOutputButtonContainer.width + 10
-        height: selectOutputButtonContainer.height + 5
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            top: consolidationSwellDataContainer.bottom
-            topMargin: 20
-        }
-
-        // Error highlighting
-        Rectangle {
-            visible: (consolidationSwellDataBackground.highlightErrors && !consolidationSwellDataBackground.selectedOutputFile)
-            opacity: 0.8
-            anchors.fill: parent
-            color: "transparent"
-            border.color: "red"
-            border.width: 1
-            radius: 5
-        }
-
-        Item {
-            id: selectOutputButtonContainer
-            
-            height: selectOutputButtonIcon.height
-            width: selectOutputButtonText.width + gap + selectOutputButtonIcon.width
-
-            anchors.centerIn: parent
-
-            property int gap: 10
-            property string fileName: ""
-
-            Text{
-                id: selectOutputButtonText
-                text: (consolidationSwellDataBackground.selectedOutputFile) ? selectOutputButtonContainer.fileName : "Select Output File"
-                color: "#483434"
-                font.pixelSize: 15
-                anchors{
-                    left: parent.left
-                    verticalCenter: selectOutputButtonIcon.verticalCenter
-                }
-            }
-            Image {
-                id: selectOutputButtonIcon
-                source: (consolidationSwellDataBackground.selectedOutputFile) ? "../Assets/fileAccept.png" : "../Assets/fileUpload.png"
-                width: 20
-                height: 20
-                anchors {
-                    verticalCenter: parent.verticalCenter
-                    left: selectOutputButtonText.right
-                    leftMargin: selectOutputButtonContainer.gap
-                }
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: fileDialog.open()
-        }
-    }
-    FileDialog {
-        id: fileDialog
-        title: "Please select output file"
-        selectMultiple: false
-        selectExisting: false
-        folder: shortcuts.home
-        nameFilters: ["VDisp data files (*.dat)" ]
-        onAccepted: {
-            consolidationSwellDataBackground.selectedOutputFile = true
-            props.outputFile = fileUrl.toString()
-            // Convert URL to string
-            var name = fileUrl.toString()
-            // Split URL String at each "/" and extract last piece of data
-            var path = name.split("/")
-            var fileName = path[path.length - 1]
-            // Update fileName property
-            selectOutputButtonContainer.fileName = fileName
-        }
-        onRejected: {
-            consolidationSwellDataBackground.selectedOutputFile = false
-        }
-    }
-    ///////////////////////////////
-
     // Continue Button ///
     Rectangle {
         id: continueButton
@@ -791,9 +719,16 @@ Rectangle {
             anchors.fill: parent
             onClicked: {
                 if(consolidationSwellDataBackground.formFilled){
-                    // mainLoader.source = "" (switch to next screen when it's designed)
-                    props.finishedInput = true
-                    Qt.quit()
+                    mainLoader.source = consolidationSwellDataBackground.nextScreen
+                    /*
+                       Since we can't directly call a function from Julia (until the bug in CxxWrap.jl and QML.jl is fixed),
+                    I'm forced to create an Observable() variable in Julia and pass it into props. When this variable updates
+                    to true, I will execute the Julia subroutine from the Julia code. 
+                       If user comes back from output screen and updates input, props.createOutputData will already be true, 
+                    thus we have to change it to false, then back to true, just to force an update on the Julia side
+                    */
+                    props.createOutputData = false
+                    props.createOutputData = true
                 }else{
                     consolidationSwellDataBackground.highlightErrors = true
                 }
@@ -822,4 +757,5 @@ Rectangle {
         }
     }
     //////////////////////
+
 }

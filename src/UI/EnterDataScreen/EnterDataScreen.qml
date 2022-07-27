@@ -14,14 +14,21 @@ Item {
     // Back arrow
     Image {
         id: backArrow
+        
         width: height
         height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-        source: "../Assets/back.png"
+        
+        property string folder: vdispWindow.getImageFolder(width, 32, 512)
+        source: "../Assets/" + folder + "/next.png"
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left 
             leftMargin: 5
         }
+
+        rotation: 180  // Back arrow just reuses the next arrow icon but flipped
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
@@ -36,15 +43,20 @@ Item {
     // Next arrow
     Image {
         id: nextArrow
+        
         width: height 
         height: 32 + (50-32)*(vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-        source: "../Assets/back.png"
+        
+        property string folder: vdispWindow.getImageFolder(width, 32, 512)
+        source: "../Assets/" + folder + "/next.png"
+        
         anchors {
             verticalCenter: parent.verticalCenter
             right: parent.right 
             rightMargin: 5
         }
-        rotation: 180
+
+        
         MouseArea {
             anchors.fill: parent
             onClicked: {
@@ -52,8 +64,21 @@ Item {
                 if(enterDataStackView.currentItem.formFilled){
                     // If we are at 4th stage, move on to output
                     if(enterDataStackView.depth > 3) {
-                        Qt.quit()
-                        props.finishedInput = true
+                        if(enterDataStackView.currentItem.nextScreen){
+                            mainLoader.source = enterDataStackView.currentItem.nextScreen
+                            /*
+                               Since we can't directly call a function from Julia (until the bug in CxxWrap.jl and QML.jl is fixed),
+                            I'm forced to create an Observable() variable in Julia and pass it into props. When this variable updates
+                            to true, I will execute the Julia subroutine from the Julia code. 
+                               If user comes back from output screen and updates input, props.createOutputData will already be true, 
+                            thus we have to change it to false, then back to true, just to force an update on the Julia side
+                            */
+                            props.createOutputData = false
+                            props.createOutputData = true
+                        }else{
+                            Qt.quit()
+                            props.finishedInput = true
+                        }
                     }
                     // Else, go to next stage of data entry
                     enterDataStackView.push(enterDataStackView.currentItem.nextScreen)

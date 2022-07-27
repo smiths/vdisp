@@ -35,13 +35,18 @@ Item {
     }
     ////////////////////////
 
+    // Menu Buttons /////////
     Item {
+        id: menuButtons
+        
         property int buttonWidth: 305 + 200 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
         property int buttonHeight: 50 + 50 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
         property int buttonSpacing: 40 + 30 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
-        id: menuButtons
+        property int iconSize: 33 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
+
         width: buttonWidth
         height: buttonHeight*3 + buttonSpacing*2
+        
         anchors {
             horizontalCenter: parent.horizontalCenter
             verticalCenter: parent.verticalCenter
@@ -69,13 +74,16 @@ Item {
                 id: enterDataButtonIcon
                 anchors {
                     verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: 40
+                    right: parent.horizontalCenter
+                    rightMargin: parent.width/4
                 }
-                width: 33
-                height: 33
+                
+                width: menuButtons.iconSize
+                height: width
+                
                 property string fileExt: parent.activeFocus ? "-selected" : ""
-                source: "../Assets/play" + fileExt + ".png"
+                property string folder: vdispWindow.getImageFolder(width, 64, 512)
+                source: "../Assets/" + folder + "/play" + fileExt + ".png"
             }
 
             Text {
@@ -121,13 +129,16 @@ Item {
                 id: settingsButtonIcon
                 anchors {
                     verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: 40
+                    right: parent.horizontalCenter
+                    rightMargin: parent.width/4
                 }
-                width: 33
-                height: 33
+                
+                width: menuButtons.iconSize
+                height: width
+                
                 property string fileExt: parent.activeFocus ? "-selected" : ""
-                source: "../Assets/settings" + fileExt + ".png"
+                property string folder: vdispWindow.getImageFolder(width, 64, 512)
+                source: "../Assets/" + folder + "/settings" + fileExt + ".png"
             }
 
             Text {
@@ -174,13 +185,16 @@ Item {
                 id: exitButtonIcon
                 anchors {
                     verticalCenter: parent.verticalCenter
-                    left: parent.left
-                    leftMargin: 40
+                    right: parent.horizontalCenter
+                    rightMargin: parent.width/4
                 }
-                width: 33
-                height: 33
+                
+                width: menuButtons.iconSize
+                height: width
+                
                 property string fileExt: parent.activeFocus ? "-selected" : ""
-                source: "../Assets/exit" + fileExt + ".png"
+                property string folder: vdispWindow.getImageFolder(width, 16, 256)
+                source: "../Assets/" + folder + "/exit" + fileExt + ".png"
             }
 
             Text {
@@ -209,4 +223,5 @@ Item {
         ///////////////////
         
     }
+    /////////////////////////
 }

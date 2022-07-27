@@ -10,6 +10,8 @@ using QML
 using Qt5QuickControls_jll
 using Qt5QuickControls2_jll
 using Observables
+using Plots
+using PlotlyJS
 
 export readInputFile
 
@@ -68,9 +70,9 @@ timeAfterConstruction = Observable(1)
 conePenetrationQML = Observable([])
 # Enter Data Stage 5 (Elastic Modulus)
 elasticModulusQML = Observable([])
+
 # Misc
 finishedInput = Observable(false)
-outputFileQML = Observable("")
 inputFile = Observable("")
 inputFileSelected = Observable(false)
 on(inputFileSelected) do val
@@ -130,9 +132,7 @@ on(inputFileSelected) do val
         end
     end
 end
-# Units
 units = Observable(Int(InputParser.Imperial))
-
 
 # Update QML variables
 setProblemName = on(problemName) do val
@@ -284,6 +284,7 @@ setSwellPressure = on(swellPressureQML) do val
     if PRINT_DEBUG
         println("\nGot an update for swellPressure: ", val)
     end
+
     sp = Array{Float64}(undef,0)
     for v in val
         push!(sp, QML.value(v))
@@ -346,56 +347,37 @@ setElasticMod = on(elasticModulusQML) do val
     global elasticModulus = copy(em)
 end
 
-# Don't load or run anything for tests
-if size(ARGS)[1] == 2
-    path = (size(ARGS)[1] == 2) ? "./src/UI/main.qml" : "../src/UI/main.qml"
-    
-    # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged))
-    
-    # Run the app
-    exec()
-
-    # After app is done executing
-
-    # Exit if form is not filled
-    if !finishedInput[]
-        println("Form not filled. Exiting app....")
-        exit()
-    end
-
+# Output functions
+function createOutputDataFromGUI()
     global materialNames, specificGravity, voidRatio, waterContent, subdivisions, bounds, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, elasticModulus, conePenetration
-
+    
     println("Converting Data")
 
     # Calculate elements and nodal points
     elements = 0
     for i in subdivisions
-        global elements += i
+        elements += i
     end
     nodalPoints = elements + 1
 
     # Calculate dx
     dx = Array{Float64}(undef,0)
     for i in 1:materials[]
-        global bounds, dx, subdivisions, inputFileSelected
         index = materials[] - i + 1
         push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
     end
 
+    outputDataProgress[] = 10
+
     # Soil layer numbers
     soilLayerNums = Array{Int32}(undef,0)
     for i in 1:materials[]
-        global subdivisions, soilLayerNumbers, soilLayerNums
         for j in 1:subdivisions[i]
-            # In the input file, soil layer number index starts at 1, in GUI it starts at 0
-            if inputFileSelected[]
-                push!(soilLayerNums, soilLayerNumbers[i])
-            else
-                push!(soilLayerNums, soilLayerNumbers[i]+1)
-            end
+            push!(soilLayerNums, soilLayerNumbers[i])
         end
     end
+
+    outputDataProgress[] = 30
 
     # Foundation index, layer
     depth = 0
@@ -403,7 +385,6 @@ if size(ARGS)[1] == 2
     foundationLayer = 1
     increment = 0
     while depth < foundationDepth[]
-        global depth, foundationIndex, foundationLayer, increment, subdivisions
         depth += dx[foundationLayer]
         foundationIndex += 1
         increment += 1
@@ -413,8 +394,10 @@ if size(ARGS)[1] == 2
         end
     end
 
+    outputDataProgress[] = 45
+
     # Converting from dropdown menu index to value
-    modelConversion = [0, 2, 4] # Consolidation Swell NOPT = 0, Schmertmann NOPT = 2, Schemrtmann Elastic NOPT = 4
+    modelConversion = [Int(InputParser.ConsolidationSwell), Int(InputParser.Schmertmann), Int(InputParser.SchmertmannElastic)]
     foundationType = (foundation[] == 0) ? "RectangularSlab" : "LongStripFooting"
 
     println("Data calculated")
@@ -431,11 +414,203 @@ if size(ARGS)[1] == 2
 
     println("OutputData created")
 
-    # Remove "file://" from beginning of path
-    outputPath = outputFileQML[][7:end]
-    # defaultFile = "./src/.data/output_data.dat"
+    outputDataProgress[] = 100
+
+    return outData
+end
+
+"""
+    writeGUIDataToFile(path, outData)
+
+`writeGUIDataToFile()` takes in a String, `path`, which represents a relative
+file path and writes the contents of `writeDefaultOutput(path, outData)` to file at `path`
+"""
+writeGUIDataToFile(path::String, outData = createOutputDataFromGUI()) = writeDefaultOutput(outData, path)
+
+function getStressesFromArrays(P, PP, inData)
+    # Get effective, foundation, and effective+foundation stresses for each layer
+    # Initialize arrays
+    effectiveStresses = []   
+    totalStresses = []
+    foundationStresses = []
+
+    lastLayer = inData.soilLayerNumber[1]  # Store the layer value of the first sublayer 
+    # Loop through each sublayer
+    for i in 1:inData.elements 
+        if inData.soilLayerNumber[i] != lastLayer  # If we encounter a different layer value
+            push!(effectiveStresses, P[i-1])  # The previous entry in P[] was the effective stress of the bottom sublayer of lastLayer
+            push!(totalStresses, PP[i-1])
+            push!(foundationStresses, PP[i-1]-P[i-1])
+            lastLayer = inData.soilLayerNumber[i]  # Update lastLayer
+        end
+    end
+    # Append final layer stresses
+    push!(effectiveStresses, P[end])
+    push!(totalStresses, PP[end])
+    push!(foundationStresses, PP[end]-P[end])
+
+    return (effectiveStresses, foundationStresses, totalStresses)
+end
+
+pathFromVar(str::String) = str[7:end]
+
+# Output 
+outputFileQML = Observable("")
+on(outputFileQML) do val
+    # Every time user selects output file, save to file
+    writeGUIDataToFile(pathFromVar(val))
+end
+outputData = Observable([])
+createOutputData = Observable(false)
+on(createOutputData) do val
+    # If createOutputData changes to true
+    if val
+        outData = createOutputDataFromGUI()
+        inData = outData.inputData
+        outputParams = []
+        
+        # Consolidation / Swell
+        if Int(inData.model) == Int(InputParser.ConsolidationSwell)
+            P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = OutputFormat.performGetCalculationValue(outData)
+            
+            # When passing a 2D array into QML, it becomes 1D array so we need to know the number of rows
+            heaveAboveFoundationTableRows = size(heaveAboveFoundationTable)[1]
+            heaveBelowFoundationTableRows = size(heaveBelowFoundationTable)[1]
+            
+            # Get effective, foundation, and effective+foundation stresses for each layer
+            effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
+            
+            append!(outputParams, [inData.problemName, P, PP, heaveAboveFoundationTable, heaveAboveFoundationTableRows, heaveBelowFoundationTable, heaveBelowFoundationTableRows, Δh1, Δh2, Δh, effectiveStresses, totalStresses, foundationStresses])
+        elseif Int(inData.model) == Int(InputParser.Schmertmann)  # Schmertmann
+            P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outData)
+            
+            # When passing a 2D array into QML, it becomes 1D array so we need to know the number of rows
+            settlementTableRows = size(settlementTable)[1]
+            
+            # Get effective, foundation, and effective+foundation stresses for each layer
+            effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
+            
+            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh, effectiveStresses, foundationStresses, totalStresses])
+        else  # Schmertmann Elastic (Kept this separate incase in the future we want to pass in Elastic Mod vs Cone Pen values)
+            P, PP, settlementTable, Δh = OutputFormat.performGetCalculationValue(outData)
+            
+            # When passing a 2D array into QML, it becomes 1D array so we need to know the number of rows
+            settlementTableRows = size(settlementTable)[1]
+            
+            # Get effective, foundation, and effective+foundation stresses for each layer
+            effectiveStresses, foundationStresses, totalStresses = getStressesFromArrays(P, PP, inData)
+            
+            append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh, effectiveStresses, foundationStresses, totalStresses])
+        end
+        global outputData[] = outputParams
+    end
+end
+outputDataCreated = Observable(false)
+outputDataProgress = Observable(0.0)
+on(outputDataProgress) do val 
+    if val == 100
+        outputDataCreated[] = true
+    end
+end
+graphData = Observable(false)
+on(graphData) do val 
+    if val
+        println("Graphing...")
+
+        if model[] == Int(InputParser.ConsolidationSwell)
+            table1 = outputData[][4]
+            table2 = outputData[][6]
+
+            # Prepare Plot Axes
+            depths1 = table1[:,2]
+            depths2 = table2[:,2]
+            heave1 = table1[:,3]
+            heave2 = table2[:,3]
+
+            distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
+
+            p1 = Plots.plot(depths1, heave1,
+            window_title = "VDisp: Heave vs Settlement",
+            title = "Depth vs Heave Above Foundation", 
+            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1))
+        
+            p2 = Plots.plot(depths2, heave2,
+            title = "Depth vs Heave Below Foundation", 
+            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1))
+            
+            p = Plots.plot(p1, p2, layout=(2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+
+            Base.invokelatest(display, p)
+        else
+            table = outputData[][5]
+
+            # Prepare Plot Axes
+            depths = table[:,2]
+            settlements = table[:, 3]
+            
+            # Select Backend
+            # pyplot()
+            # pygui(true)
+            # plotlyjs()
+
+            # Create Plot
+            distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
+            p = Plots.plot(depths, settlements, 
+            window_title = "VDisp: Depth vs Settlement",
+            title = "Depth vs Settlement", 
+            xlabel = "Depth ($(distUnits))", ylabel = "Settlement ($(distUnits))", 
+            label = "Depth of Soil Profile",
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1)
+            )
+
+            Base.invokelatest(display, p)
+        end
+
+        println("Done")
+    end
+end
+
+# Don't load or run anything for tests
+if size(ARGS)[1] == 1
+    path = "./src/UI/main.qml"  # Path to main QML file when executing `make` command from `vdisp/` directory 
     
-    writeDefaultOutput(outData, outputPath)
+    if ARGS[1] == "debug"
+        global PRINT_DEBUG = true
+    end
+
+    # Load file main.qml
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "outputDataProgress" => outputDataProgress, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData))
+    
+    # Run the app
+    exec()
+
+    # After app is done executing
+
+    # Exit if form is not filled
+    if !finishedInput[]
+        println("Form not filled. Exiting app....")
+        exit()
+    end
+
+    # defaultFile = "./src/.data/output_data.dat"
+    writeGUIDataToFile(pathFromVar(outputFileQML[]))
 end
 
 """

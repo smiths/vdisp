@@ -23,6 +23,40 @@ Window {
         return isMinHeight() && isMinWidth()
     }
 
+    /*
+        VDisp icons are sorted into folders of 16px, 24px, 32px, 64px,
+    128px, 256px and 512px. When rendering, each icon calls this function
+    to determine the nearest resolution given the desired icon size.
+        Since each icon will not necessarily exist in all 7 folders, min and
+    max ensure an existing size is chosen
+    */
+    function getImageFolder(sourceSize, min, max){
+        var finalSize = 0
+        if(sourceSize < 24){
+            /* 
+                Halfway between 16 and 24 is 20. Any icon less than 20px
+            in size will get its image from the 16px folder. Follow the same 
+            logic to derive values 28, 48, 96, etc... in "else if" statements
+            */
+            finalSize = 16
+        }else if(sourceSize < 32){
+            finalSize = 24
+        }else if(sourceSize < 64){
+            finalSize = 32
+        }else if(sourceSize < 128){
+            finalSize = 64
+        }else if(sourceSize < 256){
+            finalSize = 128
+        }else if(sourceSize < 512){
+            finalSize = 256
+        }else{
+            finalSize = 512
+        }
+
+        // Make sure finalSize is in range [min, max]
+        return Math.min(max, Math.max(min, finalSize))
+    }
+
     Loader {
         id: mainLoader
         anchors.fill: parent

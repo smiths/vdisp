@@ -100,9 +100,12 @@ Rectangle {
         }
         Image {
             id: continueButtonIcon
+            
             source: "../Assets/continue.png"
+            
             width: 19
             height: 19
+            
             anchors {
                 left: parent.horizontalCenter
                 leftMargin: 20
@@ -362,11 +365,15 @@ Rectangle {
         // Add button
         Image {
             id: addBtn
+            focus: true
+            
             width: 20 + (25-20) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
             height: width
-            focus: true
+            
+            property string folder: vdispWindow.getImageFolder(width, 16, 128)
             property string fileExt: activeFocus ? "-selected" : ""
-            source: "../Assets/add" + fileExt + ".png"
+            source: "../Assets/" + folder + "/add" + fileExt + ".png"
+            
             anchors {
                 left: wcTextbox.right
                 leftMargin: topForm.labelGap
@@ -458,7 +465,9 @@ Rectangle {
                         vrTextInput.text = ""
                         wcTextInput.text = ""
                     }else{
-                        materialPropertiesFormBackground.highlightErrors = true
+                        // Only highlight error for unfilled forms, not for material count
+                        if(materialsModel.count < materialsList.maxMaterials) materialPropertiesFormBackground.highlightErrors = true
+                        // TODO: Add popup to alert user they have reached max material count?
                     }
                 }
             }
@@ -483,6 +492,7 @@ Rectangle {
         interactive: (model.count <= maxMaterials) ? false : true  // Allow scrolling when list becomes too large
         implicitWidth: parent.width
         implicitHeight: Math.min(materialPropertiesFormBackground.materialListEntryHeight * materialsList.count, maximumHeight)
+        
         clip: true
         anchors {
             horizontalCenter: parent.horizontalCenter
@@ -499,6 +509,7 @@ Rectangle {
 
         delegate: Item {
             id: materialEntry
+            
             width: (!deleted) ? parent.width : undefined
             height: materialPropertiesFormBackground.materialListEntryHeight
 
@@ -513,6 +524,7 @@ Rectangle {
             Item {
                 implicitWidth: 2*materialEntry.sideGap + 4*materialEntry.inputGap + 4*materialEntry.labelGap + 3*materialEntry.inputWidth + sgLabelEntry.width + vrLabelEntry.width + wcLabelEntry.width + entryNameTextbox.width + deleteEntryBtn.width
                 height: parent.height
+                
                 anchors.horizontalCenter: parent.horizontalCenter
                 
                 // Material Name //
@@ -648,14 +660,19 @@ Rectangle {
                 // DELETE ////////
                 Image {
                     id: deleteEntryBtn
+                    
                     width: 15 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
                     height: width
-                    source: "../Assets/delete.png"
+                    
+                    property string folder: vdispWindow.getImageFolder(width, 16, 64)
+                    source: "../Assets/" + folder + "/delete.png"
+                    
                     anchors {
                         verticalCenter: parent.verticalCenter
                         left: wcEntryTextbox.right
                         leftMargin: materialEntry.inputGap
                     }
+                    
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {

@@ -278,13 +278,14 @@ function schmertElasticGUITest(filePath::String)
     @test guiData.subdivisions[2] == 7
     @test guiData.subdivisions[3] == 2
 
-    @test guiData.timeAfterConstruction == 1
+    @test guiData.timeAfterConstruction == 10
     @test guiData.elasticModulus[1] == 34
     @test guiData.elasticModulus[2] == 75.5
     @test guiData.elasticModulus[3] == 112.4
 end
 
 # Testing files for old models (LeonardFrost and CollapsibleSoil)
+
 # function testFile2(outputData)
 #     inputData = outputData.inputData
 # 
