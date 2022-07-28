@@ -7,6 +7,10 @@ Software for 1D Settlement Analysis
 
 [Wiki Page](https://github.com/smiths/vdisp/wiki#vdisp)
 
+## Code of Conduct
+
+VDisp has adopted the [Contributor Covenant](https://contributor-covenant.org/) code of conduct to clarify expected behavior in our community. You can read it at [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
 ## API Documentation
 
 [Documentation from Julia Code](https://smiths.github.io/vdisp/dev/)
