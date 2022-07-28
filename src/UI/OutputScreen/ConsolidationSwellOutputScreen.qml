@@ -234,7 +234,7 @@ Rectangle {
         }
     }
     Text {
-        text: (props.units === 0) ? "m" : "ft"
+        text: (props.units === 0) ? " m" : " ft"
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors {
@@ -438,7 +438,7 @@ Rectangle {
         }
     }
     Text {
-        text: (props.units === 0) ? "m" : "ft"
+        text: (props.units === 0) ? " m" : " ft"
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors {
@@ -452,7 +452,7 @@ Rectangle {
     // Total Heave ///
     Text {
         id: totalheaveValue
-        property string unitString: (props.units === 0) ? "m" : "ft"
+        property string unitString: (props.units === 0) ? " m" : " ft"
         text: (props.outputDataCreated) ? "Total Heave of Soil Profile: " + props.outputData[9].toFixed(3) + unitString : "N/A"
         color: "#fff3e4"
         font.pixelSize: 20 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
@@ -552,7 +552,7 @@ Rectangle {
                     Text {
                         color: "#483434"
                         font.pixelSize: 20
-                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        property string unitString: (props.units == 0) ? " Pa" : " tsf"
                         text: (props.outputDataCreated) ? props.materialNames[index] + ": " + props.outputData[10][index].toFixed(3) + unitString: "N/A"
                         anchors.centerIn: parent
                     }
@@ -667,7 +667,7 @@ Rectangle {
                     Text {
                         color: "#483434"
                         font.pixelSize: 20
-                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        property string unitString: (props.units == 0) ? " Pa" : " tsf"
                         property string dataString: foundationStressPopup.totalStress ?  props.outputData[11][index].toFixed(3) : props.outputData[12][index].toFixed(3)
                         text: (props.outputDataCreated) ? props.materialNames[index] + ": " + dataString + unitString: "N/A"
                         anchors.centerIn: parent
