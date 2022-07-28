@@ -928,6 +928,8 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
+                mainLoader.pushScreens = true
+                mainLoader.lastScreen = "EnterDataStage4.qml"
                 mainLoader.source = "../EnterDataScreen/EnterDataScreen.qml"
             }
         }

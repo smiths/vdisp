@@ -695,6 +695,8 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
+                mainLoader.pushScreens = true
+                mainLoader.lastScreen = (props.model === 1) ? "EnterDataStage5.qml" : "EnterDataStage6.qml"
                 mainLoader.source = "../EnterDataScreen/EnterDataScreen.qml"
             }
         }
