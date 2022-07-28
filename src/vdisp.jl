@@ -11,7 +11,6 @@ using Qt5QuickControls_jll
 using Qt5QuickControls2_jll
 using Observables
 using Plots
-using PlotlyJS
 
 export readInputFile
 
@@ -570,7 +569,7 @@ on(graphData) do val
             effectiveStressVsDepth = Plots.plot(effectiveStress, allDepths,
             title = "Effective Stress vs Depth", 
             ylabel = "Depth ($(distUnits))", xlabel = "Effective Stress ($(pressureUnits))", 
-            yflip = true, xflip = true,
+            yflip = true,
             label = "σ': effective stress",
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
@@ -643,7 +642,7 @@ on(graphData) do val
             effectiveStressVsDepth = Plots.plot(effectiveStress, allDepths,
             title = "Effective Stress vs Depth", 
             ylabel = "Depth ($(distUnits))", xlabel = "Effective Stress ($(pressureUnits))", 
-            yflip = true, xflip = true,
+            yflip = true,
             label = "σ': effective stress",
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
