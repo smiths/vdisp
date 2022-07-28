@@ -279,9 +279,9 @@ function schmertElasticGUITest(filePath::String)
     @test guiData.subdivisions[3] == 2
 
     @test guiData.timeAfterConstruction == 10
-    @test guiData.elasticModulus[1] == 34
-    @test guiData.elasticModulus[2] == 75.5
-    @test guiData.elasticModulus[3] == 112.4
+    @test guiData.elasticModulus[1] == 34000
+    @test guiData.elasticModulus[2] == 75500
+    @test guiData.elasticModulus[3] == 112400
 end
 
 # Testing files for old models (LeonardFrost and CollapsibleSoil)

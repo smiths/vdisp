@@ -1379,6 +1379,11 @@ struct GUIData
                 if cp < 0
                     throw(PropertyError("Line $(lastLineIndex+i): Cone penetration resistance cannot be negative"))
                 end
+                
+                # For metric, Cone Penetration is in KPa, convert to Pa
+                if units == Int(Metric)
+                    cp *= 1000
+                end
 
                 conePenetration[m] = cp
             end
@@ -1420,6 +1425,11 @@ struct GUIData
                 end
                 if em < 0
                     throw(PropertyError("Line $(lastLineIndex+i): Elastic modulus cannot be negative"))
+                end
+
+                # For metric, Elastic Mod is in KPa, convert to Pa
+                if units == Int(Metric)
+                    em *= 1000
                 end
 
                 elasticModulus[m] = em
