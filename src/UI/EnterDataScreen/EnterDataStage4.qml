@@ -2,7 +2,6 @@ import QtQuick 2.0
 import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Shapes 1.3
-// import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -161,6 +160,61 @@ Rectangle {
 
                 width: parent.sliderWidth
                 height: 26
+
+                // Foundation depth indicator ////
+                Rectangle {
+                    id: foundationDepthCircle
+                    color: "#483434"
+                    width: 13
+                    height: width
+                    radius: width/2
+
+                    x: (props.foundationDepth / props.totalDepth) * heaveSlider.width - width/2
+                    y: heaveSlider.topPadding + heaveSlider.availableHeight / 2 - height / 2
+                }
+                Rectangle {
+                    id: foundationDepthRect
+                    color: "#483434"
+                    width: 3
+                    height: 75
+                    
+                    anchors {
+                        horizontalCenter: foundationDepthCircle.horizontalCenter
+                        bottom: foundationDepthCircle.verticalCenter
+                    }
+                }
+                Rectangle {
+                    id: foundationDepthCircle2
+                    color: "#483434"
+                    width: 30
+                    height: width
+                    radius: width/2
+                    
+                    anchors {
+                        horizontalCenter: foundationDepthRect.horizontalCenter
+                        verticalCenter: foundationDepthRect.top
+                    }
+
+                    Image {
+                        source: "../Assets/64/building.png"
+                        width: 20
+                        height: width
+                        anchors.centerIn: parent
+                    }
+                }
+                Text {
+                    color: "#fff3e4"
+                    font.pixelSize: 12
+                    text: props.foundationDepth.toFixed(3)
+
+                    anchors {
+                        bottom: foundationDepthCircle2.top
+                        bottomMargin: 4
+                        horizontalCenter: foundationDepthCircle2.horizontalCenter
+                    }
+                }
+                /////////////////////////////////
+                
 
                 first.onMoved: {
                     // Update Julia Variable
