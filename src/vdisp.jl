@@ -507,13 +507,19 @@ on(graphData) do val
         println("Graphing...")
 
         if model[] == Int(InputParser.ConsolidationSwell)
-            table1 = outputData[][4]
-            table2 = outputData[][6]
+            table1 = outputData[][4]  # heaveAboveFoundationTable
+            table2 = outputData[][6]  # heaveBelowFoundationTable
+
+            # Sometimes, heaveAboveFoundationTable could be empty
+            heaveAbove = true
+            if heaveBegin[] > foundationDepth[]
+                heaveAbove = false
+            end
 
             # Prepare Plot Axes
-            depths1 = table1[:,2]
+            depths1 = (heaveAbove) ? table1[:,2] : []
             depths2 = table2[:,2]
-            heaveIncremental1 = table1[:,3]
+            heaveIncremental1 = (heaveAbove) ? table1[:,3] : []
             heaveIncremental2 = table2[:,3]
             
             # Calculate cumilative heave values
@@ -521,11 +527,13 @@ on(graphData) do val
             s2 = size(heaveIncremental2)[1]
             heave1 = Array{Float64}(undef, s1)
             heave2 = Array{Float64}(undef, s2)
-            heave1[1] = heaveIncremental1[1]
-            heave2[1] = heaveIncremental2[1]
-            for i=2:s1
-                heave1[i] = heave1[i-1]+heaveIncremental1[i]
+            if heaveAbove
+                heave1[1] = heaveIncremental1[1]
+                for i=2:s1
+                    heave1[i] = heave1[i-1]+heaveIncremental1[i]
+                end
             end
+            heave2[1] = heaveIncremental2[1]
             for i=2:s2
                 heave2[i] = heave2[i-1]+heaveIncremental2[i]
             end
@@ -555,23 +563,28 @@ on(graphData) do val
             allDepths[end] = totalDepth[] 
 
             # Normalize heave values based on sublayer size
-            heave1 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave1)]
+            if heaveAbove
+                heave1 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave1)]
+            end
             heave2 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave2)]
 
             distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
             pressureUnits = units[] === Int(InputParser.Metric) ? "Pa" : "tsf"
 
-            heave1VsDepth = Plots.plot(heave1, depths1,
-            title = "Heave Contribution Above Foundation vs Depth", 
-            ylabel = "Depth ($(distUnits))", xlabel = "Heave Per Unit Depth ($(distUnits))", 
-            yflip = true, xflip = true,
-            linecolor = RGBA(1,0.95,0.89,1), 
-            markershape = :circle, 
-            markercolor = RGBA(0.28,0.20,0.20,1), 
-            markerstrokewidth = 0, 
-            background_color = RGBA(0.42,0.31,0.31,1), 
-            foreground_color = RGBA(1,0.95,0.89,1))
-        
+            heave1VsDepth = UndefInitializer
+            if heaveAbove
+                heave1VsDepth = Plots.plot(heave1, depths1,
+                title = "Heave Contribution Above Foundation vs Depth", 
+                ylabel = "Depth ($(distUnits))", xlabel = "Heave Per Unit Depth ($(distUnits))", 
+                yflip = true, xflip = true,
+                linecolor = RGBA(1,0.95,0.89,1), 
+                markershape = :circle, 
+                markercolor = RGBA(0.28,0.20,0.20,1), 
+                markerstrokewidth = 0, 
+                background_color = RGBA(0.42,0.31,0.31,1), 
+                foreground_color = RGBA(1,0.95,0.89,1))
+            end
+
             heave2VsDepth = Plots.plot(heave2, depths2,
             title = "Heave Contribution Below Foundation vs Depth", 
             ylabel = "Depth ($(distUnits))", xlabel = "Heave Per Unit Depth ($(distUnits))", 
@@ -596,7 +609,8 @@ on(graphData) do val
             foreground_color = RGBA(1,0.95,0.89,1)
             )
 
-            p = Plots.plot(heave1VsDepth, heave2VsDepth, effectiveStressVsDepth, layout=(3,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+            p = (heaveAbove) ? Plots.plot(heave1VsDepth, heave2VsDepth, effectiveStressVsDepth, layout=(3,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1)) : Plots.plot(heave2VsDepth, effectiveStressVsDepth, layout=(2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+            
 
             Base.invokelatest(display, p)
         else
