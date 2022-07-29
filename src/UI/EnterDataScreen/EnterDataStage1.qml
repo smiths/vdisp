@@ -291,7 +291,7 @@ Rectangle {
         id: fileDialog
         title: "Please select input file"
         selectMultiple: false
-        folder: shortcuts.home
+        folder: (props.lastInputFileDir.length > 0) ? props.lastInputFileDir : shortcuts.home
         nameFilters: ["VDisp data files (*.dat)" ]
         onAccepted: {
             props.inputFile = fileUrl.toString()
@@ -304,6 +304,8 @@ Rectangle {
             // the required code. Thus, we force a change in the next line
             props.inputFileSelected = false   
             props.inputFileSelected = true
+
+            props.lastInputFileDir = folder.toString()
 
             // Convert URL to string
             var name = fileUrl.toString()

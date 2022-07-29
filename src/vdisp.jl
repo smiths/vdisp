@@ -16,6 +16,11 @@ export readInputFile
 
 PRINT_DEBUG = false
 
+"""
+    Removes "file://" prefix of QUrl paths
+"""
+pathFromVar(str::String) = str[7:end]
+
 # Julia variables
 materialNames = Array{String}(undef,0)
 specificGravity = Array{Float64}(undef,0)
@@ -128,6 +133,17 @@ on(inputFileSelected) do val
         else
             @emit inputFileRejected(message)
         end
+    end
+end
+# Read last selected folder path
+LAST_DIR_FILE = "./src/.data/dir.dat"
+lastInputFileDirContents = open(LAST_DIR_FILE) do file
+    readlines(file)
+end
+lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
+on(lastInputFileDir) do val
+    open(LAST_DIR_FILE, "w") do file
+        write(file, pathFromVar(val))
     end
 end
 units = Observable(Int(InputParser.Imperial))
@@ -442,11 +458,6 @@ function getStressesFromArrays(P, PP, inData)
     return (effectiveStresses, foundationStresses, totalStresses)
 end
 
-"""
-    Removes "file://" prefix of QUrl paths
-"""
-pathFromVar(str::String) = str[7:end]
-
 # Output 
 outputFileQML = Observable("")
 on(outputFileQML) do val
@@ -516,11 +527,11 @@ on(graphData) do val
             heaveIncremental1 = table1[:,3]
             heaveIncremental2 = table2[:,3]
             
+            # Calculate cumilative heave values
             s1 = size(heaveIncremental1)[1]
             s2 = size(heaveIncremental2)[1]
             heave1 = Array{Float64}(undef, s1)
             heave2 = Array{Float64}(undef, s2)
-
             heave1[1] = heaveIncremental1[1]
             heave2[1] = heaveIncremental2[1]
             for i=2:s1
@@ -554,7 +565,7 @@ on(graphData) do val
             end
             allDepths[end] = totalDepth[] 
 
-            # Normalize settlement values based on sublayer size
+            # Normalize heave values based on sublayer size
             heave1 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave1)]
             heave2 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave2)]
 
@@ -690,7 +701,7 @@ if size(ARGS)[1] == 1
     end
 
     # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData))
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData, "lastInputFileDir" => lastInputFileDir))
     
     # Run the app
     exec()
