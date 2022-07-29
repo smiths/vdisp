@@ -513,9 +513,22 @@ on(graphData) do val
             # Prepare Plot Axes
             depths1 = table1[:,2]
             depths2 = table2[:,2]
-            heave1 = table1[:,3]
-            heave2 = table2[:,3]
-            # TODO: Change to cumilative
+            heaveIncremental1 = table1[:,3]
+            heaveIncremental2 = table2[:,3]
+            
+            s1 = size(heaveIncremental1)[1]
+            s2 = size(heaveIncremental2)[1]
+            heave1 = Array{Float64}(undef, s1)
+            heave2 = Array{Float64}(undef, s2)
+
+            heave1[1] = heaveIncremental1[1]
+            heave2[1] = heaveIncremental2[1]
+            for i=2:s1
+                heave1[i] = heave1[i-1]+heaveIncremental1[i]
+            end
+            for i=2:s2
+                heave2[i] = heave2[i-1]+heaveIncremental2[i]
+            end
 
             # Prepare effective stress vs depth data
             effectiveStress = outputData[][3]
@@ -541,12 +554,16 @@ on(graphData) do val
             end
             allDepths[end] = totalDepth[] 
 
+            # Normalize settlement values based on sublayer size
+            heave1 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave1)]
+            heave2 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave2)]
+
             distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
             pressureUnits = units[] === Int(InputParser.Metric) ? "Pa" : "tsf"
 
             heave1VsDepth = Plots.plot(heave1, depths1,
             title = "Heave Contribution Above Foundation vs Depth", 
-            ylabel = "Depth ($(distUnits))", xlabel = "Heave ($(distUnits))", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Heave Per Unit Depth ($(distUnits))", 
             yflip = true, xflip = true,
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
@@ -557,7 +574,7 @@ on(graphData) do val
         
             heave2VsDepth = Plots.plot(heave2, depths2,
             title = "Heave Contribution Below Foundation vs Depth", 
-            ylabel = "Depth ($(distUnits))", xlabel = "Heave ($(distUnits))", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Heave Per Unit Depth ($(distUnits))", 
             yflip = true, xflip = true,
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
@@ -612,7 +629,10 @@ on(graphData) do val
                     push!(soilSublayerMats, soilLayerNumbers[i])
                 end
             end
-            
+
+            # Normalize settlement values based on sublayer size
+            settlements = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(settlements)]
+
             # Calculate the depth of each sublayer
             sublayers = size(soilSublayerMats)[1]
             allDepths = Array{Float64}(undef, sublayers+1) # Add extra entry for depth 0
@@ -628,7 +648,7 @@ on(graphData) do val
             
             settlementVsDepth = Plots.plot(settlements, depths, 
             title = "Settlement vs Depth", 
-            ylabel = "Depth ($(distUnits))", xlabel = "Settlement ($(distUnits))", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Settlement Per Unit Depth ($(distUnits))", 
             yflip = true, xflip = true,
             label = "Depth of Soil Profile",
             linecolor = RGBA(1,0.95,0.89,1), 
