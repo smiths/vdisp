@@ -135,17 +135,6 @@ on(inputFileSelected) do val
         end
     end
 end
-# Read last selected folder path
-LAST_DIR_FILE = "./src/.data/dir.dat"
-lastInputFileDirContents = open(LAST_DIR_FILE) do file
-    readlines(file)
-end
-lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
-on(lastInputFileDir) do val
-    open(LAST_DIR_FILE, "w") do file
-        write(file, pathFromVar(val))
-    end
-end
 units = Observable(Int(InputParser.Imperial))
 
 # Update QML variables
@@ -698,6 +687,18 @@ if size(ARGS)[1] == 1
     
     if ARGS[1] == "debug"
         global PRINT_DEBUG = true
+    end
+
+    # Read last selected folder path
+    LAST_DIR_FILE = "./src/.data/dir.dat"
+    lastInputFileDirContents = open(LAST_DIR_FILE) do file
+        readlines(file)
+    end
+    lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
+    on(lastInputFileDir) do val
+        open(LAST_DIR_FILE, "w") do file
+            write(file, pathFromVar(val))
+        end
     end
 
     # Load file main.qml
