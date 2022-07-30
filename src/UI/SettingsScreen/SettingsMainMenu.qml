@@ -67,7 +67,7 @@ Item {
                 }
                 onClicked: {
                     if(menuText === "Unit System"){
-                        settingsStackView.push("UnitSystem.qml")
+                        settingsStackView.push("Options.qml")
                     }
                 }
             }
