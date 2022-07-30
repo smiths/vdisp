@@ -497,7 +497,7 @@ on(createOutputData) do val
             append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh, effectiveStresses, foundationStresses, totalStresses])
         end
         global outputData[] = outputParams
-
+    
         outputDataCreated[] = true
     end
 end

@@ -14,6 +14,8 @@ Rectangle {
     property int tableMargin: 1 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
     property int tableBottomValueFontSize: 12 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
     
+    property bool heaveAbove: !props.outputDataCreated || props.outputData[4] > 0 // heaveAboveFoundationRows > 0
+
     // Title
     Text{
         id: outputScreenTitle
@@ -56,7 +58,7 @@ Rectangle {
         id: heaveAboveFoundationContainer
 
         width: 600 + 300 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
-        height: heaveAboveFoundationTableHeaderView.height + heaveAboveFoundationTableView.height
+        height: (consolidationSwellOutputScreen.heaveAbove) ? heaveAboveFoundationTableHeaderView.height + heaveAboveFoundationTableView.height : 0
 
         clip: true
 
@@ -220,6 +222,7 @@ Rectangle {
             verticalCenter: totalHeaveAboveFoundationValue.verticalCenter
             right: totalHeaveAboveFoundationValue.left
         }
+        visible: (consolidationSwellOutputScreen.heaveAbove)
     }
     Text {
         id: totalHeaveAboveFoundationValue
@@ -232,6 +235,7 @@ Rectangle {
             left: heaveAboveFoundationContainer.horizontalCenter
             leftMargin: (heaveAboveFoundationContainer.width/4)/2 - width/2
         }
+        visible: (consolidationSwellOutputScreen.heaveAbove)
     }
     Text {
         text: (props.units === 0) ? " m" : " ft"
@@ -241,6 +245,17 @@ Rectangle {
             verticalCenter: totalHeaveAboveFoundationValue.verticalCenter
             left: totalHeaveAboveFoundationValue.right
             leftMargin: 1
+        }
+        visible: (consolidationSwellOutputScreen.heaveAbove)
+    }
+    Text{
+        visible: !(consolidationSwellOutputScreen.heaveAbove)
+        text: "No Heave Above Foundation"
+        color: "#fff3e4"
+        font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: heaveAboveFoundationContainer.bottom
         }
     }
     /////////////////////////////////////////////
