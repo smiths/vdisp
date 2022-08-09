@@ -135,7 +135,7 @@ on(inputFileSelected) do val
         end
     end
 end
-units = Observable(Int(InputParser.Imperial))
+units = UndefInitializer
 
 # Update QML variables
 setProblemName = on(problemName) do val
@@ -712,6 +712,19 @@ if size(ARGS)[1] == 1
     on(lastInputFileDir) do val
         open(LAST_DIR_FILE, "w") do file
             write(file, pathFromVar(val))
+        end
+    end
+
+    # Read preferred unit system
+    UNITS_FILE = "./src/.data/.units"
+    unitsContent = open(UNITS_FILE) do file
+        readlines(file)
+    end
+    units = (unitsContent[1] == "Metric") ? Observable(Int(InputParser.Metric)) : Observable(Int(InputParser.Imperial))
+    on(units) do val
+        # Rewrite unit system value
+        open(UNITS_FILE, "w") do file
+            write(file, string(InputParser.Units(val)))
         end
     end
 
