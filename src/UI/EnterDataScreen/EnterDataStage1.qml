@@ -500,7 +500,7 @@ Rectangle {
         // MODEL ////////////
         ComboBox {
             id: modelDropdown
-            model: ["Consolidation Swell", "Schmertmann", "Schmertmann Elastic"]
+            model: ["Consolidation/Swell", "Schmertmann", "Schmertmann Elastic"]
             anchors {
                 top: problemNameTextbox.bottom
                 topMargin: formTop.itemGap
