@@ -59,7 +59,10 @@ Window {
 
     Loader {
         id: mainLoader
-        anchors.fill: parent
+        
+        width: vdispWindow.width
+        height: vdispWindow.height
+
         // Initial screen
         source: "./MenuScreen/MenuScreen.qml"
 
