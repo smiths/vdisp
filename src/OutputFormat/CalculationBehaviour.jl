@@ -156,6 +156,8 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 
 ``\rho_{cj}``: one-dimensional consolidation of layer *j*
 
+``\rho_c``: oen-dimensional consolidation of soil profile
+
 ``H_j``: thickness of layer *j*
 
 ``n``: number of layers

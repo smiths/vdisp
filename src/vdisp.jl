@@ -14,7 +14,7 @@ using Plots
 
 export readInputFile
 
-PRINT_DEBUG = false
+PRINT_DEBUG = false  # Many descriptive print statements are shown when this is true
 
 """
       pathFromVar(str::String)
