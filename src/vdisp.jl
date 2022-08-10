@@ -17,7 +17,8 @@ export readInputFile
 PRINT_DEBUG = false
 
 """
-    Removes "file://" prefix of QUrl paths
+      pathFromVar(str::String)
+Removes *"file://"* prefix of `QUrl` paths
 """
 pathFromVar(str::String) = str[7:end]
 
@@ -135,7 +136,7 @@ on(inputFileSelected) do val
         end
     end
 end
-units = UndefInitializer
+units = UndefInitializer # This gets defined right before loading qml (Reads value from vdisp/src/.data/.units)
 
 # Update QML variables
 setProblemName = on(problemName) do val
@@ -350,11 +351,18 @@ setElasticMod = on(elasticModulusQML) do val
     global elasticModulus = copy(em)
 end
 
-# Output functions
+"""
+    createOutputDataFromGUI()
+
+Returns `OutputData` instance created from data entered by user in **VDisp** GUI.
+Data entered by user is accessed through the global `Observable` variables they are stored in.
+"""
 function createOutputDataFromGUI()
     global materialNames, specificGravity, voidRatio, waterContent, subdivisions, bounds, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, elasticModulus, conePenetration
     
-    println("Converting Data")
+    if PRINT_DEBUG
+        println("Converting Data")
+    end
 
     # Calculate elements and nodal points
     elements = 0
@@ -397,7 +405,9 @@ function createOutputDataFromGUI()
     modelConversion = [Int(InputParser.ConsolidationSwell), Int(InputParser.Schmertmann), Int(InputParser.SchmertmannElastic)]
     foundationType = (foundation[] == 0) ? "RectangularSlab" : "LongStripFooting"
 
-    println("Data calculated")
+    if PRINT_DEBUG
+        println("Data calculated")
+    end
 
     # Creating OutputData Object
     outData = 0
@@ -409,7 +419,9 @@ function createOutputDataFromGUI()
         outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], elasticModulus, Int32(timeAfterConstruction[]), Int32(units[]))
     end
 
-    println("OutputData created")
+    if PRINT_DEBUG 
+        println("OutputData created")
+    end
 
     return outData
 end
@@ -422,6 +434,15 @@ file path and writes the contents of `writeDefaultOutput(path, outData)` to file
 """
 writeGUIDataToFile(path::String, outData = createOutputDataFromGUI()) = writeDefaultOutput(outData, path)
 
+"""
+    getStressesFromArrays(P, PP, inData)
+
+Returns a `Tuple` of 3 `Array{Float64}`s: `effectiveStresses`, `foundationStresses`, `totalStresses`. These arrays store
+the effective stress, added stress from placing foundation, and sum of the effective and foundation stress of each soil layer.
+
+They are calculated from the arrays `P` and `PP`, outputs of the `getEffectiveStress()` and `getSurchargePressure` functions in
+the `CalculationBehaviour.jl` module, and data from an `InputData` instance. 
+"""
 function getStressesFromArrays(P, PP, inData)
     # Get effective, foundation, and effective+foundation stresses for each layer
     # Initialize arrays
@@ -515,7 +536,7 @@ on(graphData) do val
             if heaveBegin[] > foundationDepth[]
                 heaveAbove = false
             end
-
+            
             # Prepare Plot Axes
             depths1 = (heaveAbove) ? table1[:,2] : []
             depths2 = table2[:,2]
@@ -695,7 +716,7 @@ on(graphData) do val
     end
 end
 
-# Don't load or run anything for tests
+# When runtests.jl compiles vdisp, there are no command line arguments. Skip loading the qml in that case
 if size(ARGS)[1] == 1
     path = "./src/UI/main.qml"  # Path to main QML file when executing `make` command from `vdisp/` directory 
     
@@ -738,7 +759,11 @@ end
 """
     readInputFile(inputPath, outputPath)
 
-Reads and parses input file at inputPath and outputs calculations to file at outputPath
+Reads and parses input file at inputPath and outputs calculations to file at outputPath.
+
+This function was used to emulate old `VDispl` software's CLI funcitonality. It is no longer 
+used in this version of `VDisp`. It has been left in for any developers that would like to have
+the command line funcitonality.
 """
 function readInputFile(inputPath::String, outputPath::String)
     # Instantiate OutputData object

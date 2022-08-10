@@ -1,6 +1,5 @@
 module InputParser
 
-# Julia implicitly numbers Enum items 0,1,2,3,4
 @enum Model ConsolidationSwell LeonardFrost Schmertmann CollapsibleSoil SchmertmannElastic 
 @enum Foundation ErrorFoundation RectangularSlab LongStripFooting 
 @enum ErrorID ParsingErrorId FoundationErrorId SoilNumberErrorId NotEnoughValuesErrorId ModelErrorId FoundationTypeErrorId FloatConvertErrorId DimensionNegativeErrorId IntConvertErrorId UnitErrorId BoolConvertErrorId MaterialIndexOutOfBoundsErrorId PropertyErrorId
@@ -8,42 +7,83 @@ module InputParser
 
 #### Custom Exceptions  ################################
 
-# ParsingError is for when we have already caught an error 
-# in the body of InputData constructor, given user feedback, 
-# but want to throw another error so caller of InputData 
-# constructor can decide what to do
+"""
+    ParsingError()
+
+There was an error parsing old input file type to create `InputData` instance.
+
+This is usually thrown when the module has already caught a specific error while parsing 
+in another function, and given user the neccessary feedback. This error is then thrown so 
+it can be caught and handled gracefuly by the script calling the function.
+
+> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been
+left in for developers who would like to test it out.
+"""
 struct ParsingError <: Exception 
     id::Int
     ParsingError()=new(Int(ParsingErrorId))
 end
 Base.showerror(io::IO, e::ParsingError) = print(io, "Could not parse file.")
 
-# FoundationError is for when foundationOption is not read as 1 or 2
+"""
+    FoundationError()
+
+The foundationOption was not read as 1 or 2 in old input file type.
+
+> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been
+left in for developers who would like to test it out.
+"""
 struct FoundationError <: Exception 
     id::Int
     FoundationError()=new(Int(FoundationErrorId))
 end
 Base.showerror(io::IO, e::FoundationError) = print(io, "Incorrect option for foundation.")
 
-# SoilNumberError is for when reading soilLayerNumber and invalid sequence given
+"""
+    SoilNumberError(line::Int)
+
+Invalid sequence of soilLayerNumber specified in old input file type.
+
+Ex. The soilLayerNumber of layer 12 is given before layer 11. Invalid sequence: 
+```
+1  1
+12 2
+11 3    
+16 3
+```
+
+> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been
+left in for developers who would like to test it out.
+"""
 struct SoilNumberError <: Exception
     id::Int 
     line::Int
+    SoilNumberError(line::Int) = new(Int(SoilNumberErrorId), line)
 end
 Base.showerror(io::IO, e::SoilNumberError) = print(io, "Invalid soil layer number value on line $(e.line)!")
 
-# NotEnoughValuesError is for the parseCurrentLine function
-# If given line doesn't have as many values as expected, this error
-# is thrown
+"""
+    NotEnoughValuesError(requiredValues::Int, givenValues::Int, line::Int)
+
+Not enough values were given on the current line being parsed.
+
+> Note: If more values than needed are given, extra values are ignored and no error is thrown.
+"""
 struct NotEnoughValuesError <: Exception 
     id::Int
     requiredValues::Int
     givenValues::Int
     line::Int
+
+    NotEnoughValuesError(requiredValues::Int, givenValues::Int, line::Int) = new(Int(NotEnoughValuesErrorId), requiredValues, givenValues, line)
 end
 Base.showerror(io::IO, e::NotEnoughValuesError) = print(io, "Invalid input file!\n\t>Line $(e.line): $(e.requiredValues) values expected, only given $(e.givenValues)!")
 
-# ModelError is thrown when user enters invalid number for model in input file
+"""
+    ModelError(line::Int32, value::String)
+
+`model` value was not 0, 1 or 2.
+"""
 struct ModelError <: Exception
     id::Int32
     line::Int32
@@ -52,7 +92,11 @@ struct ModelError <: Exception
 end
 Base.showerror(io::IO, e::ModelError) = print(io, "Line $(e.line): Model input should be 0, 1 or 2. Input was $(e.value)")
 
-# UnitError is thrown when user enters invalid number for unit in input file
+"""
+    UnitError(line::Int32, value::String)
+
+`unit` value was not 0, or 1.
+"""
 struct UnitError <: Exception
     id::Int32
     line::Int32
@@ -61,7 +105,11 @@ struct UnitError <: Exception
 end
 Base.showerror(io::IO, e::UnitError) = print(io, "Line $(e.line): Unit input should be 0, or 1. Input was $(e.value)")
 
-# FoundationTypeError is thrown when user enters invalid number for foundation in input file
+"""
+    FoundationTypeError(line::Int32, value::String)
+
+`foundationType` value was not 0, or 1.
+"""
 struct FoundationTypeError <: Exception
     id::Int32
     line::Int32
@@ -70,7 +118,12 @@ struct FoundationTypeError <: Exception
 end
 Base.showerror(io::IO, e::FoundationTypeError) = print(io, "Line $(e.line): Foundation input should be 0 or 1. Input was $(e.value)")
 
-# Anytime a variable that was supposed to be floating point number has trouble parsing
+"""
+    FloatConvertError(line::Int32, var::String, value::String)
+
+Value could not be converted to a `Float`. This happens when user enters a non-numeric value 
+for a field that must be a floating point value.
+"""
 struct FloatConvertError <: Exception
     id::Int32
     line::Int32
@@ -80,7 +133,12 @@ struct FloatConvertError <: Exception
 end
 Base.showerror(io::IO, e::FloatConvertError) = print(io, "Line $(e.line): $(e.var) value should be a valid float value. Trouble parsing input \"$(e.value)\"")
 
-# Anytime a variable that was supposed to be an integer number has trouble parsing
+"""
+    IntConvertError(line::Int32, var::String, value::String)
+
+Value could not be converted to an `Int`. This happens when user enters a non-numeric value 
+for a field that must be an integer value.
+"""
 struct IntConvertError <: Exception
     id::Int32
     line::Int32
@@ -90,7 +148,11 @@ struct IntConvertError <: Exception
 end
 Base.showerror(io::IO, e::IntConvertError) = print(io, "Line $(e.line): $(e.var) value should be a valid integer value. Trouble parsing input \"$(e.value)\"")
 
-# Anytime a variable that was supposed to be a boolean has trouble parsing
+"""
+    BoolConvertError(line::Int32, var::String, value::String)
+
+Value could not be converted to a `Bool`. This happens when user enters a value that is not 0 (`false`) or 1(`true`).
+"""
 struct BoolConvertError <: Exception
     id::Int32
     line::Int32
@@ -100,7 +162,11 @@ struct BoolConvertError <: Exception
 end
 Base.showerror(io::IO, e::BoolConvertError) = print(io, "Line $(e.line): $(e.var) value should be a 0(false) or 1(true). Trouble parsing input \"$(e.value)\"")
 
-# Anytime a dimension variable was negative
+"""
+    DimensionNegativeError(line::Int32, var::String, value::String)
+
+A dimension was given a negative value.
+"""
 struct DimensionNegativeError <: Exception 
     id::Int32
     line::Int32
@@ -110,7 +176,11 @@ struct DimensionNegativeError <: Exception
 end
 Base.showerror(io::IO, e::DimensionNegativeError) = print(io, "Line $(e.line): $(e.var) value should be positive. Input was \"$(e.value)\"")
 
-# When material index is out of bounds
+"""
+    MaterialIndexOutOfBoundsError(line::Int32, value::String)
+
+Given material index is not within bounds of given list of materials.
+"""
 struct MaterialIndexOutOfBoundsError <: Exception
     id::Int32
     line::Int32
@@ -119,6 +189,11 @@ struct MaterialIndexOutOfBoundsError <: Exception
 end
 Base.showerror(io::IO, e::MaterialIndexOutOfBoundsError) = print(io, "Line $(e.line): Invalid material index \"$(e.value)\"")
 
+"""
+    PropertyError(msg::String)
+
+Value given for this property is not within constraints. A descriptive message is passed in for `msg`.
+"""
 struct PropertyError <: Exception
     id::Int32
     msg::String
@@ -127,8 +202,7 @@ end
 Base.showerror(io::IO, e::PropertyError) = print(io, e.msg)
 ########################################################
 
-# These are variables/objects visible to all modules
-# that include InputParser module
+# These are variables/objects visible to all modules that include InputParser module
 export Model, Units, Foundation, ErrorID, GUIData, InputData, ParsingError, SoilNumberError, ModelError, UnitError, FoundationTypeError, FloatConvertError, IntConvertError, BoolConvertError, DimensionNegativeError, MaterialIndexOutOfBoundsError, PropertyError
 
 """
@@ -145,12 +219,18 @@ function parseCurrentLine(input::Array{String}, items::Int, index::Int, splitStr
     currentLineData = filter(x -> x != "", currentLineData)
     # Check if data is there
     if size(currentLineData)[1] < items
-        throw(NotEnoughValuesError(Int(NotEnoughValuesErrorId), items, size(currentLineData)[1], index))
+        throw(NotEnoughValuesError(items, size(currentLineData)[1], index))
     end
     return currentLineData
 end
 
-# struct for InputData (OOP in Julia)
+"""
+    InputData()
+
+The `InputData` struct contains all the variables needed to perform `VDisp` calculations.
+
+It is constructed either by parsing an input file, or by converting data entered in GUI.
+"""
 struct InputData
     problemName::String
     numProblems::Int
@@ -390,7 +470,7 @@ struct InputData
             else   # We have seen element before
                 # This lines element must be larger than previous lines
                 if element <= lastElement
-                    throw(SoilNumberError(Int(SoilNumberErrorId), lastLineIndex+1))
+                    throw(SoilNumberError(lastLineIndex+1))
                 end
                 # Fill spots from last element to this one with 
                 # last layer num 
@@ -892,6 +972,11 @@ struct InputData
     end
 end
 
+"""
+    GUIData()
+
+The `GUIData` struct contains all the information parsed from new input file format.
+"""
 struct GUIData
     # Stage 1
     problemName::String
