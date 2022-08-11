@@ -86,3 +86,47 @@ Line 14 (Repeat for each material) > materialIndex:Int[0, materials), elasticMod
 |  `depthToGroundWaterTable`  |                                            Depth to Ground Water Table                                            |             m/ft            |
 |    `layerBoundaryiDepth`    |                               Depth of Boundary Between Layer *(i-1)* and Layer *i*                               |             m/ft            |
 |     `subdivisionsLayeri`    |                                             Subdivisions of Layer *i*                                             |             N/A             |
+|      `heaveBeginDepth`      |                            Depth From Ground Surface to Where Heave Active Zone Begins                            |             m/ft            |
+|      `heaveActiveDepth`     |                                             Depth of Heave Active Zone                                            |             m/ft            |
+|       `swellPressure`       |                                             Swell Pressure of Material                                            |            Pa/tsf           |
+|         `swellIndex`        |                                              Swell Index of Material                                              |           unitless          |
+|      `compressionIndex`     |                                           Compression Index of Material                                           |           unitless          |
+|      `maxPastPressure`      |                           Max Past Pressure (aka Preconsolidation Pressure) of Material                           |            Pa/tsf           |
+|   `yearsAfterConstruction`  |                                          Time in Years After Construction                                         |            years            |
+| `conePenetrationResistance` |                                      Cone Penetration Resistance of Material                                      |           KPa/tsf           |
+|       `elasticModulus`      |                                            Elastic Modulus of Material                                            |           KPa/tsf           |
+
+## Notes
+
+- **Comments**: Comments can be placed in input files using the `#` character. These work exactly like comments in `Python` or `Julia`.
+
+- **Whitespace**: Any amount of whitespace can be left between fields, as long as rows appear in same order and ever field is presented in its corresponding row.
+
+## Sample Input File
+
+This is a sample input file, taken from the test cases for `VDisp`:
+
+## Input file for GUI
+
+```text
+Problem 1 - Consolidation/Swell
+0,1
+0,3.00,3.00
+1.00,0
+
+1,1  # Outpt Increments, Saturated Above Water TAble
+
+2
+1,Sand,2.6,0.9,20   # Interesting material names!
+2,Dirt,2.3,1.35,35
+
+16.0
+7.5,15.0
+0,12.0,16.0
+1,2
+12,4
+
+0.0,8.0
+1,2,0.1,0.3,2
+2,3,0.15,0.35,3
+```
