@@ -106,9 +106,9 @@ Line 14 (Repeat for each material) > materialIndex:Int[0, materials), elasticMod
 
 This is a sample input file, taken from the test cases for `VDisp`:
 
-## Input file for GUI
 
 ```text
+# Input file for GUI
 Problem 1 - Consolidation/Swell
 0,1
 0,3.00,3.00
