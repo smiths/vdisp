@@ -132,5 +132,10 @@ Item {
         height: 0.9 * parent.height
         anchors.centerIn: parent
         initialItem: "EnterDataStage1.qml"
+
+        Component.onCompleted: {
+            // If back button was pressed from ouput screen, push all screens until last stage of enter data
+            if(mainLoader.pushScreens) enterDataStackView.push(["EnterDataStage2.qml", "EnterDataStage3.qml", mainLoader.lastScreen]) // Pushing an array of screens only transistions to the last screen
+        }
     }
 }

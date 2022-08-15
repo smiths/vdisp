@@ -3,10 +3,10 @@ import QtQuick 2.0
 Item {
     ListModel {
         id: settingsMenuModel
-        ListElement { menuText: "Unit System"; iconSource: "../Assets/settings.png" }
+        ListElement { menuText: "Unit System"; iconSource: "../Assets/512/settings-selected.png" }
         ListElement { menuText: "Constants"; iconSource: "../Assets/pencil.png" }
-        ListElement { menuText: "Help"; iconSource: "../Assets/fileUpload.png" }
-        ListElement { menuText: "About"; iconSource: "../Assets/add.png" }
+        ListElement { menuText: "Help"; iconSource: "../Assets/64/input-file-selected.png" }
+        ListElement { menuText: "About"; iconSource: "../Assets/128/add-selected.png" }
     }
 
      Rectangle {
@@ -67,7 +67,9 @@ Item {
                 }
                 onClicked: {
                     if(menuText === "Unit System"){
-                        settingsStackView.push("UnitSystem.qml")
+                        settingsStackView.push("Options.qml")
+                    }else if(menuText === "Help"){
+                        settingsStackView.push("Help.qml")
                     }
                 }
             }

@@ -651,7 +651,7 @@ Rectangle {
                     Text {
                         text: waterContent.toFixed(1) + "%"
                         color: "#483434"
-                        font.pixelSize: (parseFloat(waterContent) === 100) ? materialEntry.textSize - 3 : materialEntry.textSize
+                        font.pixelSize: (parseFloat(waterContent) === 100) ? materialEntry.textSize - 3 : (parseFloat(waterContent) >= 10.0) ? materialEntry.textSize - 2 : materialEntry.textSize
                         anchors.centerIn: parent
                     }
                 }

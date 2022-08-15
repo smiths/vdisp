@@ -59,7 +59,18 @@ Window {
 
     Loader {
         id: mainLoader
-        anchors.fill: parent
+        
+        width: vdispWindow.width
+        height: vdispWindow.height
+
+        // Initial screen
         source: "./MenuScreen/MenuScreen.qml"
+
+        /*
+            If user presses back button, push all screens 
+        to stack until the last page
+        */
+        property bool pushScreens: false
+        property string lastScreen: ""  // Which screen is the last (Stage 4 or 5 or 6)
     }
 }

@@ -58,14 +58,28 @@ struct ConsolidationSwellCalculationBehaviour <: CalculationOutputBehaviour
     outputIncrements::Bool
     elements::Int
     units::Int
+    materialNames::Array{String}
 
-    ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6],calcValues[1],calcValues[2],calcValues[3],calcValues[4],calcValues[5],calcValues[6],calcValues[7], calcValues[8], calcValues[9])
+    ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6],calcValues[1],calcValues[2],calcValues[3],calcValues[4],calcValues[5],calcValues[6],calcValues[7], calcValues[8], calcValues[9], calcValues[10])
 end
 function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     # getValue does the calculations
     P, PP, heaveAboveFoundationTable, heaveBelowFoundationTable, Δh1, Δh2, Δh = getValue(behaviour)
     
     out = ""
+
+    # Output Material Properties Table 
+    materialCount = size(behaviour.materialNames)[1]
+    materialPropertiesTable = [1 behaviour.materialNames[1] behaviour.swellPressure[1] behaviour.swellIndex[1] behaviour.compressionIndex[1] behaviour.maxPastPressure[1]]
+    for i=2:materialCount
+        materialPropertiesTable = vcat(materialPropertiesTable, [i behaviour.materialNames[i] behaviour.swellPressure[i] behaviour.swellIndex[i] behaviour.compressionIndex[i] behaviour.maxPastPressure[i]])
+    end
+
+    pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
+    
+    out *= "Material Properties\n"
+    out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Swell Pressure ($(pressureUnit))", "Swell Index", "Compression Index", "Preconsolidation Pressure ($(pressureUnit))"],tf = tf_markdown)
+    out *= "\n"
 
     if OUTPUT_EFFECTIVE_STRESS
         for i=1:behaviour.nodalPoints
@@ -141,6 +155,8 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 ``C_r``: recompression index
 
 ``\rho_{cj}``: one-dimensional consolidation of layer *j*
+
+``\rho_c``: oen-dimensional consolidation of soil profile
 
 ``H_j``: thickness of layer *j*
 
@@ -332,14 +348,28 @@ struct SchmertmannCalculationBehaviour <: CalculationOutputBehaviour
     conePenetrationResistance::Array{Float64}
     outputIncrements::Bool
     units::Int
+    materialNames::Array{String}
 
-    SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5])
+    SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5], calcValues[6])
 end
 function getOutput(behaviour::SchmertmannCalculationBehaviour)
     # getValue does the calculations
     P, PP, settlementTable, Δh = getValue(behaviour)
     
     out = ""
+
+    # Output Material Properties Table 
+    materialCount = size(behaviour.materialNames)[1]
+    materialPropertiesTable = [1 behaviour.materialNames[1] behaviour.conePenetrationResistance[1]]
+    for i=2:materialCount
+        materialPropertiesTable = vcat(materialPropertiesTable, [i behaviour.materialNames[i] behaviour.conePenetrationResistance[i]])
+    end
+
+    pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
+    
+    out *= "Cone Penetration Resistance of Materials\n"
+    out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Cone Penetration Resistance ($(pressureUnit))"],tf = tf_markdown)
+    out *= "\n"
 
     if OUTPUT_EFFECTIVE_STRESS
         for i=1:behaviour.nodalPoints
@@ -466,14 +496,28 @@ struct SchmertmannElasticCalculationBehaviour <: CalculationOutputBehaviour
     outputIncrements::Bool
     elasticModulus::Array{Float64}
     units::Int
+    materialNames::Array{String}
 
-    SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5], calcValues[6])
+    SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues) = new(effectiveStressValues[1],effectiveStressValues[2],effectiveStressValues[3],effectiveStressValues[4],effectiveStressValues[5],effectiveStressValues[6],effectiveStressValues[7],effectiveStressValues[8],effectiveStressValues[9],surchargePressureValues[1], surchargePressureValues[2],surchargePressureValues[3],surchargePressureValues[4],surchargePressureValues[5],surchargePressureValues[6], calcValues[1], calcValues[2], calcValues[3], calcValues[4], calcValues[5], calcValues[6], calcValues[7])
 end
 function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     # getValue does the calculations
     P, PP, settlementTable, Δh = getValue(behaviour)
     
     out = ""
+
+    # Output Material Properties Table 
+    materialCount = size(behaviour.materialNames)[1]
+    materialPropertiesTable = [1 behaviour.materialNames[1] behaviour.elasticModulus[1]]
+    for i=2:materialCount
+        materialPropertiesTable = vcat(materialPropertiesTable, [i behaviour.materialNames[i] behaviour.elasticModulus[i]])
+    end
+
+    pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
+    
+    out *= "Elastic Modulus of Materials\n"
+    out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Elastic Modulus ($(pressureUnit))"],tf = tf_markdown)
+    out *= "\n"
 
     if OUTPUT_EFFECTIVE_STRESS
         for i=1:behaviour.nodalPoints

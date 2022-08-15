@@ -14,6 +14,8 @@ Rectangle {
     property int tableMargin: 1 + 20 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
     property int tableBottomValueFontSize: 12 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
     
+    property bool heaveAbove: !props.outputDataCreated || props.outputData[4] > 0 // heaveAboveFoundationRows > 0
+
     // Title
     Text{
         id: outputScreenTitle
@@ -42,7 +44,7 @@ Rectangle {
     // Heave Above Foundation ///////////////////
     Text {
         id: heaveAboveFoundationTableTitle
-        text: "Heave Above Foundation"
+        text: "Heave Contribution Above Foundation"
         font.pixelSize: 20
         color: "#fff3e4"
         anchors {
@@ -56,7 +58,7 @@ Rectangle {
         id: heaveAboveFoundationContainer
 
         width: 600 + 300 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
-        height: heaveAboveFoundationTableHeaderView.height + heaveAboveFoundationTableView.height
+        height: (consolidationSwellOutputScreen.heaveAbove) ? heaveAboveFoundationTableHeaderView.height + heaveAboveFoundationTableView.height : 0
 
         clip: true
 
@@ -213,13 +215,14 @@ Rectangle {
         //////////////////////////////
     }
     Text {
-        text: "Total Heave Above Foundation: "
+        text: "Total Heave Contribution Above Foundation: "
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors{
             verticalCenter: totalHeaveAboveFoundationValue.verticalCenter
             right: totalHeaveAboveFoundationValue.left
         }
+        visible: (consolidationSwellOutputScreen.heaveAbove)
     }
     Text {
         id: totalHeaveAboveFoundationValue
@@ -232,9 +235,10 @@ Rectangle {
             left: heaveAboveFoundationContainer.horizontalCenter
             leftMargin: (heaveAboveFoundationContainer.width/4)/2 - width/2
         }
+        visible: (consolidationSwellOutputScreen.heaveAbove)
     }
     Text {
-        text: (props.units === 0) ? "m" : "ft"
+        text: (props.units === 0) ? " m" : " ft"
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors {
@@ -242,13 +246,24 @@ Rectangle {
             left: totalHeaveAboveFoundationValue.right
             leftMargin: 1
         }
+        visible: (consolidationSwellOutputScreen.heaveAbove)
+    }
+    Text{
+        visible: !(consolidationSwellOutputScreen.heaveAbove)
+        text: "No Heave Above Foundation"
+        color: "#fff3e4"
+        font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: heaveAboveFoundationContainer.bottom
+        }
     }
     /////////////////////////////////////////////
 
     // Heave Below Foundation ///////////////////
     Text {
         id: heaveBelowFoundationTableTitle
-        text: "Heave Below Foundation"
+        text: "Heave Contribution Below Foundation"
         font.pixelSize: 20
         color: "#fff3e4"
         anchors {
@@ -417,7 +432,7 @@ Rectangle {
         //////////////////////////////
     }
     Text {
-        text: "Total Heave Below Foundation: "
+        text: "Total Heave Contribution Below Foundation: "
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors{
@@ -438,7 +453,7 @@ Rectangle {
         }
     }
     Text {
-        text: (props.units === 0) ? "m" : "ft"
+        text: (props.units === 0) ? " m" : " ft"
         color: "#fff3e4"
         font.pixelSize: consolidationSwellOutputScreen.tableBottomValueFontSize
         anchors {
@@ -452,7 +467,7 @@ Rectangle {
     // Total Heave ///
     Text {
         id: totalheaveValue
-        property string unitString: (props.units === 0) ? "m" : "ft"
+        property string unitString: (props.units === 0) ? " m" : " ft"
         text: (props.outputDataCreated) ? "Total Heave of Soil Profile: " + props.outputData[9].toFixed(3) + unitString : "N/A"
         color: "#fff3e4"
         font.pixelSize: 20 + 10 * (vdispWindow.height-vdispWindow.minimumHeight)/(vdispWindow.maximumHeight-vdispWindow.minimumHeight)
@@ -552,7 +567,7 @@ Rectangle {
                     Text {
                         color: "#483434"
                         font.pixelSize: 20
-                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        property string unitString: (props.units == 0) ? " Pa" : " tsf"
                         text: (props.outputDataCreated) ? props.materialNames[index] + ": " + props.outputData[10][index].toFixed(3) + unitString: "N/A"
                         anchors.centerIn: parent
                     }
@@ -667,7 +682,7 @@ Rectangle {
                     Text {
                         color: "#483434"
                         font.pixelSize: 20
-                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        property string unitString: (props.units == 0) ? " Pa" : " tsf"
                         property string dataString: foundationStressPopup.totalStress ?  props.outputData[11][index].toFixed(3) : props.outputData[12][index].toFixed(3)
                         text: (props.outputDataCreated) ? props.materialNames[index] + ": " + dataString + unitString: "N/A"
                         anchors.centerIn: parent
@@ -928,6 +943,8 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
+                mainLoader.pushScreens = true
+                mainLoader.lastScreen = "EnterDataStage4.qml"
                 mainLoader.source = "../EnterDataScreen/EnterDataScreen.qml"
             }
         }

@@ -11,11 +11,16 @@ using Qt5QuickControls_jll
 using Qt5QuickControls2_jll
 using Observables
 using Plots
-using PlotlyJS
 
 export readInputFile
 
-PRINT_DEBUG = false
+PRINT_DEBUG = false  # Many descriptive print statements are shown when this is true
+
+"""
+      pathFromVar(str::String)
+Removes *"file://"* prefix of `QUrl` paths
+"""
+pathFromVar(str::String) = str[7:end]
 
 # Julia variables
 materialNames = Array{String}(undef,0)
@@ -72,7 +77,6 @@ conePenetrationQML = Observable([])
 elasticModulusQML = Observable([])
 
 # Misc
-finishedInput = Observable(false)
 inputFile = Observable("")
 inputFileSelected = Observable(false)
 on(inputFileSelected) do val
@@ -132,7 +136,7 @@ on(inputFileSelected) do val
         end
     end
 end
-units = Observable(Int(InputParser.Imperial))
+units = UndefInitializer # This gets defined right before loading qml (Reads value from vdisp/src/.data/.units)
 
 # Update QML variables
 setProblemName = on(problemName) do val
@@ -347,11 +351,18 @@ setElasticMod = on(elasticModulusQML) do val
     global elasticModulus = copy(em)
 end
 
-# Output functions
+"""
+    createOutputDataFromGUI()
+
+Returns `OutputData` instance created from data entered by user in **VDisp** GUI.
+Data entered by user is accessed through the global `Observable` variables they are stored in.
+"""
 function createOutputDataFromGUI()
     global materialNames, specificGravity, voidRatio, waterContent, subdivisions, bounds, soilLayerNumbers, swellPressure, swellIndex, compressionIndex, recompressionIndex, elasticModulus, conePenetration
     
-    println("Converting Data")
+    if PRINT_DEBUG
+        println("Converting Data")
+    end
 
     # Calculate elements and nodal points
     elements = 0
@@ -367,8 +378,6 @@ function createOutputDataFromGUI()
         push!(dx, (bounds[index]-bounds[index+1])/subdivisions[i])
     end
 
-    outputDataProgress[] = 10
-
     # Soil layer numbers
     soilLayerNums = Array{Int32}(undef,0)
     for i in 1:materials[]
@@ -376,8 +385,6 @@ function createOutputDataFromGUI()
             push!(soilLayerNums, soilLayerNumbers[i])
         end
     end
-
-    outputDataProgress[] = 30
 
     # Foundation index, layer
     depth = 0
@@ -394,13 +401,13 @@ function createOutputDataFromGUI()
         end
     end
 
-    outputDataProgress[] = 45
-
     # Converting from dropdown menu index to value
     modelConversion = [Int(InputParser.ConsolidationSwell), Int(InputParser.Schmertmann), Int(InputParser.SchmertmannElastic)]
     foundationType = (foundation[] == 0) ? "RectangularSlab" : "LongStripFooting"
 
-    println("Data calculated")
+    if PRINT_DEBUG
+        println("Data calculated")
+    end
 
     # Creating OutputData Object
     outData = 0
@@ -412,9 +419,9 @@ function createOutputDataFromGUI()
         outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], elasticModulus, Int32(timeAfterConstruction[]), Int32(units[]))
     end
 
-    println("OutputData created")
-
-    outputDataProgress[] = 100
+    if PRINT_DEBUG 
+        println("OutputData created")
+    end
 
     return outData
 end
@@ -427,6 +434,15 @@ file path and writes the contents of `writeDefaultOutput(path, outData)` to file
 """
 writeGUIDataToFile(path::String, outData = createOutputDataFromGUI()) = writeDefaultOutput(outData, path)
 
+"""
+    getStressesFromArrays(P, PP, inData)
+
+Returns a `Tuple` of 3 `Array{Float64}`s: `effectiveStresses`, `foundationStresses`, `totalStresses`. These arrays store
+the effective stress, added stress from placing foundation, and sum of the effective and foundation stress of each soil layer.
+
+They are calculated from the arrays `P` and `PP`, outputs of the `getEffectiveStress()` and `getSurchargePressure` functions in
+the `CalculationBehaviour.jl` module, and data from an `InputData` instance. 
+"""
 function getStressesFromArrays(P, PP, inData)
     # Get effective, foundation, and effective+foundation stresses for each layer
     # Initialize arrays
@@ -452,8 +468,6 @@ function getStressesFromArrays(P, PP, inData)
     return (effectiveStresses, foundationStresses, totalStresses)
 end
 
-pathFromVar(str::String) = str[7:end]
-
 # Output 
 outputFileQML = Observable("")
 on(outputFileQML) do val
@@ -462,6 +476,7 @@ on(outputFileQML) do val
 end
 outputData = Observable([])
 createOutputData = Observable(false)
+outputDataCreated = Observable(false)
 on(createOutputData) do val
     # If createOutputData changes to true
     if val
@@ -503,12 +518,7 @@ on(createOutputData) do val
             append!(outputParams, [inData.problemName, inData.timeAfterConstruction, P, PP, settlementTable, settlementTableRows, Δh, effectiveStresses, foundationStresses, totalStresses])
         end
         global outputData[] = outputParams
-    end
-end
-outputDataCreated = Observable(false)
-outputDataProgress = Observable(0.0)
-on(outputDataProgress) do val 
-    if val == 100
+    
         outputDataCreated[] = true
     end
 end
@@ -518,31 +528,88 @@ on(graphData) do val
         println("Graphing...")
 
         if model[] == Int(InputParser.ConsolidationSwell)
-            table1 = outputData[][4]
-            table2 = outputData[][6]
+            table1 = outputData[][4]  # heaveAboveFoundationTable
+            table2 = outputData[][6]  # heaveBelowFoundationTable
 
+            # Sometimes, heaveAboveFoundationTable could be empty
+            heaveAbove = true
+            if heaveBegin[] > foundationDepth[]
+                heaveAbove = false
+            end
+            
             # Prepare Plot Axes
-            depths1 = table1[:,2]
+            depths1 = (heaveAbove) ? table1[:,2] : []
             depths2 = table2[:,2]
-            heave1 = table1[:,3]
-            heave2 = table2[:,3]
+            heaveIncremental1 = (heaveAbove) ? table1[:,3] : []
+            heaveIncremental2 = table2[:,3]
+            
+            # Calculate cumilative heave values
+            s1 = size(heaveIncremental1)[1]
+            s2 = size(heaveIncremental2)[1]
+            heave1 = Array{Float64}(undef, s1)
+            heave2 = Array{Float64}(undef, s2)
+            if heaveAbove
+                heave1[1] = heaveIncremental1[1]
+                for i=2:s1
+                    heave1[i] = heave1[i-1]+heaveIncremental1[i]
+                end
+            end
+            heave2[1] = heaveIncremental2[1]
+            for i=2:s2
+                heave2[i] = heave2[i-1]+heaveIncremental2[i]
+            end
+
+            # Prepare effective stress vs depth data
+            effectiveStress = outputData[][3]
+            
+            # Get material number of each sublayer, and dx of each layer
+            soilSublayerMats = []
+            dx = Array{Float64}(undef, materials[])
+            for i=1:materials[]
+                # Remember bounds array is backwards, thats why we index as materials - i
+                Δx = (bounds[materials[]-(i-1)]-bounds[materials[]-(i-2)])/subdivisions[i]
+                dx[soilLayerNumbers[i]] = round(Δx, digits=4)
+                for j=1:subdivisions[i]
+                    push!(soilSublayerMats, soilLayerNumbers[i])
+                end
+            end
+            
+            # Calculate the depth of each sublayer
+            sublayers = size(soilSublayerMats)[1]
+            allDepths = Array{Float64}(undef, sublayers+1) # Add extra entry for depth 0
+            allDepths[1] = 0.0
+            for i=2:sublayers
+                allDepths[i] = allDepths[i-1] + dx[soilSublayerMats[i]]
+            end
+            allDepths[end] = totalDepth[] 
+
+            # Normalize heave values based on sublayer size
+            if heaveAbove
+                heave1 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave1)]
+            end
+            heave2 = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(heave2)]
 
             distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
+            pressureUnits = units[] === Int(InputParser.Metric) ? "Pa" : "tsf"
 
-            p1 = Plots.plot(depths1, heave1,
-            window_title = "VDisp: Heave vs Settlement",
-            title = "Depth vs Heave Above Foundation", 
-            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
-            linecolor = RGBA(1,0.95,0.89,1), 
-            markershape = :circle, 
-            markercolor = RGBA(0.28,0.20,0.20,1), 
-            markerstrokewidth = 0, 
-            background_color = RGBA(0.42,0.31,0.31,1), 
-            foreground_color = RGBA(1,0.95,0.89,1))
-        
-            p2 = Plots.plot(depths2, heave2,
-            title = "Depth vs Heave Below Foundation", 
-            xlabel = "Depth ($(distUnits))", ylabel = "Heave ($(distUnits))", 
+            heave1VsDepth = UndefInitializer
+            if heaveAbove
+                heave1VsDepth = Plots.plot(heave1, depths1,
+                title = "Heave Contribution Above Foundation vs Depth", 
+                ylabel = "Depth ($(distUnits))", xlabel = "Heave Per Unit Depth ($(distUnits))", 
+                yflip = true, xflip = true,
+                linecolor = RGBA(1,0.95,0.89,1), 
+                markershape = :circle, 
+                markercolor = RGBA(0.28,0.20,0.20,1), 
+                markerstrokewidth = 0, 
+                background_color = RGBA(0.42,0.31,0.31,1), 
+                foreground_color = RGBA(1,0.95,0.89,1))
+            end
+
+            heave2VsDepth = Plots.plot(heave2, depths2,
+            title = "Heave Contribution Below Foundation vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Heave Per Unit Depth ($(distUnits))", 
+            yflip = true, xflip = true,
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
             markercolor = RGBA(0.28,0.20,0.20,1), 
@@ -550,27 +617,74 @@ on(graphData) do val
             background_color = RGBA(0.42,0.31,0.31,1), 
             foreground_color = RGBA(1,0.95,0.89,1))
             
-            p = Plots.plot(p1, p2, layout=(2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+            effectiveStressVsDepth = Plots.plot(effectiveStress, allDepths,
+            title = "Effective Stress vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Effective Stress ($(pressureUnits))", 
+            yflip = true,
+            label = "σ': effective stress",
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1)
+            )
+
+            p = (heaveAbove) ? Plots.plot(heave1VsDepth, heave2VsDepth, effectiveStressVsDepth, layout=(3,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1)) : Plots.plot(heave2VsDepth, effectiveStressVsDepth, layout=(2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+            
 
             Base.invokelatest(display, p)
         else
+            # Get output table
             table = outputData[][5]
 
-            # Prepare Plot Axes
+            # Prepare Settlement vs Depth
             depths = table[:,2]
-            settlements = table[:, 3]
+            incrementalSettlements = table[:, 3]
             
-            # Select Backend
-            # pyplot()
-            # pygui(true)
-            # plotlyjs()
+            # Convert incremental settlement values to cumalitive
+            incrementalSettlementsSize = size(incrementalSettlements)[1]
+            settlements = Array{Float64}(undef, incrementalSettlementsSize)
+            settlements[1] = incrementalSettlements[1]
+            for i=2:incrementalSettlementsSize
+                settlements[i] = settlements[i-1]+incrementalSettlements[i]
+            end
+            
+            # Prepare effective stress vs depth data
+            effectiveStress = outputData[][3]
+            
+            # Get material number of each sublayer, and dx of each layer
+            soilSublayerMats = []
+            dx = Array{Float64}(undef, materials[])
+            for i=1:materials[]
+                # Remember bounds array is backwards, thats why we index as materials - i
+                Δx = (bounds[materials[]-(i-1)]-bounds[materials[]-(i-2)])/subdivisions[i]
+                dx[soilLayerNumbers[i]] = round(Δx, digits=4)
+                for j=1:subdivisions[i]
+                    push!(soilSublayerMats, soilLayerNumbers[i])
+                end
+            end
 
-            # Create Plot
+            # Normalize settlement values based on sublayer size
+            settlements = [Δh/dx[soilSublayerMats[i]] for (i, Δh) in enumerate(settlements)]
+
+            # Calculate the depth of each sublayer
+            sublayers = size(soilSublayerMats)[1]
+            allDepths = Array{Float64}(undef, sublayers+1) # Add extra entry for depth 0
+            allDepths[1] = 0.0
+            for i=2:sublayers
+                allDepths[i] = allDepths[i-1] + dx[soilSublayerMats[i]]
+            end
+            allDepths[end] = totalDepth[]            
+
+            # Create Plots
             distUnits = units[] === Int(InputParser.Metric) ? "m" : "ft"
-            p = Plots.plot(depths, settlements, 
-            window_title = "VDisp: Depth vs Settlement",
-            title = "Depth vs Settlement", 
-            xlabel = "Depth ($(distUnits))", ylabel = "Settlement ($(distUnits))", 
+            pressureUnits = units[] === Int(InputParser.Metric) ? "Pa" : "tsf"
+            
+            settlementVsDepth = Plots.plot(settlements, depths, 
+            title = "Settlement vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Settlement Per Unit Depth ($(distUnits))", 
+            yflip = true, xflip = true,
             label = "Depth of Soil Profile",
             linecolor = RGBA(1,0.95,0.89,1), 
             markershape = :circle, 
@@ -580,14 +694,29 @@ on(graphData) do val
             foreground_color = RGBA(1,0.95,0.89,1)
             )
 
-            Base.invokelatest(display, p)
+            effectiveStressVsDepth = Plots.plot(effectiveStress, allDepths,
+            title = "Effective Stress vs Depth", 
+            ylabel = "Depth ($(distUnits))", xlabel = "Effective Stress ($(pressureUnits))", 
+            yflip = true,
+            label = "σ': effective stress",
+            linecolor = RGBA(1,0.95,0.89,1), 
+            markershape = :circle, 
+            markercolor = RGBA(0.28,0.20,0.20,1), 
+            markerstrokewidth = 0, 
+            background_color = RGBA(0.42,0.31,0.31,1), 
+            foreground_color = RGBA(1,0.95,0.89,1)
+            )
+
+            plt = Plots.plot(settlementVsDepth, effectiveStressVsDepth, layout = (2,1), legend=false,background_color = RGBA(0.42,0.31,0.31,1), foreground_color = RGBA(1,0.95,0.89,1))
+
+            Base.invokelatest(display, plt)
         end
 
         println("Done")
     end
 end
 
-# Don't load or run anything for tests
+# When runtests.jl compiles vdisp, there are no command line arguments. Skip loading the qml in that case
 if size(ARGS)[1] == 1
     path = "./src/UI/main.qml"  # Path to main QML file when executing `make` command from `vdisp/` directory 
     
@@ -595,28 +724,46 @@ if size(ARGS)[1] == 1
         global PRINT_DEBUG = true
     end
 
+    # Read last selected folder path
+    LAST_DIR_FILE = "./src/.data/dir.dat"
+    lastInputFileDirContents = open(LAST_DIR_FILE) do file
+        readlines(file)
+    end
+    lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
+    on(lastInputFileDir) do val
+        open(LAST_DIR_FILE, "w") do file
+            write(file, pathFromVar(val))
+        end
+    end
+
+    # Read preferred unit system
+    UNITS_FILE = "./src/.data/.units"
+    unitsContent = open(UNITS_FILE) do file
+        readlines(file)
+    end
+    units = (unitsContent[1] == "Metric") ? Observable(Int(InputParser.Metric)) : Observable(Int(InputParser.Imperial))
+    on(units) do val
+        # Rewrite unit system value
+        open(UNITS_FILE, "w") do file
+            write(file, string(InputParser.Units(val)))
+        end
+    end
+
     # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "finishedInput" => finishedInput, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "outputDataProgress" => outputDataProgress, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData))
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData, "lastInputFileDir" => lastInputFileDir))
     
     # Run the app
     exec()
-
-    # After app is done executing
-
-    # Exit if form is not filled
-    if !finishedInput[]
-        println("Form not filled. Exiting app....")
-        exit()
-    end
-
-    # defaultFile = "./src/.data/output_data.dat"
-    writeGUIDataToFile(pathFromVar(outputFileQML[]))
 end
 
 """
     readInputFile(inputPath, outputPath)
 
-Reads and parses input file at inputPath and outputs calculations to file at outputPath
+Reads and parses input file at inputPath and outputs calculations to file at outputPath.
+
+This function was used to emulate old `VDispl` software's CLI funcitonality. It is no longer 
+used in this version of `VDisp`. It has been left in for any developers that would like to have
+the command line funcitonality.
 """
 function readInputFile(inputPath::String, outputPath::String)
     # Instantiate OutputData object

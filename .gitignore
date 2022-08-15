@@ -314,5 +314,8 @@ Manifest.toml
 src/.data/output_data.dat
 test/testdata/output_*.dat
 
+# Ignore last file directory
+src/.data/dir.dat
+
 # Ignore FORTRAN output
 Resources/fortran_src/VDOU.DAT

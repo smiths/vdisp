@@ -4,7 +4,9 @@ import QtQuick.Controls 2.12
 Rectangle {
     id: settingsScreen
     color: "#483434"
-    anchors.fill: parent 
+    
+    width: mainLoader.width 
+    height: mainLoader.height
 
     // Back Button
     Image {
@@ -32,7 +34,7 @@ Rectangle {
 
     StackView {
         id: settingsStackView
-        anchors.fill: parent
+        anchors.fill: settingsScreen
         initialItem: "SettingsMainMenu.qml"
     }
 }

@@ -65,7 +65,7 @@ end
 function getHeader(outputData::OutputData)
     inData = outputData.inputData
     
-    headerString = "Title: $(inData.problemName)\nNodal Points: $(inData.nodalPoints), Base Nodal Point Index: $(inData.bottomPointIndex)\nNumber of different soil layers: $(inData.soilLayers)\n\n"
+    headerString = "Title: $(inData.problemName)\nNumber of different soil layers: $(inData.soilLayers)\n\n"
     
     incrementTable = []
     for (i,x) in enumerate(inData.dx)
@@ -242,17 +242,17 @@ function getCalculationOutputBehaviour(outputData)
     surchargePressureValues = [inputData.bottomPointIndex, inputData.appliedPressure, string(inputData.foundation), inputData.foundationLength, inputData.foundationWidth, inputData.center]
     
     if string(inputData.model) == string(InputParser.ConsolidationSwell)
-        calcValues = [inputData.heaveActiveZoneDepth, inputData.groundToHeaveDepth, inputData.swellPressure, inputData.swellIndex, inputData.compressionIndex, inputData.maxPastPressure, inputData.outputIncrements, inputData.elements, inputData.units]
+        calcValues = [inputData.heaveActiveZoneDepth, inputData.groundToHeaveDepth, inputData.swellPressure, inputData.swellIndex, inputData.compressionIndex, inputData.maxPastPressure, inputData.outputIncrements, inputData.elements, inputData.units, inputData.materialNames]
         return ConsolidationSwellCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues)
     elseif string(inputData.model) == string(InputParser.LeonardFrost)
         return LeonardFrostCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     elseif string(inputData.model) == string(InputParser.Schmertmann)
-        calcValues = [inputData.elements, inputData.timeAfterConstruction, inputData.conePenetrationResistance, inputData.outputIncrements, inputData.units]
+        calcValues = [inputData.elements, inputData.timeAfterConstruction, inputData.conePenetrationResistance, inputData.outputIncrements, inputData.units,  inputData.materialNames]
         return SchmertmannCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues)
     elseif string(inputData.model) == string(InputParser.CollapsibleSoil)
         return CollapsibleSoilCalculationBehaviour(effectiveStressValues, surchargePressureValues)
     else
-        calcValues = [inputData.elements, inputData.timeAfterConstruction, inputData.conePenetrationResistance, inputData.outputIncrements, inputData.elasticModulus, inputData.units]
+        calcValues = [inputData.elements, inputData.timeAfterConstruction, inputData.conePenetrationResistance, inputData.outputIncrements, inputData.elasticModulus, inputData.units,  inputData.materialNames]
         return SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues)
     end
 end

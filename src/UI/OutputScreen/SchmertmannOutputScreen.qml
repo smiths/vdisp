@@ -218,7 +218,7 @@ Rectangle {
         color: "#fff3e4"
         font.pixelSize: schmertmannOutputScreen.tableBottomValueFontSize + 8
         
-        property string unitString: (props.units === 0) ? "m" : "ft"
+        property string unitString: (props.units === 0) ? " m" : " ft"
         property double settlement: (props.outputDataCreated) ? props.outputData[6].toFixed(3) : "N/A"
         text: "Total Settlement: " + settlement + unitString
         
@@ -318,7 +318,7 @@ Rectangle {
                     Text {
                         color: "#483434"
                         font.pixelSize: 20
-                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        property string unitString: (props.units == 0) ? " Pa" : " tsf"
                         text: (props.outputDataCreated) ? props.materialNames[index] + ": " + props.outputData[7][index].toFixed(3) + unitString: "N/A"
                         anchors.centerIn: parent
                     }
@@ -433,7 +433,7 @@ Rectangle {
                     Text {
                         color: "#483434"
                         font.pixelSize: 20
-                        property string unitString: (props.units == 0) ? "Pa" : "tsf"
+                        property string unitString: (props.units == 0) ? " Pa" : " tsf"
                         property string dataString: foundationStressPopup.totalStress ?  props.outputData[9][index].toFixed(3) : props.outputData[8][index].toFixed(3)
                         text: (props.outputDataCreated) ? props.materialNames[index] + ": " + dataString + unitString: "N/A"
                         anchors.centerIn: parent
@@ -695,6 +695,8 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
+                mainLoader.pushScreens = true
+                mainLoader.lastScreen = (props.model === 1) ? "EnterDataStage5.qml" : "EnterDataStage6.qml"
                 mainLoader.source = "../EnterDataScreen/EnterDataScreen.qml"
             }
         }
