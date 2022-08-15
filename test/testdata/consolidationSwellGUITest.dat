@@ -5,7 +5,7 @@ Problem 1 - Consolidation/Swell
 0,3.00,3.00
 1.00,0
 
-1,1  # Outpt Increments, Saturated Above Water TAble
+1,1  # Output Increments, Saturated Above Water TAble
 
 2
 1,Sand,2.6,0.9,20   # Interesting material names!
