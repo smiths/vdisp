@@ -6,7 +6,7 @@ Item {
         ListElement { menuText: "Unit System"; iconSource: "../Assets/512/settings-selected.png" }
         ListElement { menuText: "Constants"; iconSource: "../Assets/pencil.png" }
         ListElement { menuText: "Help"; iconSource: "../Assets/64/input-file-selected.png" }
-        ListElement { menuText: "About"; iconSource: "../Assets/128/add-selected.png" }
+        ListElement { menuText: "About"; iconSource: "../Assets/256/info.png" }
     }
 
      Rectangle {
@@ -70,6 +70,8 @@ Item {
                         settingsStackView.push("Options.qml")
                     }else if(menuText === "Help"){
                         settingsStackView.push("Help.qml")
+                    }else if(menuText === "About"){
+                        settingsStackView.push("About.qml")
                     }
                 }
             }
