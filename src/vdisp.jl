@@ -138,6 +138,10 @@ on(inputFileSelected) do val
 end
 units = UndefInitializer # This gets defined right before loading qml (Reads value from vdisp/src/.data/.units)
 
+# Constants
+GAMMA_W = Observable([0.03125, 0.9810])  # Unit weight of water (0.03125 tcf = 62.4 pcf or 9810 N/m^3 = 0.981kN/m^3)
+MIN_LAYER_SIZE = Observable([0.0254, 1/12])  # Default minimum layer size (0.0254 m = 2.54 cm or (1/12) ft = 1 in)
+
 # Update QML variables
 setProblemName = on(problemName) do val
     if PRINT_DEBUG

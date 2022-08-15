@@ -166,14 +166,15 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 
 """
 function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
-    
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
     
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
+
     # Begin main calculations
     Δh1 = 0.0
+
     # Get Heave begin index
     heaveBeginIndex = 1
     depth = 0
@@ -181,6 +182,7 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         depth += behaviour.dx[behaviour.soilLayerNumber[heaveBeginIndex]]
         heaveBeginIndex += 1
     end
+
     # Get Heave active index
     heaveActiveIndex = 1
     depth = 0
@@ -188,6 +190,7 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         depth += behaviour.dx[behaviour.soilLayerNumber[heaveActiveIndex]]
         heaveActiveIndex += 1
     end
+
     # Get initial depth (Δx)
     Δx = behaviour.groundToHeaveDepth + (behaviour.dx[behaviour.soilLayerNumber[behaviour.bottomPointIndex]] / 2)
     foundationBottomIndex = behaviour.bottomPointIndex - 1
@@ -214,15 +217,15 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
 
             finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
-            if behaviour.outputIncrements
-                Δp = swellPressure - pressure
-                # TODO: Round values to a fixed number of decimal places
-                if size(heaveAboveFoundationTable, 1) == 0
-                    heaveAboveFoundationTable = [i Δx Δe Δp]
-                else
-                    heaveAboveFoundationTable = vcat(heaveAboveFoundationTable, [i Δx Δe Δp]) 
-                end
+            
+            Δp = swellPressure - pressure
+            # TODO: Round values to a fixed number of decimal places
+            if size(heaveAboveFoundationTable, 1) == 0
+                heaveAboveFoundationTable = [i Δx Δe Δp]
+            else
+                heaveAboveFoundationTable = vcat(heaveAboveFoundationTable, [i Δx Δe Δp]) 
             end
+            
             Δh1 += behaviour.dx[material] * Δe
             Δx += behaviour.dx[material]
         end
@@ -248,15 +251,15 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
         Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
         
-        if behaviour.outputIncrements
-            Δp = swellPressure - pressure
-            # TODO: Round values to a fixed number of decimal places
-            if size(heaveBelowFoundationTable, 1) == 0
-                heaveBelowFoundationTable = [i Δx Δe Δp]
-            else
-                heaveBelowFoundationTable = vcat(heaveBelowFoundationTable, [i Δx Δe Δp]) 
-            end
+        
+        Δp = swellPressure - pressure
+        # TODO: Round values to a fixed number of decimal places
+        if size(heaveBelowFoundationTable, 1) == 0
+            heaveBelowFoundationTable = [i Δx Δe Δp]
+        else
+            heaveBelowFoundationTable = vcat(heaveBelowFoundationTable, [i Δx Δe Δp]) 
         end
+        
         Δh2 += behaviour.dx[material] * Δe
         Δx += behaviour.dx[material]
     end
@@ -600,7 +603,7 @@ This calculation is repeated at each depth increment.
 ``\gamma_{sat}``: unit weight of saturated soil
 """
 function getEffectiveStress(behaviour::CalculationOutputBehaviour)
-    # Initialize arrays (TODO: Think of better names)
+    # Initialize arrays
     P = Array{Float64}(undef,behaviour.nodalPoints)
     PP = Array{Float64}(undef,behaviour.nodalPoints)
     
@@ -633,7 +636,7 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
         Δx += behaviour.dx[material]
     end
     
-    # Not sure why we have to do this, or theory behind it
+    # The following code is from the original VDispl program. The theory behind it remains unclear to me.
     if behaviour.model == "ConsolidationSwell" && behaviour.equilibriumMoistureProfile
         # MO = DGWT/DX, but cannot be bigger than NNP
         groudWaterTableIndex = 1
@@ -819,6 +822,7 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
     # Begin calculations
     Δh = 0.0
     Δh1 = 0.0
+
     # Net Applied Footing Pressure
     Qnet = behaviour.appliedPressure - PP[behaviour.bottomPointIndex]
 
@@ -832,6 +836,7 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
         foundationDepth += behaviour.dx[behaviour.soilLayerNumber[i]]
     end
     Δx = foundationDepth - behaviour.dx[foundationMaterial]/2
+
     # Depth of nodal point above the base of foundation
     aboveFoundationDepth = 0
     for i = 1:behaviour.bottomPointIndex-1
@@ -840,6 +845,7 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
 
     # Correction to account for strain relief from embedment
     C1 = max(0.5, 1 - 0.5*PP[behaviour.bottomPointIndex]/Qnet)
+
     # Correction for time dependant increase in settlement
     time = behaviour.timeAfterConstruction/ 0.1
     Ct = 1 + 0.2*log10(time)
@@ -876,16 +882,15 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
 
         # Settlement of layer i 
         Δh_i = -C1 * Ct * Δp * Δz * Iz  / Esi
-        # Add settlemnt of layer i to total settlement, Δh
+
+        # Add settlement of layer i to total settlement, Δh
         Δh += Δh_i
 
-        if behaviour.outputIncrements
-            # Append i Δx Δh_i to table
-            if size(settlementTable,1) == 0
-                settlementTable = [i Δx Δh_i]
-            else
-                settlementTable = vcat(settlementTable, [i Δx Δh_i])
-            end
+        # Append i Δx Δh_i to table
+        if size(settlementTable,1) == 0
+            settlementTable = [i Δx Δh_i]
+        else
+            settlementTable = vcat(settlementTable, [i Δx Δh_i])
         end
 
         # Increment current depth
