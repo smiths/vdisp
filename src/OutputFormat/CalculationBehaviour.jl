@@ -17,6 +17,31 @@ export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, Leona
 # be part of a module of constants
 OUTPUT_EFFECTIVE_STRESS = false
 
+"""
+    toFixed(n::Float64, digits::Int)
+
+Returns `String` of `n` rounded and displayed to `digits` digits after decimal point.
+
+# Examples
+
+```
+> toFixed(54.5, 4)
+"54.5000"
+```
+
+```
+> toFixed(54.51999, 2)
+"54.52"
+```
+
+This function is used by `VDisp` to round calculation results before writing tables to the output file.
+"""
+function toFixed(n::Float64, digits::Int)::String
+    s = string(round(n, digits=digits)) * "0"^digits
+    index = length(split(s, ".")[1]) + digits
+    return s[1:index+1]
+end
+
 ### CalculationOutputBehaviour interface ##############
 abstract type CalculationOutputBehaviour end
 function writeCalculationOutput(calcBehaviour::CalculationOutputBehaviour, path::String)
@@ -96,22 +121,52 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
+    # Output tables if user selected "Output Increments" option
     if behaviour.outputIncrements
         if size(heaveAboveFoundationTable)[1] > 0
+            # Copy calculations table to new table with values rounded to fixed number of digits
+            heaveAboveFoundationTableRows, heaveAboveFoundationTableCols = size(heaveAboveFoundationTable)
+            heaveAbove = Array{Union{Int, Float64, String}}(undef, heaveAboveFoundationTableRows, heaveAboveFoundationTableCols)
+            for i=1:heaveAboveFoundationTableRows
+                for j=1:heaveAboveFoundationTableCols
+                    if j == 1   # Make sure Material Index is Int
+                        heaveAbove[i, j] = Int(heaveAboveFoundationTable[i, j])
+                    elseif j == 2  # Round Depth values to 3 decimal places
+                        heaveAbove[i, j] = toFixed(heaveAboveFoundationTable[i, j], 3)
+                    else  # Round other values to 4 decimal places
+                        heaveAbove[i, j] = toFixed(heaveAboveFoundationTable[i, j], 4)
+                    end
+                end
+            end
+            heaveBelowFoundationTableRows, heaveBelowFoundationTableCols = size(heaveBelowFoundationTable)
+            heaveBelow = Array{Union{Int, Float64, String}}(undef, heaveBelowFoundationTableRows, heaveBelowFoundationTableCols)
+            for i=1:heaveBelowFoundationTableRows
+                for j=1:heaveBelowFoundationTableCols
+                    if j == 1   # Make sure Material Index is Int
+                        heaveBelow[i, j] = Int(heaveBelowFoundationTable[i, j])
+                    elseif j == 2  # Round Depth values to 3 decimal places
+                        heaveBelow[i, j] = toFixed(heaveBelowFoundationTable[i, j], 3)
+                    else  # Round other values to 4 decimal places
+                        heaveBelow[i, j] = toFixed(heaveBelowFoundationTable[i, j], 4)
+                    end
+                end
+            end
+
+            # Write outputs
             out *= "Heave Distribution Above Foundation: \n"
-            out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= pretty_table(String, heaveAbove; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
             out *= "Heave Distribution Below Foundation: \n"
-            out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= pretty_table(String, heaveBelow; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
         else
             out *= "Not enough increments to show tables\n\n"
         end
     end
 
-    out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * string(Δh1) * "$(depthUnit)\n"
-    out *= "Subsoil Movement: " * string(Δh2) * "$(depthUnit)\n"
-    out *= "Total Heave: " * string(Δh) * "$(depthUnit)\n"
+    out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * toFixed(Δh1, 4) * " $(depthUnit)\n"
+    out *= "Subsoil Movement: " * toFixed(Δh2, 4) * " $(depthUnit)\n"
+    out *= "Total Heave: " * toFixed(Δh, 4) * " $(depthUnit)\n"
 
     return out
 end
@@ -392,12 +447,27 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
+        # Copy calculations table to new table with values rounded to fixed number of digits
+        settlementTableRows, settlementTableCols = size(settlementTable)
+        _settlementTable = Array{Union{Int, String}}(undef, settlementTableRows, settlementTableCols)
+        for i=1:settlementTableRows
+            for j=1:settlementTableCols
+                if j == 1  # Make sure Material Index is Int
+                    _settlementTable[i, j] = Int(settlementTable[i, j])
+                elseif j == 2  # Round Depth to 3 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 3)
+                else  # Round Settlement values to 4 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 4)
+                end
+            end
+        end
+
         out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
+        out *= pretty_table(String, _settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end
 
-    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "$(depthUnit)\n"
+    out *= "Total Settlement Beneath Foundation: " * toFixed(Δh, 4) * "$(depthUnit)\n"
 
     return out
 end
@@ -540,12 +610,27 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
+        # Copy calculations table to new table with values rounded to fixed number of digits
+        settlementTableRows, settlementTableCols = size(settlementTable)
+        _settlementTable = Array{Union{Int, String}}(undef, settlementTableRows, settlementTableCols)
+        for i=1:settlementTableRows
+            for j=1:settlementTableCols
+                if j == 1  # Make sure Material Index is Int
+                    _settlementTable[i, j] = Int(settlementTable[i, j])
+                elseif j == 2  # Round Depth to 3 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 3)
+                else  # Round Settlement values to 4 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 4)
+                end
+            end
+        end
+
         out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
+        out *= pretty_table(String, _settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end
 
-    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "$(depthUnit)\n"
+    out *= "Total Settlement Beneath Foundation: " * toFixed(Δh, 4) * "$(depthUnit)\n"
 
     return out
 end

@@ -144,6 +144,7 @@ getDepthToGroundWaterTableValue(outputData::OutputData) = outputData.inputData.d
 ####################################
 
 ### CHANGING BEHAVIOUR FUNCTIONS ###
+
 # ModelOutputBehaviour
 performWriteModelOutput(outputData::OutputData, path::String) = ModelBehaviour.writeModelOutput(getModelOutBehaviour(outputData), path)
 performGetModelOutput(outputData::OutputData) = ModelBehaviour.getModelOutput(getModelOutBehaviour(outputData))
@@ -173,10 +174,12 @@ performGetForcePointValue(outputData::OutputData) = ForcePointBehaviour.getForce
 performWriteCalculationOutput(outputData::OutputData, path::String) = CalculationBehaviour.writeCalculationOutput(getCalculationOutputBehaviour(outputData), path)
 performGetCalculationOutput(outputData::OutputData) = CalculationBehaviour.getCalculationOutput(getCalculationOutputBehaviour(outputData))
 performGetCalculationValue(outputData) = CalculationBehaviour.getCalculationValue(getCalculationOutputBehaviour(outputData))
+
 ####################################
 
 
 ### Get behaviour instances  ######
+
 # Get ModelOutputBehaviour Instance
 function getModelOutBehaviour(outputData::OutputData)::ModelBehaviour.ModelOutputBehaviour
     modelOutBehaviour = 0
@@ -194,6 +197,7 @@ function getModelOutBehaviour(outputData::OutputData)::ModelBehaviour.ModelOutpu
     end
     return modelOutBehaviour
 end
+
 # Get FoundationOutputBehaviour instance
 function getFoundationOutBehaviour(outputData::OutputData)
     foundationOutBehaviour = 0
@@ -204,6 +208,7 @@ function getFoundationOutBehaviour(outputData::OutputData)
     end
     return foundationOutBehaviour
 end
+
 # Get DisplacementInfoBehaviour instance
 function getDisplacementInfoBehaviour(outputData::OutputData)
     displacementInfoBehaviour = 0
@@ -214,6 +219,7 @@ function getDisplacementInfoBehaviour(outputData::OutputData)
     end
     return displacementInfoBehaviour
 end
+
 # Get EquilibriumInfoBehaviour instance
 function getEquilibriumInfoBehaviour(outputData::OutputData)
     # !equilibriumMoistureProfile or NOpt = Saturated
@@ -225,6 +231,7 @@ function getEquilibriumInfoBehaviour(outputData::OutputData)
         return EquilibriumBehaviour.EquilibriumHydrostaticBehaviour()
     end
 end
+
 # Get ForcePointOutputBehaviour instance
 function getForcePointOutputBehaviour(outputData::OutputData)
     center = outputData.inputData.center
@@ -234,6 +241,7 @@ function getForcePointOutputBehaviour(outputData::OutputData)
     foundation = outputData.inputData.foundation
     return EdgeForceBehaviour(string(foundation))
 end
+
 # Get CalculationOutputBehaviour instance
 function getCalculationOutputBehaviour(outputData)
     inputData = outputData.inputData
@@ -256,6 +264,7 @@ function getCalculationOutputBehaviour(outputData)
         return SchmertmannElasticCalculationBehaviour(effectiveStressValues, surchargePressureValues, calcValues)
     end
 end
+
 ####################################
 
 """
