@@ -8,7 +8,7 @@ The following document will provide users with the specification for the input f
 
 - `field:Type{value1, value2, ...}` means `field` *must* be of type `Type`, and its value must be one of `[value1, value2, ...]`.
 
-- `field:Type[a, b]` means `field` *must* be of type `Type`, and its value must be in range `[a,b]`. Round-brackets, `()`, will be used to indicate the boundary is *exclusive*, while square-brackets, `[]`, will be used to indicate the boundary is *inclusive*
+- `field:Type[a, b]` means `field` *must* be of type `Type`, and its value must be in range `[a,b]`. Round-brackets, `()`, will be used to indicate the boundary is *exclusive*, while square-brackets, `[]`, will be used to indicate the boundary is *inclusive*.
 
 - `field:Type(+)` means `field` *must* be of type `Type`, and its value must be *positive*.
 
@@ -100,7 +100,7 @@ Line 14 (Repeat for each material) > materialIndex:Int[0, materials), elasticMod
 
 - **Comments**: Comments can be placed in input files using the `#` character. These work exactly like comments in `Python` or `Julia`.
 
-- **Whitespace**: Any amount of whitespace can be left between fields, as long as rows appear in same order and ever field is presented in its corresponding row.
+- **Whitespace**: Any amount of whitespace can be left between fields, as long as rows appear in same order and every field is presented in its corresponding row.
 
 ## Sample Input File
 
