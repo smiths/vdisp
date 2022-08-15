@@ -197,7 +197,7 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 
 ``e_{0j}``: initial void ratio of soil layer *j*
 
-``\sigma_{oj}'``: effectuve stress of layer *j*
+``\sigma_{oj}'``: effective stress of layer *j*
 
 ``\sigma_{oj1}'``: effective stress at top of layer *j*
 
