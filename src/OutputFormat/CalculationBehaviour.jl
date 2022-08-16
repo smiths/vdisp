@@ -17,7 +17,7 @@ export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, Leona
 # be part of a module of constants
 OUTPUT_EFFECTIVE_STRESS = false
 
-"""
+@doc raw"""
     toFixed(n::Float64, digits::Int)
 
 Returns `String` of `n` rounded and displayed to `digits` digits after decimal point. If all data would be lost to rounding,
@@ -162,7 +162,7 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
 
     pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
     
-    out *= "Material Properties\n"
+    out *= "Material Properties:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Swell Pressure ($(pressureUnit))", "Swell Index", "Compression Index", "Preconsolidation Pressure ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
 
@@ -213,10 +213,10 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
             end
 
             # Write outputs
-            out *= "Heave Distribution Above Foundation: \n"
+            out *= "Heave Distribution Above Foundation: \n\n"
             out *= pretty_table(String, heaveAbove; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
-            out *= "Heave Distribution Below Foundation: \n"
+            out *= "Heave Distribution Below Foundation: \n\n"
             out *= pretty_table(String, heaveBelow; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
         else
@@ -485,7 +485,7 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
 
     pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
     
-    out *= "Cone Penetration Resistance of Materials\n"
+    out *= "Cone Penetration Resistance of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Cone Penetration Resistance ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
 
@@ -522,7 +522,7 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
             end
         end
 
-        out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
+        out *= "Settlement Beneath Foundation at Each Depth Increment: \n\n"
         out *= pretty_table(String, _settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end
@@ -648,7 +648,7 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
 
     pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
     
-    out *= "Elastic Modulus of Materials\n"
+    out *= "Elastic Modulus of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Elastic Modulus ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
 
@@ -685,7 +685,7 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
             end
         end
 
-        out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
+        out *= "Settlement Beneath Foundation at Each Depth Increment: \n\n"
         out *= pretty_table(String, _settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end

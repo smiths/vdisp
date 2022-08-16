@@ -65,7 +65,7 @@ end
 function getHeader(outputData::OutputData)
     inData = outputData.inputData
     
-    headerString = "Title: $(inData.problemName)\nNumber of different soil layers: $(inData.soilLayers)\n\n"
+    headerString = "Title: $(inData.problemName)\n\n"
     
     incrementTable = []
     for (i,x) in enumerate(inData.dx)
