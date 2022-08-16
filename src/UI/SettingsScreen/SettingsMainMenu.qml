@@ -68,6 +68,8 @@ Item {
                 onClicked: {
                     if(menuText === "Unit System"){
                         settingsStackView.push("Options.qml")
+                    }else if(menuText === "Constants"){
+                        settingsStackView.push("Constants.qml")
                     }else if(menuText === "Help"){
                         settingsStackView.push("Help.qml")
                     }else if(menuText === "About"){
