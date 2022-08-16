@@ -17,6 +17,91 @@ export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, Leona
 # be part of a module of constants
 OUTPUT_EFFECTIVE_STRESS = false
 
+@doc raw"""
+    toFixed(n::Float64, digits::Int)
+
+Returns `String` of `n` rounded and displayed to `digits` digits after decimal point. If all data would be lost to rounding,
+returns `n` in scientific notation
+
+# Examples
+
+```
+julia> toFixed(54.5, 4)
+"54.5000"
+```
+
+```
+julia> toFixed(54.51999, 2)
+"54.52"
+```
+
+```
+julia> toFixed(0.0000054, 3)
+"5.400e-6"
+```
+
+```
+julia> toFixed(0.00024234, 3)
+"2.423e-4"
+```
+
+This function is used by `VDisp` to round calculation results before writing tables to the output file.
+"""
+function toFixed(n::Float64, digits::Int)::String
+    rounded = round(n, digits=digits)
+    
+    if rounded == 0  # If we lost all data to rounding, convert to scientific notation
+        s = string(n)
+        if 'e' in s  # string() automatically converted it to scientific notation
+            # Split number and exponent
+            num, exp = split(s, "e")  
+            # Parse exponent as Int (and make it positive)
+            e = -parse(Int, exp)  
+            # Bring decimal point past first non-zero digit
+            newNum = n * 10^e  
+
+            # Add extra trailing 0s
+            s = string(newNum) * "0"^digits  
+            # Grab everything before the decimal and the desired amount of digits past the decimal
+            index = length(split(s, ".")[1]) + digits  
+
+
+            # Return number in scientific notation
+            return s[1:index+1] * "e-$e" 
+        else  # string() didn't convert to scientific
+            # Split number around the decimal point
+            a, b = split(s, ".")
+
+            # Find how many places we need to move over the decimal
+            exp = 1
+            while b[exp] == '0'
+                exp += 1
+            end
+
+            # Move over decimal until first number is non-zero
+            newNum = n * 10^exp
+
+            # Add extra trailing 0s
+            s = string(newNum) * "0"^digits
+            # Grab everything before the decimal and the desired amount of digits past the decimal
+            index = length(split(s, ".")[1]) + digits
+            
+            # Return number in scientific notation
+            return s[1:index+1] * "e-$(exp)" 
+        end 
+    end
+    
+    # Else if data was not lost
+
+     # Add extra trailing 0s
+    s = string(rounded) * "0"^digits
+    # Grab everything before the decimal and the desired amount of digits past the decimal
+    index = length(split(s, ".")[1]) + digits
+
+    # Return string up until desired index
+    return s[1:index+1]
+end
+
 ### CalculationOutputBehaviour interface ##############
 abstract type CalculationOutputBehaviour end
 function writeCalculationOutput(calcBehaviour::CalculationOutputBehaviour, path::String)
@@ -77,7 +162,7 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
 
     pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
     
-    out *= "Material Properties\n"
+    out *= "Material Properties:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Swell Pressure ($(pressureUnit))", "Swell Index", "Compression Index", "Preconsolidation Pressure ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
 
@@ -96,22 +181,52 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
+    # Output tables if user selected "Output Increments" option
     if behaviour.outputIncrements
         if size(heaveAboveFoundationTable)[1] > 0
-            out *= "Heave Distribution Above Foundation: \n"
-            out *= pretty_table(String, heaveAboveFoundationTable; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            # Copy calculations table to new table with values rounded to fixed number of digits
+            heaveAboveFoundationTableRows, heaveAboveFoundationTableCols = size(heaveAboveFoundationTable)
+            heaveAbove = Array{Union{Int, Float64, String}}(undef, heaveAboveFoundationTableRows, heaveAboveFoundationTableCols)
+            for i=1:heaveAboveFoundationTableRows
+                for j=1:heaveAboveFoundationTableCols
+                    if j == 1   # Make sure Material Index is Int
+                        heaveAbove[i, j] = Int(heaveAboveFoundationTable[i, j])
+                    elseif j == 2  # Round Depth values to 3 decimal places
+                        heaveAbove[i, j] = toFixed(heaveAboveFoundationTable[i, j], 3)
+                    else  # Round other values to 4 decimal places
+                        heaveAbove[i, j] = toFixed(heaveAboveFoundationTable[i, j], 4)
+                    end
+                end
+            end
+            heaveBelowFoundationTableRows, heaveBelowFoundationTableCols = size(heaveBelowFoundationTable)
+            heaveBelow = Array{Union{Int, Float64, String}}(undef, heaveBelowFoundationTableRows, heaveBelowFoundationTableCols)
+            for i=1:heaveBelowFoundationTableRows
+                for j=1:heaveBelowFoundationTableCols
+                    if j == 1   # Make sure Material Index is Int
+                        heaveBelow[i, j] = Int(heaveBelowFoundationTable[i, j])
+                    elseif j == 2  # Round Depth values to 3 decimal places
+                        heaveBelow[i, j] = toFixed(heaveBelowFoundationTable[i, j], 3)
+                    else  # Round other values to 4 decimal places
+                        heaveBelow[i, j] = toFixed(heaveBelowFoundationTable[i, j], 4)
+                    end
+                end
+            end
+
+            # Write outputs
+            out *= "Heave Distribution Above Foundation: \n\n"
+            out *= pretty_table(String, heaveAbove; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
-            out *= "Heave Distribution Below Foundation: \n"
-            out *= pretty_table(String, heaveBelowFoundationTable; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
+            out *= "Heave Distribution Below Foundation: \n\n"
+            out *= pretty_table(String, heaveBelow; header = ["Element", "Depth ($(depthUnit))", "Delta Heave ($(depthUnit))", "Excess Pore Pressure (tsf)"],tf = tf_markdown)
             out *= "\n"
         else
             out *= "Not enough increments to show tables\n\n"
         end
     end
 
-    out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * string(Δh1) * "$(depthUnit)\n"
-    out *= "Subsoil Movement: " * string(Δh2) * "$(depthUnit)\n"
-    out *= "Total Heave: " * string(Δh) * "$(depthUnit)\n"
+    out *= "Soil Heave Next to Foundation Excluding Heave in Subsoil Beneath Foundation: " * toFixed(Δh1, 4) * " $(depthUnit)\n"
+    out *= "Subsoil Movement: " * toFixed(Δh2, 4) * " $(depthUnit)\n"
+    out *= "Total Heave: " * toFixed(Δh, 4) * " $(depthUnit)\n"
 
     return out
 end
@@ -142,7 +257,7 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 
 ``e_{0j}``: initial void ratio of soil layer *j*
 
-``\sigma_{oj}'``: effectuve stress of layer *j*
+``\sigma_{oj}'``: effective stress of layer *j*
 
 ``\sigma_{oj1}'``: effective stress at top of layer *j*
 
@@ -166,14 +281,15 @@ above foundation (`Δh1`). It also calculates values at each depth increment and
 
 """
 function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
-    
     # Get effective stress
     P, PP = getEffectiveStress(behaviour)
     
     # Get surcharge pressure 
     P = getSurchargePressure(behaviour, P, PP)
+
     # Begin main calculations
     Δh1 = 0.0
+
     # Get Heave begin index
     heaveBeginIndex = 1
     depth = 0
@@ -181,6 +297,7 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         depth += behaviour.dx[behaviour.soilLayerNumber[heaveBeginIndex]]
         heaveBeginIndex += 1
     end
+
     # Get Heave active index
     heaveActiveIndex = 1
     depth = 0
@@ -188,6 +305,7 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         depth += behaviour.dx[behaviour.soilLayerNumber[heaveActiveIndex]]
         heaveActiveIndex += 1
     end
+
     # Get initial depth (Δx)
     Δx = behaviour.groundToHeaveDepth + (behaviour.dx[behaviour.soilLayerNumber[behaviour.bottomPointIndex]] / 2)
     foundationBottomIndex = behaviour.bottomPointIndex - 1
@@ -214,15 +332,15 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
 
             finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
-            if behaviour.outputIncrements
-                Δp = swellPressure - pressure
-                # TODO: Round values to a fixed number of decimal places
-                if size(heaveAboveFoundationTable, 1) == 0
-                    heaveAboveFoundationTable = [i Δx Δe Δp]
-                else
-                    heaveAboveFoundationTable = vcat(heaveAboveFoundationTable, [i Δx Δe Δp]) 
-                end
+            
+            Δp = swellPressure - pressure
+            # TODO: Round values to a fixed number of decimal places
+            if size(heaveAboveFoundationTable, 1) == 0
+                heaveAboveFoundationTable = [i Δx Δe Δp]
+            else
+                heaveAboveFoundationTable = vcat(heaveAboveFoundationTable, [i Δx Δe Δp]) 
             end
+            
             Δh1 += behaviour.dx[material] * Δe
             Δx += behaviour.dx[material]
         end
@@ -248,15 +366,15 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         finalVoidRatio = (pressure > maxPastPressure) ? initialVoidRatio + swellIndex * log10(term2) + compressionIndex * log10(term3) : initialVoidRatio + swellIndex * log10(term1)
         Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
         
-        if behaviour.outputIncrements
-            Δp = swellPressure - pressure
-            # TODO: Round values to a fixed number of decimal places
-            if size(heaveBelowFoundationTable, 1) == 0
-                heaveBelowFoundationTable = [i Δx Δe Δp]
-            else
-                heaveBelowFoundationTable = vcat(heaveBelowFoundationTable, [i Δx Δe Δp]) 
-            end
+        
+        Δp = swellPressure - pressure
+        # TODO: Round values to a fixed number of decimal places
+        if size(heaveBelowFoundationTable, 1) == 0
+            heaveBelowFoundationTable = [i Δx Δe Δp]
+        else
+            heaveBelowFoundationTable = vcat(heaveBelowFoundationTable, [i Δx Δe Δp]) 
         end
+        
         Δh2 += behaviour.dx[material] * Δe
         Δx += behaviour.dx[material]
     end
@@ -367,7 +485,7 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
 
     pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
     
-    out *= "Cone Penetration Resistance of Materials\n"
+    out *= "Cone Penetration Resistance of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Cone Penetration Resistance ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
 
@@ -389,12 +507,27 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
-        out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
+        # Copy calculations table to new table with values rounded to fixed number of digits
+        settlementTableRows, settlementTableCols = size(settlementTable)
+        _settlementTable = Array{Union{Int, String}}(undef, settlementTableRows, settlementTableCols)
+        for i=1:settlementTableRows
+            for j=1:settlementTableCols
+                if j == 1  # Make sure Material Index is Int
+                    _settlementTable[i, j] = Int(settlementTable[i, j])
+                elseif j == 2  # Round Depth to 3 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 3)
+                else  # Round Settlement values to 4 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 4)
+                end
+            end
+        end
+
+        out *= "Settlement Beneath Foundation at Each Depth Increment: \n\n"
+        out *= pretty_table(String, _settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end
 
-    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "$(depthUnit)\n"
+    out *= "Total Settlement Beneath Foundation: " * toFixed(Δh, 4) * "$(depthUnit)\n"
 
     return out
 end
@@ -515,7 +648,7 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
 
     pressureUnit = (behaviour.units == Int(InputParser.Imperial)) ? "tsf" : "KPa"
     
-    out *= "Elastic Modulus of Materials\n"
+    out *= "Elastic Modulus of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Elastic Modulus ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
 
@@ -537,12 +670,27 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     out *= "Time After Construction in Years: " * string(behaviour.timeAfterConstruction) * "\n\n"
 
     if behaviour.outputIncrements
-        out *= "Settlement Beneath Foundation at Each Depth Increment: \n"
-        out *= pretty_table(String, settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
+        # Copy calculations table to new table with values rounded to fixed number of digits
+        settlementTableRows, settlementTableCols = size(settlementTable)
+        _settlementTable = Array{Union{Int, String}}(undef, settlementTableRows, settlementTableCols)
+        for i=1:settlementTableRows
+            for j=1:settlementTableCols
+                if j == 1  # Make sure Material Index is Int
+                    _settlementTable[i, j] = Int(settlementTable[i, j])
+                elseif j == 2  # Round Depth to 3 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 3)
+                else  # Round Settlement values to 4 decimal places
+                    _settlementTable[i, j] = toFixed(settlementTable[i, j], 4)
+                end
+            end
+        end
+
+        out *= "Settlement Beneath Foundation at Each Depth Increment: \n\n"
+        out *= pretty_table(String, _settlementTable; header = ["Element", "Depth ($(depthUnit))", "Settlement ($(depthUnit))"],tf = tf_markdown)
         out *= "\n"
     end
 
-    out *= "Total Settlement Beneath Foundation: " * string(Δh) * "$(depthUnit)\n"
+    out *= "Total Settlement Beneath Foundation: " * toFixed(Δh, 4) * "$(depthUnit)\n"
 
     return out
 end
@@ -611,7 +759,7 @@ is calculated by the following formula:
 ``e``: void ratio of soil
 """
 function getEffectiveStress(behaviour::CalculationOutputBehaviour)
-    # Initialize arrays (TODO: Think of better names)
+    # Initialize arrays
     P = Array{Float64}(undef,behaviour.nodalPoints)
     PP = Array{Float64}(undef,behaviour.nodalPoints)
     
@@ -644,7 +792,7 @@ function getEffectiveStress(behaviour::CalculationOutputBehaviour)
         Δx += behaviour.dx[material]
     end
     
-    # Not sure why we have to do this, or theory behind it
+    # The following code is from the original VDispl program. The theory behind it remains unclear to me.
     if behaviour.model == "ConsolidationSwell" && behaviour.equilibriumMoistureProfile
         # MO = DGWT/DX, but cannot be bigger than NNP
         groudWaterTableIndex = 1
@@ -830,6 +978,7 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
     # Begin calculations
     Δh = 0.0
     Δh1 = 0.0
+
     # Net Applied Footing Pressure
     Qnet = behaviour.appliedPressure - PP[behaviour.bottomPointIndex]
 
@@ -843,6 +992,7 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
         foundationDepth += behaviour.dx[behaviour.soilLayerNumber[i]]
     end
     Δx = foundationDepth - behaviour.dx[foundationMaterial]/2
+
     # Depth of nodal point above the base of foundation
     aboveFoundationDepth = 0
     for i = 1:behaviour.bottomPointIndex-1
@@ -851,6 +1001,7 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
 
     # Correction to account for strain relief from embedment
     C1 = max(0.5, 1 - 0.5*PP[behaviour.bottomPointIndex]/Qnet)
+
     # Correction for time dependant increase in settlement
     time = behaviour.timeAfterConstruction/ 0.1
     Ct = 1 + 0.2*log10(time)
@@ -887,16 +1038,15 @@ function schmertmannApproximation(behaviour, elasticModulusGiven::Bool, PP::Arra
 
         # Settlement of layer i 
         Δh_i = -C1 * Ct * Δp * Δz * Iz  / Esi
-        # Add settlemnt of layer i to total settlement, Δh
+
+        # Add settlement of layer i to total settlement, Δh
         Δh += Δh_i
 
-        if behaviour.outputIncrements
-            # Append i Δx Δh_i to table
-            if size(settlementTable,1) == 0
-                settlementTable = [i Δx Δh_i]
-            else
-                settlementTable = vcat(settlementTable, [i Δx Δh_i])
-            end
+        # Append i Δx Δh_i to table
+        if size(settlementTable,1) == 0
+            settlementTable = [i Δx Δh_i]
+        else
+            settlementTable = vcat(settlementTable, [i Δx Δh_i])
         end
 
         # Increment current depth

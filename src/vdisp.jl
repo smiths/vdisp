@@ -138,6 +138,10 @@ on(inputFileSelected) do val
 end
 units = UndefInitializer # This gets defined right before loading qml (Reads value from vdisp/src/.data/.units)
 
+# Constants
+GAMMA_W = Observable([0.03125, 0.9810])  # Unit weight of water (0.03125 tcf = 62.4 pcf or 9810 N/m^3 = 0.981kN/m^3)
+MIN_LAYER_SIZE = Observable([0.0254, 1/12])  # Default minimum layer size (0.0254 m = 2.54 cm or (1/12) ft = 1 in)
+
 # Update QML variables
 setProblemName = on(problemName) do val
     if PRINT_DEBUG
@@ -409,10 +413,13 @@ function createOutputDataFromGUI()
         println("Data calculated")
     end
 
+    # Heave Active Zone Depth spans from Heave Begin Depth to end of Heave Active Zone
+    heaveDepth = heaveActive[] - heaveBegin[]
+
     # Creating OutputData Object
     outData = 0
     if model[] == 0
-        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, swellPressure, swellIndex, compressionIndex, recompressionIndex, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], Int32(units[]))
+        outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, swellPressure, swellIndex, compressionIndex, recompressionIndex, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveDepth, heaveBegin[], totalDepth[], foundationDepth[], Int32(units[]))
     elseif model[] == 1
         outData = OutputData(problemName[], foundationType, Int32(materials[]), dx, soilLayerNums, Int32(nodalPoints), Int32(elements), materialNames, specificGravity, voidRatio, waterContent, subdivisions, conePenetration, Int32(foundationIndex), depthToGroundWaterTable[], saturatedAboveWaterTable[], outputIncrements[], appliedPressure[], foundationLength[], foundationWidth[], center[], heaveActive[], heaveBegin[], totalDepth[], foundationDepth[], Int32(timeAfterConstruction[]), Int32(units[]))
     else
@@ -726,18 +733,33 @@ if size(ARGS)[1] == 1
 
     # Read last selected folder path
     LAST_DIR_FILE = "./src/.data/dir.dat"
+    if !isfile(LAST_DIR_FILE)
+        open(LAST_DIR_FILE, "w") do file  # Create file if it does not exist. Leave it blank.
+            write(file, "")
+        end
+    end
+    # Read contents of file
     lastInputFileDirContents = open(LAST_DIR_FILE) do file
         readlines(file)
     end
+    # Initialize lastInputFileDir Observable
     lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
+    # Define what to do when lastInputFileDir is changed
     on(lastInputFileDir) do val
-        open(LAST_DIR_FILE, "w") do file
+        open(LAST_DIR_FILE, "w") do file  # Update file to contain last selected input file directory
             write(file, pathFromVar(val))
         end
     end
 
     # Read preferred unit system
     UNITS_FILE = "./src/.data/.units"
+    # If units file doesn't already exist, create it
+    if !isfile(UNITS_FILE)
+        open(UNITS_FILE, "w") do file
+            write(file, string(InputParser.Imperial))  # Write Imperial by default
+        end
+    end
+    # Read units file
     unitsContent = open(UNITS_FILE) do file
         readlines(file)
     end

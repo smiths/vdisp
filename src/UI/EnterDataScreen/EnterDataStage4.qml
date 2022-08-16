@@ -291,7 +291,7 @@ Rectangle {
 
                     Text {
                         id: heaveActiveText
-                        text: "Active: " + heaveSlider.second.value.toFixed(3)
+                        text: "End: " + heaveSlider.second.value.toFixed(3)
                         color: "#fff3e4"
                         font.pixelSize: heaveSliderContainer.fontSize
                         anchors {
