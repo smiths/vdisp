@@ -20,25 +20,85 @@ OUTPUT_EFFECTIVE_STRESS = false
 """
     toFixed(n::Float64, digits::Int)
 
-Returns `String` of `n` rounded and displayed to `digits` digits after decimal point.
+Returns `String` of `n` rounded and displayed to `digits` digits after decimal point. If all data would be lost to rounding,
+returns `n` in scientific notation
 
 # Examples
 
 ```
-> toFixed(54.5, 4)
+julia> toFixed(54.5, 4)
 "54.5000"
 ```
 
 ```
-> toFixed(54.51999, 2)
+julia> toFixed(54.51999, 2)
 "54.52"
+```
+
+```
+julia> toFixed(0.0000054, 3)
+"5.400e-6"
+```
+
+```
+julia> toFixed(0.00024234, 3)
+"2.423e-4"
 ```
 
 This function is used by `VDisp` to round calculation results before writing tables to the output file.
 """
 function toFixed(n::Float64, digits::Int)::String
-    s = string(round(n, digits=digits)) * "0"^digits
+    rounded = round(n, digits=digits)
+    
+    if rounded == 0  # If we lost all data to rounding, convert to scientific notation
+        s = string(n)
+        if 'e' in s  # string() automatically converted it to scientific notation
+            # Split number and exponent
+            num, exp = split(s, "e")  
+            # Parse exponent as Int (and make it positive)
+            e = -parse(Int, exp)  
+            # Bring decimal point past first non-zero digit
+            newNum = n * 10^e  
+
+            # Add extra trailing 0s
+            s = string(newNum) * "0"^digits  
+            # Grab everything before the decimal and the desired amount of digits past the decimal
+            index = length(split(s, ".")[1]) + digits  
+
+
+            # Return number in scientific notation
+            return s[1:index+1] * "e-$e" 
+        else  # string() didn't convert to scientific
+            # Split number around the decimal point
+            a, b = split(s, ".")
+
+            # Find how many places we need to move over the decimal
+            exp = 1
+            while b[exp] == '0'
+                exp += 1
+            end
+
+            # Move over decimal until first number is non-zero
+            newNum = n * 10^exp
+
+            # Add extra trailing 0s
+            s = string(newNum) * "0"^digits
+            # Grab everything before the decimal and the desired amount of digits past the decimal
+            index = length(split(s, ".")[1]) + digits
+            
+            # Return number in scientific notation
+            return s[1:index+1] * "e-$(exp)" 
+        end 
+    end
+    
+    # Else if data was not lost
+
+     # Add extra trailing 0s
+    s = string(rounded) * "0"^digits
+    # Grab everything before the decimal and the desired amount of digits past the decimal
     index = length(split(s, ".")[1]) + digits
+
+    # Return string up until desired index
     return s[1:index+1]
 end
 
