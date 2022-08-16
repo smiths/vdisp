@@ -314,8 +314,8 @@ Manifest.toml
 src/.data/output_data.dat
 test/testdata/output_*.dat
 
-# Ignore last file directory
-src/.data/dir.dat
+# Ignore everything in .data directory, this directory is used to store system specific information
+src/.data/*
 
 # Ignore FORTRAN output
 Resources/fortran_src/VDOU.DAT

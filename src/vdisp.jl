@@ -733,18 +733,33 @@ if size(ARGS)[1] == 1
 
     # Read last selected folder path
     LAST_DIR_FILE = "./src/.data/dir.dat"
+    if !isfile(LAST_DIR_FILE)
+        open(LAST_DIR_FILE, "w") do file  # Create file if it does not exist. Leave it blank.
+            write(file, "")
+        end
+    end
+    # Read contents of file
     lastInputFileDirContents = open(LAST_DIR_FILE) do file
         readlines(file)
     end
+    # Initialize lastInputFileDir Observable
     lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
+    # Define what to do when lastInputFileDir is changed
     on(lastInputFileDir) do val
-        open(LAST_DIR_FILE, "w") do file
+        open(LAST_DIR_FILE, "w") do file  # Update file to contain last selected input file directory
             write(file, pathFromVar(val))
         end
     end
 
     # Read preferred unit system
     UNITS_FILE = "./src/.data/.units"
+    # If units file doesn't already exist, create it
+    if !isfile(UNITS_FILE)
+        open(UNITS_FILE, "w") do file
+            write(file, string(InputParser.Imperial))  # Write Imperial by default
+        end
+    end
+    # Read units file
     unitsContent = open(UNITS_FILE) do file
         readlines(file)
     end
