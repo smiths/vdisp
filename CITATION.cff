@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 title: "VDisp"
-abstract: "?One-dimensional soil settlement analysis software developed in the Julia programming language"
+abstract: "One-dimensional soil settlement analysis software developed in the Julia programming language"
 type: software
-message: "?Please cite this software using the metadata, preferring information from 'preferred-citation' section."
+message: "Please cite this software using the metadata, preferring information from 'preferred-citation' section."
 
 preferred-citation:
   authors:
@@ -19,17 +19,13 @@ contact:
     email: "smiths@mcmaster.ca"
   
 keywords:
-  - research
-  - julia
   - "soil settlement"
   - "geotechnical engineering"
-  - scientific
+  - julia
   - qml
-  - software
-  - ADD MORE?
 
-license: "?"
-url: "? docs url ?"
+license: "license: "BSD-2-Clause""
+url: "https://smiths.github.io/vdisp/dev/"
 repository: "https://github.com/smiths/vdisp"
 repository-code: "?"
 version: "?"
@@ -49,4 +45,9 @@ authors:
     country: "CA"
     email: soleymae@mcmaster.ca
     website: "https://www.emilsoleymani.com/"
-  - Dr. Stolle info
+  - family-names: Stolle
+    given-names: Dieter
+    orcid: "https://orcid.org/?"
+    website: "https://www.eng.mcmaster.ca/civil/people/faculty/dieter-stolle"
+    affiliation: "McMaster University, Civil Engineering Department"
+    email: "stolle@mcmaster.ca"
