@@ -6,7 +6,7 @@ message: "?Please cite this software using the metadata, preferring information 
 
 preferred-citation:
   authors:
-    - name: "The VDisp Research Team"
+    - name: "?The VDisp Research Team"
   title: "VDisp"
   type: software
 
