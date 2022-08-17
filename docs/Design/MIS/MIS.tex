@@ -42,7 +42,8 @@ urlcolor=cyan          % color of external links
 \begin{tabularx}{\textwidth}{p{3cm}p{2cm}X}
 \toprule {\bf Date} & {\bf Version} & {\bf Notes}\\
 \midrule
-May 18, 2022 & 1.0 & Initial Draft\\
+May 18, 2022 & 0.1 & Initial Draft\\
+Aug 16, 2022 & 0.2 & Addition of initial syntax sections for modules\\
 \bottomrule
 \end{tabularx}
 
@@ -60,14 +61,14 @@ May 18, 2022 & 1.0 & Initial Draft\\
 
 \section{Introduction}
 
-The following document details the Module Interface Specifications for \emph{VDisp}
+The following document details the Module Interface Specifications for
+\emph{VDisp}
 
 Complementary documents include the System Requirement Specifications
 and Module Guide.  The full documentation and implementation can be
 found at \url{...}.  
 
 \section{Notation}
-
 
 The structure of the MIS for modules comes from ,
 with the addition that template modules have been adapted from
@@ -97,13 +98,14 @@ real & $\mathbb{R}$ & any number in (-$\infty$, $\infty$)\\
 The specification of VDisp uses some derived data types: sequences, strings, and
 tuples. Sequences are lists filled with elements of the same data type. Strings
 are sequences of characters. Tuples contain a list of values, potentially of
-different types. In addition, VDisp uses functions, which
-are defined by the data types of their inputs and outputs. Local functions are
-described by giving their type signature followed by their specification.
+different types. In addition, VDisp uses functions, which are defined by the
+data types of their inputs and outputs. Local functions are described by giving
+their type signature followed by their specification.
 
 \section{Module Decomposition}
 
-The following table is taken directly from the Module Guide document for this project.
+The following table is taken directly from the Module Guide document for this
+project.
 
 \begin{table}[h!]
 \centering
