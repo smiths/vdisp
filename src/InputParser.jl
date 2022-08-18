@@ -16,8 +16,7 @@ This is usually thrown when the module has already caught a specific error while
 in another function, and given user the neccessary feedback. This error is then thrown so 
 it can be caught and handled gracefuly by the script calling the function.
 
-> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been
-left in for developers who would like to test it out.
+> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been left in for developers who would like to test it out.
 """
 struct ParsingError <: Exception 
     id::Int
@@ -30,8 +29,7 @@ Base.showerror(io::IO, e::ParsingError) = print(io, "Could not parse file.")
 
 The foundationOption was not read as 1 or 2 in old input file type.
 
-> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been
-left in for developers who would like to test it out.
+> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been left in for developers who would like to test it out.
 """
 struct FoundationError <: Exception 
     id::Int
@@ -52,8 +50,7 @@ Ex. The soilLayerNumber of layer 12 is given before layer 11. Invalid sequence:
 16 3
 ```
 
-> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been
-left in for developers who would like to test it out.
+> Note: Old input file type is no longer used in the modern version of `VDisp`. The parsing has been left in for developers who would like to test it out.
 """
 struct SoilNumberError <: Exception
     id::Int 
@@ -206,16 +203,17 @@ Base.showerror(io::IO, e::PropertyError) = print(io, e.msg)
 export Model, Units, Foundation, ErrorID, GUIData, InputData, ParsingError, SoilNumberError, ModelError, UnitError, FoundationTypeError, FloatConvertError, IntConvertError, BoolConvertError, DimensionNegativeError, MaterialIndexOutOfBoundsError, PropertyError
 
 """
-    parseCurrentLine(input, items, index)
+    parseCurrentLine(input::Array{String}, items::Int, index::Int, delimiter::String=" ")
 
-Parses the string and *index*-th index of *input* array. Makes sure there are *items*
-values separated by spaces in the string. 
+Given an array of `String` values, `input`, the index of a string in this array to parse, `index`, and the number of values expected to be parsed 
+in this string, `items`, `parseCurrentLine()` returns an `Array` of values parsed from the specified line, or a `NotEnoughValuesError` if not enough values
+were found. There is also an optional argument, `delimiter`, which specifies the delimiter which separates each value. The default value for `delimiter` is a single space.
 """
-function parseCurrentLine(input::Array{String}, items::Int, index::Int, splitString::String=" ")
+function parseCurrentLine(input::Array{String}, items::Int, index::Int, delimiter::String=" ")
     currentLine = input[index]
     # Tabs ruin splitting by space
     currentLine = replace(currentLine, "\t" => " ")
-    currentLineData = split(currentLine, splitString)
+    currentLineData = split(currentLine, delimiter)
     currentLineData = filter(x -> x != "", currentLineData)
     # Check if data is there
     if size(currentLineData)[1] < items
@@ -229,7 +227,11 @@ end
 
 The `InputData` struct contains all the variables needed to perform `VDisp` calculations.
 
-It is constructed either by parsing an input file, or by converting data entered in GUI.
+There are two main ways to construct an instance of `InputData`:
+
+* Parse an input file which follows the speciication of the **old** `VDispl` file format. Details about this file format can be found in Appendix F of [this](https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf) publication. This functionality is not used in the modern version of `VDisp`, it has only been kept to allow people to parse the old input files if they want.
+
+* By converting values entered in the GUI into the values that populate the fields of an `InputData` instance. This is the way `VDisp` creates `InputData`instances, which are then used to make `OutputData`instances, in the `createOutputDataFromGUI()` function. 
 """
 struct InputData
     problemName::String
@@ -975,7 +977,8 @@ end
 """
     GUIData()
 
-The `GUIData` struct contains all the information parsed from new input file format.
+The `GUIData` struct contains all the information parsed from new input file format. This information 
+is used to populate the GUI entries, significantly speeding up the process and improving the user experience.
 """
 struct GUIData
     # Stage 1
