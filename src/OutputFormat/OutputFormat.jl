@@ -50,8 +50,17 @@ function writeOutput(order::Array{Function}, outputData::OutputData, path::Strin
         end
     end
 end
+
+"""
+"""
 function writeDefaultOutput(outputData::OutputData, path::String)
+    # Write all content to output file in default order
     writeOutput([getHeader, performGetModelOutput, performGetFoundationOutput, getFoundationDepth, getSoilTable, getMaterialInfoTable, getDepthToGroundWaterTable, performGetDisplacementOutput, performGetEquilibriumOutput, performGetForcePointOutput, performGetCalculationOutput], outputData, path)
+    
+    # Path of effective stress file is <file>.eff.dat
+    effPath = path[1:end-3]*"eff.dat"
+    # Write effective stress values to file at effPath
+    writeEffectiveStresses(outputData, effPath)
 end
 
 
@@ -175,6 +184,35 @@ performWriteCalculationOutput(outputData::OutputData, path::String) = Calculatio
 performGetCalculationOutput(outputData::OutputData) = CalculationBehaviour.getCalculationOutput(getCalculationOutputBehaviour(outputData))
 performGetCalculationValue(outputData) = CalculationBehaviour.getCalculationValue(getCalculationOutputBehaviour(outputData))
 
+function writeEffectiveStresses(outputData, outputPath::String)
+    # Get values from Behaviour instances getValue() function
+    vals = performGetCalculationValue(outputData)
+    
+    # Arrays P and PP are always first two values return by any behaviour instances getValue() function
+    P = vals[1]
+    PP = vals[2]
+    
+    # Create Stresses Table
+    stressTable::Array{Union{Int, Float64}} = []
+    for i=1:size(P)[1]
+        if size(stressTable)[1] == 0
+            stressTable = [Int(i) PP[i] P[i]]
+        else
+            stressTable = vcat(stressTable, [Int(i) PP[i] P[i]])
+        end
+    end
+
+    # Get units
+    pressureUnit = (outputData.inputData.units == Int(InputParser.Imperial)) ? "tsf" : "Pa"
+
+    # Create Table
+    table = pretty_table(String, stressTable; header = ["Soil Layer", "Effective Stress of Soil ($(pressureUnit))", "Effective Stress After Placing Load ($(pressureUnit))"],tf = tf_markdown)
+
+    # Write Table
+    open(outputPath, "w") do file
+        write(file, "Effective Stresses of Soil Profile\n\n" * table)
+    end
+end
 ####################################
 
 
@@ -295,6 +333,5 @@ function getData(path::String)
     end
     return (outputData, outputData.inputData)
 end
-
 
 end # module

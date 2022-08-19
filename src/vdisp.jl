@@ -483,8 +483,8 @@ on(createOutputData) do val
 end
 graphData = Observable(false)
 on(graphData) do val 
-    if val
-        println("Graphing...")
+    if val  # Only graph when graphData is changed to true
+        debugPrint("Graphing Data...")
 
         if model[] == Int(InputParser.ConsolidationSwell)
             table1 = outputData[][4]  # heaveAboveFoundationTable
@@ -519,7 +519,7 @@ on(graphData) do val
             end
 
             # Prepare effective stress vs depth data
-            effectiveStress = outputData[][3]
+            effectiveStress = outputData[][2]
             
             # Get material number of each sublayer, and dx of each layer
             soilSublayerMats = []
@@ -671,7 +671,7 @@ on(graphData) do val
             Base.invokelatest(display, plt)
         end
 
-        println("Done")
+        debugPrint("Done")
     end
 end
 
