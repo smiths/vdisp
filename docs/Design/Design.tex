@@ -3,7 +3,9 @@
 \usepackage{blindtext}
 \usepackage{hyperref}
 \usepackage{graphicx}
+
 \graphicspath{ {./} }
+
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -31,15 +33,15 @@
 
       % Description
       \indentpar The \textbf{VDisp} software was carefully designed to adhere to the \href{https://www.digitalocean.com/community/conceptual_articles/s-o-l-i-d-the-first-five-principles-of-object-oriented-design}{\emph{SOLID} software design principles}.
-      This document aims to outline the initial proposed design (which will be called the ideal design), the actual implemented
-      design, and the limitations of the Julia programming language that lead to this drastic change.
+      This document aims to outline the \hyperref[initialDesign]{initial proposed design} (which will be called the ideal design), the \hyperref[actualDesign]{actual implemented
+      design}, and the \hyperref[juliaLimits]{limitations of the Julia programming language} that lead to this drastic change.
       
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     \pagebreak
 
     %% Ideal Design %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \section*{Ideal Design}
+    \section*{Ideal Design} \label{initialDesign}
 
     \indentpar This section aims to describe the \emph{ideal} design which was drafted
     for the \textbf{VDisp} software. \\
@@ -67,6 +69,18 @@
     \indentpar The design pattern of the \emph{Output} class and the interfaces it uses (all the interfaces that 
     end in "\emph{Behaviour}") is inspired by the \emph{Duck example} in the opening chapter of \href{https://github.com/ksatria/MK-Design-Pattern/blob/master/Ebook/Head%20First%20Design%20Patterns.pdf}{this textbook}
     on design patterns.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %% Ideal Design %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \section*{Actual Design} \label{actualDesign}
+
+    \indentpar This section aims to describe the actual design which was implemented
+    in the \textbf{VDisp} software. It strays from the \hyperref[initialDesign]{ideal design} due
+    to some limitations outlined in the \hyperref[juliaLimits]{Julia Limitations} section.\\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %% Julia Limitations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \section*{Julia Limitations} \label{juliaLimits}
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
