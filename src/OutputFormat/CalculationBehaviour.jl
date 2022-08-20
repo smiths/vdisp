@@ -48,6 +48,12 @@ julia> toFixed(0.00024234, 3)
 This function is used by `VDisp` to round calculation results before writing tables to the output file.
 """
 function toFixed(n::Float64, digits::Int)::String
+    # Since we later check if rounding n makes us lose all data
+    # first check if the original value was 0.
+    if n == 0
+        return "0."*"0"^digits
+    end
+    
     rounded = round(n, digits=digits)
     
     if rounded == 0  # If we lost all data to rounding, convert to scientific notation

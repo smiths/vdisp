@@ -6,8 +6,9 @@
 16  2
 1   2.700   20.000  1.540
 2   2.650   19.300  0.900
-# Same as input data 1 but IOPTION set to 1 on line below
-  8.00  1   1    # This is case where effective stress gets adjusted 
+# Same as input_consolidationSwellTest.dat but IOPTION set to 1 on line below
+  8.00  1   1    
+# This is case where effective stress gets adjusted 
 # Adjustment corresponding to equations of method 2 in Figure 5-1 on p.99 of settlement analysis book
   1.00  3.00    3.00    0
 1   2.0000  0.1500  0.2500  2.000
