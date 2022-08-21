@@ -98,14 +98,27 @@ function toFixed(n::Float64, digits::Int)::String
     end
     
     # Else if data was not lost
+    s = string(rounded)
+    if !('e' in s)  # If value wasn't big enough to be given scientific notation
+        # Pad with zeros
+        s *= "0"^digits
+        # Grab everything before the decimal and the desired amount of digits past the decimal
+        index = length(split(s, ".")[1]) + digits
+    
+        # Return string up until desired index
+        return s[1:index+1]
+    else
+        num, exp = split(s, 'e')
 
-     # Add extra trailing 0s
-    s = string(rounded) * "0"^digits
-    # Grab everything before the decimal and the desired amount of digits past the decimal
-    index = length(split(s, ".")[1]) + digits
+        # Pad string before the exponent part with 0s
+        num = num * "0"^digits
 
-    # Return string up until desired index
-    return s[1:index+1]
+        # Grab everything before the decimal and the desired amount of digits past the decimal
+        index = length(split(num, ".")[1]) + digits
+        
+        # Return number in scientific notation
+        return num[1:index+1] * "e+$(exp)"
+    end
 end
 
 ### CalculationOutputBehaviour interface ##############
