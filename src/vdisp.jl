@@ -23,7 +23,7 @@ PRINT_DEBUG = false  # Many descriptive print statements are shown when this is 
       pathFromVar(str::String)
 Removes *"file://"* prefix of `QUrl` paths
 """
-pathFromVar(str::String) = str[7:end]
+pathFromVar(str::String) = if (length(str) > 7) return str[8:end] else return str end
 
 # Julia variables
 materialNames = Array{String}(undef,0)

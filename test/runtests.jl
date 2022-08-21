@@ -4,6 +4,8 @@ using vdisp
 # Import module specific Unit Test files
 include("./InputParserTests.jl")
 using .InputParserTests
+include("./VDispTests.jl")
+using .VDispTests
 include("./CalculationBehaviourTests.jl")
 using .CalculationBehaviourTests
 
@@ -64,5 +66,11 @@ end
 ## TESTING MODULE CALCULATIONBEHAVIOUR.JL ######
 @testset "Testing toFixed()" begin
     testToFixed()
+end
+################################################
+
+## TESTING MODULE VDISP.JL #####################
+@testset "Testing pathFromVar()" begin
+    testPathFromVar()
 end
 ################################################
