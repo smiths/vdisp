@@ -321,3 +321,6 @@ src/.data/*
 
 # Ignore FORTRAN output
 Resources/fortran_src/VDOU.DAT
+
+# Ignore viewDocs bash file
+viewDocs

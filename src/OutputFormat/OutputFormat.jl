@@ -52,6 +52,13 @@ function writeOutput(order::Array{Function}, outputData::OutputData, path::Strin
 end
 
 """
+    writeDefaultOutput(outputData::OutputData, path::String)
+
+Writes the outputs in the default format which includes all the input data for traceability
+purposes, and all the outputs after. By default, it also writes effective stress values to a 
+file with the same name but different file extension (".eff.dat"). For more info on the effective
+stress outputs, see `writeEffectiveStress` docs.
+
 """
 function writeDefaultOutput(outputData::OutputData, path::String)
     # Write all content to output file in default order
@@ -184,6 +191,15 @@ performWriteCalculationOutput(outputData::OutputData, path::String) = Calculatio
 performGetCalculationOutput(outputData::OutputData) = CalculationBehaviour.getCalculationOutput(getCalculationOutputBehaviour(outputData))
 performGetCalculationValue(outputData) = CalculationBehaviour.getCalculationValue(getCalculationOutputBehaviour(outputData))
 
+"""
+    writeEffectiveStresses(outputData, outputPath::String)
+
+Writes table of effective stress values of each soil *sub*layer before and after applying the foundation load
+to file at `outputPath`.
+
+> VDisp calls this function from within the `writeDefaultOutput()` function. Thus, by default every VDisp output includes a **separate** file which displays the effective stress values. This file has the same filepath and name as the normal output file, but has the ".eff.dat" extension rather than ".dat".
+
+"""
 function writeEffectiveStresses(outputData, outputPath::String)
     # Get values from Behaviour instances getValue() function
     vals = performGetCalculationValue(outputData)
