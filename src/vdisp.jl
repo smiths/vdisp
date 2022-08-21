@@ -1,3 +1,6 @@
+"""
+Main module of VDisp software.
+"""
 module vdisp
 
 include("./OutputFormat/OutputFormat.jl")
@@ -695,7 +698,18 @@ if size(ARGS)[1] == 1
         readlines(file)
     end
     # Initialize lastInputFileDir Observable
-    lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
+    lastInputFileDir = UndefInitializer
+    # Check if file contents weren't empty
+    if size(lastInputFileDirContents)[1] > 0
+        # Check if directory listed in dir.dat actually exists
+        if isdir(lastInputFileDirContents[1])
+            lastInputFileDir = Observable(lastInputFileDirContents[1])
+        else
+            lastInputFileDir = Observable("") # Else leave empty (Code has been set up to default to home directory if lastInputFileDir is empty string in the QML FileDialog in EnterDataStage1.qml)
+        end
+    else
+        lastInputFileDir = Observable("")  # Else leave empty (Code has been set up to default to home directory if lastInputFileDir is empty string in the QML FileDialog in EnterDataStage1.qml)
+    end
     # Define what to do when lastInputFileDir is changed
     on(lastInputFileDir) do val
         open(LAST_DIR_FILE, "w") do file  # Update file to contain last selected input file directory
