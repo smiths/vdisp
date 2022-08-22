@@ -37,16 +37,33 @@ struct OutputData
     OutputData(problemName::String, foundationType::String, materialCount::Int32, dx::Array{Float64}, soilLayerNumbers::Array{Int32}, nodalPoints::Int32, elements::Int32, materialNames::Array{String}, specificGravity::Array{Float64}, voidRatio::Array{Float64}, waterContent::Array{Float64}, subdivisions::Array{Int32}, foundationIndex::Int32, depthGroundWaterTable::Float64, saturatedAboveWaterTable::Bool, outputIncrements::Bool, appliedPressure::Float64, foundationLength::Float64, foundationWidth::Float64, center::Bool, heaveActive::Float64, heaveBegin::Float64, totalDepth::Float64, foundationDepth::Float64, elasticModulus::Array{Float64}, timeAfterConstruction::Int32, units::Int32) = new(InputData(problemName, foundationType, materialCount, dx, soilLayerNumbers, nodalPoints, elements, materialNames, specificGravity, voidRatio, waterContent, subdivisions, foundationIndex, depthGroundWaterTable, saturatedAboveWaterTable, outputIncrements, appliedPressure, foundationLength, foundationWidth, center, heaveActive, heaveBegin, totalDepth, foundationDepth, elasticModulus, timeAfterConstruction, units))
 end
 
-# Function to write outputs in order we want
-function writeOutput(order::Array{Function}, outputData::OutputData, path::String)
+"""
+    writeOutput(order::Array{Function}, outputData::OutputData, path::String, sep::String="\n")
+
+This function can be used to write data from an `OutputData` instance to file at `path` in a
+custom defined order by passing in an `Array` of functions called `order`. The return value of 
+these functions is written to the file, and each function is written in order. The output of each
+function is separated by `sep`, which is set to the newline character by default.
+
+> Note: It is recommended that each function returns a `String`, and that this `String` ends in a newline character
+
+This function is currently called in `VDisp` by the `writeDefaultOutput()` function, which passes in 
+the default order of functions who's values are written to the output file.
+
+# Example Use Case
+
+If a user wants to include timestamps at the top of each file, and wants to get rid of the sections that are repeats
+of the input data, they can first define a function called `getDate()` which returns the timestamp in whatever format they 
+please. They can then call `writeOutput([getData, performGetCalculationOutput], outputData, path)`. This will output a file
+with only the timestamp, and output information which is given by `performGetCalculationOutput`.
+"""
+function writeOutput(order::Array{Function}, outputData::OutputData, path::String, sep::String="\n")
     # w - overwrite file contents 
     open(path, "w") do file
         for f in order
             write(file, f(outputData))
-
-            # Seperate each section with empty line
-            # We can make this an option that user can toggle
-            write(file, "\n") 
+            # Seperate each section with user defined delimeter
+            write(file, sep) 
         end
     end
 end
