@@ -48,7 +48,21 @@ function is separated by `sep`, which is set to the newline character by default
 > Note: It is recommended that each function returns a `String`, and that this `String` ends in a newline character
 
 This function is currently called in `VDisp` by the `writeDefaultOutput()` function, which passes in 
-the default order of functions who's values are written to the output file.
+the default order of functions who's values are written to the output file. These functions are (in order):
+
+* getHeader
+* performGetModelOutput 
+* performGetFoundationOutput 
+* getFoundationDepth 
+* getSoilTable 
+* getMaterialInfoTable 
+* getDepthToGroundWaterTable 
+* performGetDisplacementOutput 
+* performGetEquilibriumOutput 
+* performGetForcePointOutput 
+* performGetCalculationOutput
+
+> Functions named "perform<function>" are "changing behaviour" functions. These functions return different things based on the outputData instance passed in. All modules named "<Info>Behaviour.jl" deal with this behaviour. See the [Design.pdf](https://github.com/smiths/vdisp/blob/main/docs/Design/Design.pdf) for more information on this design pattern.
 
 # Example Use Case
 
@@ -75,7 +89,6 @@ Writes the outputs in the default format which includes all the input data for t
 purposes, and all the outputs after. By default, it also writes effective stress values to a 
 file with the same name but different file extension (".eff.dat"). For more info on the effective
 stress outputs, see `writeEffectiveStress` docs.
-
 """
 function writeDefaultOutput(outputData::OutputData, path::String)
     # Write all content to output file in default order

@@ -16,7 +16,8 @@ pages = [
         "Output" => "VDispUsers/Output.md"
     ],
     "VDisp Developers" => Any[
-        "VDisp Artifacts" => "VDispDevelopers/VDisplArtifacts.md"
+        "VDisp Artifacts" => "VDispDevelopers/VDisplArtifacts.md",
+        "Output" => "VDispDevelopers/Output.md"
     ]
 ]
 
