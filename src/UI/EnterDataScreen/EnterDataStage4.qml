@@ -154,7 +154,7 @@ Rectangle {
                 first.value: (props.inputFileSelected && !props.modelChanged) ?  props.heaveBegin : props.totalDepth/4
                 second.value: (props.inputFileSelected && !props.modelChanged) ?  props.heaveActive : 3*props.totalDepth/4
                 stepSize: 0.025
-                snapMode: RangeSlider.SnapAlways  // TODO: toggle to RangeSlider.NoSnap with a snap to grid option?
+                snapMode: RangeSlider.SnapAlways
 
                 width: parent.sliderWidth
                 height: 26

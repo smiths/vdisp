@@ -353,7 +353,6 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
             
             Δp = swellPressure - pressure
-            # TODO: Round values to a fixed number of decimal places
             if size(heaveAboveFoundationTable, 1) == 0
                 heaveAboveFoundationTable = [i Δx Δe Δp]
             else
@@ -387,7 +386,6 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         
         
         Δp = swellPressure - pressure
-        # TODO: Round values to a fixed number of decimal places
         if size(heaveBelowFoundationTable, 1) == 0
             heaveBelowFoundationTable = [i Δx Δe Δp]
         else

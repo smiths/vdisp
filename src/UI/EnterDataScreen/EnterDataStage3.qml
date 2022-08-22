@@ -143,7 +143,7 @@ Rectangle {
             var dx = currentLayerHeight / props.subdivisions[currentLayerIndex]
 
 
-            return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+            return Math.max(0.001, dx)
         }
 
         Component.onCompleted: {
@@ -245,7 +245,7 @@ Rectangle {
             var dx = currentLayerHeight / props.subdivisions[currentLayerIndex]
 
 
-            return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+            return Math.max(0.001, dx)
         }
 
         Component.onCompleted: {

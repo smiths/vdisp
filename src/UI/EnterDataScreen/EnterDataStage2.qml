@@ -13,7 +13,6 @@ Rectangle {
                     return false
                 }
             }
-            // TODO: check if material name is unique?
         }
         // As long as we have one material, the page is ready
         return materialsModel.count > 0
@@ -465,7 +464,7 @@ Rectangle {
                     }else{
                         // Only highlight error for unfilled forms, not for material count
                         if(materialsModel.count < materialsList.maxMaterials) materialPropertiesFormBackground.highlightErrors = true
-                        // TODO: Add popup to alert user they have reached max material count?
+                        // TODO: Add popup to alert user they have reached max material count? 
                     }
                 }
             }
