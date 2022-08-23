@@ -13,9 +13,7 @@ using .InputParser
 
 export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure, getValue, schmertmannApproximation, toFixed
 
-# For now these will be hardcoded into here, later they will
-# be part of a module of constants
-OUTPUT_EFFECTIVE_STRESS = false
+MIN_DX = 0.01
 
 @doc raw"""
     toFixed(n::Float64, digits::Int)
@@ -184,19 +182,6 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     out *= "Material Properties:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Swell Pressure ($(pressureUnit))", "Swell Index", "Compression Index", "Preconsolidation Pressure ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
@@ -428,19 +413,6 @@ function getOutput(behaviour::LeonardFrostCalculationBehaviour)
     
     out = ""
 
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
-
     out *= "Random value: $(x)\n"
 
     return out
@@ -505,19 +477,6 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
     out *= "Cone Penetration Resistance of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Cone Penetration Resistance ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
@@ -589,20 +548,6 @@ function getOutput(behaviour::CollapsibleSoilCalculationBehaviour)
     P, PP, x = getValue(behaviour)
     
     out = ""
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
-
     out *= "Random value: $(x)\n"
 
     return out
@@ -668,19 +613,6 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     out *= "Elastic Modulus of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Elastic Modulus ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
@@ -886,7 +818,7 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
 
     # Loop through each nodal point below foundation
     for i=behaviour.bottomPointIndex:behaviour.nodalPoints
-        if Δx < 0.01 # TODO: Why was this hardcoded to 0.01? Make this a constant. Maybe named MIN_DX?
+        if Δx < MIN_DX
             # This ensures pressure at bottom of foundation is equal to behaviour.appliedPressure
             P[i] += Qnet
             Δx += behaviour.dx[behaviour.soilLayerNumber[i]]
