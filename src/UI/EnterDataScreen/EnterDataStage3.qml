@@ -35,6 +35,7 @@ Rectangle {
     property double totalDepth: 10.0
     property variant bounds: []
     property double minLayerSize: (props.units === 0) ? 0.0254 : 1/12  // Minimum layer sizes: 2.54cm/1inch
+    property int maxSublayers: 50
     property bool calculatedBounds: false
 
     radius: 20
@@ -510,7 +511,7 @@ Rectangle {
                             id: subdivisionSpinbox
                             editable: true
                             from: 2
-                            to: 50 // Should we have max?
+                            to: soilLayerFormBackground.maxSublayers
 
                             font.pixelSize: 14
 

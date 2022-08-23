@@ -10,10 +10,10 @@ using PrettyTables
 
 include("../InputParser.jl")
 using .InputParser
+include("../Constants.jl")
+using .Constants
 
 export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure, getValue, schmertmannApproximation, toFixed
-
-MIN_DX = 0.01
 
 @doc raw"""
     toFixed(n::Float64, digits::Int)
@@ -818,7 +818,7 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
 
     # Loop through each nodal point below foundation
     for i=behaviour.bottomPointIndex:behaviour.nodalPoints
-        if Δx < MIN_DX
+        if Δx < MIN_DX  # Constant MIN_DX from Constants.jl
             # This ensures pressure at bottom of foundation is equal to behaviour.appliedPressure
             P[i] += Qnet
             Δx += behaviour.dx[behaviour.soilLayerNumber[i]]

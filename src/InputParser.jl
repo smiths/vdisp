@@ -1,5 +1,8 @@
 module InputParser
 
+include("./Constants.jl")
+using .Constants
+
 @enum Model ConsolidationSwell LeonardFrost Schmertmann CollapsibleSoil SchmertmannElastic 
 @enum Foundation ErrorFoundation RectangularSlab LongStripFooting 
 @enum ErrorID ParsingErrorId FoundationErrorId SoilNumberErrorId NotEnoughValuesErrorId ModelErrorId FoundationTypeErrorId FloatConvertErrorId DimensionNegativeErrorId IntConvertErrorId UnitErrorId BoolConvertErrorId MaterialIndexOutOfBoundsErrorId PropertyErrorId
@@ -1325,8 +1328,8 @@ struct GUIData
             catch e
                 throw(IntConvertError(lastLineIndex+1, "Soil Layer $i Subdivisions", currentLineData[i]))
             end
-            if n < 2 || n > 50 # TODO: Make MAX_SUBDIVISIONS a constant
-                throw(PropertyError("Line $(lastLineIndex+1): Subdivisions for soil layer $i invalid. Value must be greater than 2 and less than 50."))  # TODO: Repalce text "50" with "$(MAX_SUBDIVISIONS)"
+            if n < 2 || n > MAX_SUBDIVISIONS  # Constant MAX_SUBDIVISIONS from Constants.jl
+                throw(PropertyError("Line $(lastLineIndex+1): Subdivisions for soil layer $i invalid. Value must be greater than 2 and less than $(MAX_SUBDIVISIONS).")) 
             end
             subdivisions[i] = n
         end
