@@ -35,7 +35,7 @@ Rectangle {
     property double totalDepth: 10.0
     property variant bounds: []
     property double minLayerSize: (props.units === 0) ? 0.0254 : 1/12  // Minimum layer sizes: 2.54cm/1inch
-    property int maxSublayers: 50
+    property int maxSublayers: props.MAX_SUBDIVISIONS
     property bool calculatedBounds: false
 
     radius: 20
@@ -47,6 +47,7 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        print(props.MAX_SUBDIVISIONS)
         // If we had input file, and materials are still the same
         if(props.inputFileSelected && !props.materialCountChanged){
             totalDepth = props.totalDepth

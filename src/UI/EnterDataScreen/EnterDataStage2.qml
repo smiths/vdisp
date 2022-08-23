@@ -23,7 +23,7 @@ Rectangle {
     property bool formFilled: isFilled()
     property bool highlightErrors: false
     property int latestMaterialIndex: 1
-    property int maxMaterialCount: 5
+    property int maxMaterialCount: props.MAX_MATERIAL_COUNT
     property string nextScreen: "EnterDataStage3.qml"
 
     property int topFormMargin: 30 + (55-30) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)

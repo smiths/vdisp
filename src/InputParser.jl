@@ -1328,8 +1328,8 @@ struct GUIData
             catch e
                 throw(IntConvertError(lastLineIndex+1, "Soil Layer $i Subdivisions", currentLineData[i]))
             end
-            if n < 2 || n > MAX_SUBDIVISIONS  # Constant MAX_SUBDIVISIONS from Constants.jl
-                throw(PropertyError("Line $(lastLineIndex+1): Subdivisions for soil layer $i invalid. Value must be greater than 2 and less than $(MAX_SUBDIVISIONS).")) 
+            if n < 2 || n > MAX_SUBDIVISIONS[]  # Constant MAX_SUBDIVISIONS from Constants.jl
+                throw(PropertyError("Line $(lastLineIndex+1): Subdivisions for soil layer $i invalid. Value must be greater than 2 and less than $(MAX_SUBDIVISIONS[]).")) 
             end
             subdivisions[i] = n
         end
