@@ -1,9 +1,14 @@
+"""
+Main module of VDisp software.
+"""
 module vdisp
 
 include("./OutputFormat/OutputFormat.jl")
 using .OutputFormat
 include("./InputParser.jl")
 using .InputParser
+include("./Constants.jl")
+using .Constants
 
 using Test
 using QML
@@ -14,13 +19,11 @@ using Plots
 
 export readInputFile
 
-PRINT_DEBUG = false  # Many descriptive print statements are shown when this is true
-
 """
       pathFromVar(str::String)
 Removes *"file://"* prefix of `QUrl` paths
 """
-pathFromVar(str::String) = str[7:end]
+pathFromVar(str::String) = if (length(str) > 7) return str[8:end] else return str end
 
 # Julia variables
 materialNames = Array{String}(undef,0)
@@ -138,65 +141,41 @@ on(inputFileSelected) do val
 end
 units = UndefInitializer # This gets defined right before loading qml (Reads value from vdisp/src/.data/.units)
 
-# Constants
-GAMMA_W = Observable([0.03125, 0.9810])  # Unit weight of water (0.03125 tcf = 62.4 pcf or 9810 N/m^3 = 0.981kN/m^3)
-MIN_LAYER_SIZE = Observable([0.0254, 1/12])  # Default minimum layer size (0.0254 m = 2.54 cm or (1/12) ft = 1 in)
-
 # Update QML variables
+debugPrint(msg::String) = if PRINT_DEBUG println(msg) end
 setProblemName = on(problemName) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for problemName: $val")
 end
 setModel = on(model) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for model: $val")
 end
 setFoundation = on(foundation) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for foundation: $val")
 end
 setAppliedPressure = on(appliedPressure) do val 
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for appliedPressure: $val")
 end
 setPressurePoint = on(center) do val 
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for center: $val")
 end
 setLength = on(foundationLength) do val 
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for foundationLength: $val")
 end
 setWidth = on(foundationWidth) do val 
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for foundationWidth: $val")
 end
 setOutputIncrements = on(outputIncrements) do val 
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for outputIncrements: $val")
 end
 setSaturatedAboveWaterTable = on(saturatedAboveWaterTable) do val 
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for saturatedAboveWaterTable: $val")
 end
 setMaterials = on(materials) do val
-    if PRINT_DEBUG
-        println("\nGot an update for materials: ", val)
-    end
+    debugPrint("Got an update for materials: $val")
 end
 setMaterialNames = on(materialNamesQML) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for materialNames: $val")
+    
     matNames = Array{String}(undef,0)
     for v in val
         push!(matNames, QML.value(v))
@@ -204,9 +183,8 @@ setMaterialNames = on(materialNamesQML) do val
     global materialNames = copy(matNames)
 end
 setSpecificGravity = on(specificGravityQML) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for specificGravity: $val")
+    
     sg = Array{Float64}(undef,0)
     for v in val
         push!(sg, QML.value(v))
@@ -214,9 +192,8 @@ setSpecificGravity = on(specificGravityQML) do val
     global specificGravity = copy(sg)
 end
 setVoidRatio = on(voidRatioQML) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for voidRatio: $val")
+    
     vr = Array{Float64}(undef,0)
     for v in val
         push!(vr, QML.value(v))
@@ -224,9 +201,8 @@ setVoidRatio = on(voidRatioQML) do val
     global voidRatio = copy(vr)
 end
 setWaterContent = on(waterContentQML) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for waterContent: $val")
+    
     wc = Array{Float64}(undef,0)
     for v in val
         push!(wc, QML.value(v))
@@ -234,9 +210,8 @@ setWaterContent = on(waterContentQML) do val
     global waterContent = copy(wc)
 end
 setSubdivisions = on(subdivisionsQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for subdivisions: ", val)
-    end
+    debugPrint("Got an update for subdivisions: $val")
+
     sub = Array{Int32}(undef,0)
     for v in val
         push!(sub, QML.value(v))
@@ -244,14 +219,11 @@ setSubdivisions = on(subdivisionsQML) do val
     global subdivisions = copy(sub)
 end
 setTotalDepth = on(totalDepth) do val
-    if PRINT_DEBUG
-        println("Got an update: ", val)
-    end
+    debugPrint("Got an update for totalDepth: $val")
 end
 setSoilLayerNumbers = on(soilLayerNumbersQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for soilLayerNumbers: ", val)
-    end
+    debugPrint("Got an update for soilLayerNumbers: $val")
+    
     sln = Array{Int32}(undef,0)
     for v in val
         push!(sln, QML.value(v))
@@ -259,9 +231,8 @@ setSoilLayerNumbers = on(soilLayerNumbersQML) do val
     global soilLayerNumbers = copy(sln)
 end
 setBounds = on(boundsQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for bounds: ", val)
-    end
+    debugPrint("Got an update for bounds: $val")
+    
     b = Array{Float64}(undef,0)
     for v in val
         push!(b, QML.value(v))
@@ -269,29 +240,19 @@ setBounds = on(boundsQML) do val
     global bounds = copy(b)
 end
 setDepthToGroundWaterTable = on(depthToGroundWaterTable) do val
-    if PRINT_DEBUG
-        println("\nGot an update for depthToGroundWaterTable: ", val)
-    end
+    debugPrint("Got an update for depthToGroundWaterTable: $val")
 end
 setFoundationDepth = on(foundationDepth) do val
-    if PRINT_DEBUG
-        println("\nGot an update for foundationDepth: ", val)
-    end
+    debugPrint("Got an update for foundationDepth: $val")
 end
 setHeaveBegin = on(heaveBegin) do val
-    if PRINT_DEBUG
-        println("\nGot an update for heaveBegin: ", val)
-    end
+    debugPrint("Got an update for heaveBegin: $val")
 end
 setHeaveActive = on(heaveActive) do val
-    if PRINT_DEBUG
-        println("\nGot an update for heaveActive: ", val)
-    end
+    debugPrint("Got an update for heaveEnd: $val")
 end
 setSwellPressure = on(swellPressureQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for swellPressure: ", val)
-    end
+    debugPrint("Got an update for swellPressure: $val")
 
     sp = Array{Float64}(undef,0)
     for v in val
@@ -300,9 +261,7 @@ setSwellPressure = on(swellPressureQML) do val
     global swellPressure = copy(sp)
 end
 setSwellIndex = on(swellIndexQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for swellIndex: ", val)
-    end
+    debugPrint("Got an update for swellIndex: $val")
     si = Array{Float64}(undef,0)
     for v in val
         push!(si, QML.value(v))
@@ -310,9 +269,7 @@ setSwellIndex = on(swellIndexQML) do val
     global swellIndex = copy(si)
 end
 setCompressionIndex = on(compressionIndexQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for compressionIndex: ", val)
-    end
+    debugPrint("Got an update for compressionIndex: $val")
     ci = Array{Float64}(undef,0)
     for v in val
         push!(ci, QML.value(v))
@@ -320,9 +277,7 @@ setCompressionIndex = on(compressionIndexQML) do val
     global compressionIndex = copy(ci)
 end
 setRecompressionIndex = on(recompressionIndexQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for recompressionIndex: ", val)
-    end
+    debugPrint("Got an update for maxPastPressure: $val")
     mpp = Array{Float64}(undef,0)
     for v in val
         push!(mpp, QML.value(v))
@@ -330,14 +285,11 @@ setRecompressionIndex = on(recompressionIndexQML) do val
     global recompressionIndex = copy(mpp)
 end
 setTimeAfterConstruction = on(timeAfterConstruction) do val
-    if PRINT_DEBUG
-        println("\nGot an update for timeAfterConstruction: ", val)
-    end
+    debugPrint("Got an update for timeAfterConstruction: $val")
 end
 setConePenetration = on(conePenetrationQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for conePenetration: ", val)
-    end
+    debugPrint("Got an update for conePenetration: $val")
+
     cp = Array{Float64}(undef,0)
     for v in val
         push!(cp, QML.value(v))
@@ -345,9 +297,8 @@ setConePenetration = on(conePenetrationQML) do val
     global conePenetration = copy(cp)
 end
 setElasticMod = on(elasticModulusQML) do val
-    if PRINT_DEBUG
-        println("\nGot an update for elasticModulus: ", val)
-    end
+    debugPrint("Got an update for elasticModulus: $val")
+
     em = Array{Float64}(undef,0)
     for v in val
         push!(em, QML.value(v))
@@ -531,8 +482,8 @@ on(createOutputData) do val
 end
 graphData = Observable(false)
 on(graphData) do val 
-    if val
-        println("Graphing...")
+    if val  # Only graph when graphData is changed to true
+        debugPrint("Graphing Data...")
 
         if model[] == Int(InputParser.ConsolidationSwell)
             table1 = outputData[][4]  # heaveAboveFoundationTable
@@ -567,7 +518,7 @@ on(graphData) do val
             end
 
             # Prepare effective stress vs depth data
-            effectiveStress = outputData[][3]
+            effectiveStress = outputData[][2]
             
             # Get material number of each sublayer, and dx of each layer
             soilSublayerMats = []
@@ -719,7 +670,7 @@ on(graphData) do val
             Base.invokelatest(display, plt)
         end
 
-        println("Done")
+        debugPrint("Done")
     end
 end
 
@@ -728,7 +679,7 @@ if size(ARGS)[1] == 1
     path = "./src/UI/main.qml"  # Path to main QML file when executing `make` command from `vdisp/` directory 
     
     if ARGS[1] == "debug"
-        global PRINT_DEBUG = true
+        setDebug(true)
     end
 
     # Read last selected folder path
@@ -743,7 +694,18 @@ if size(ARGS)[1] == 1
         readlines(file)
     end
     # Initialize lastInputFileDir Observable
-    lastInputFileDir = (size(lastInputFileDirContents)[1] > 0) ? Observable(lastInputFileDirContents[1]) : Observable("")
+    lastInputFileDir = UndefInitializer
+    # Check if file contents weren't empty
+    if size(lastInputFileDirContents)[1] > 0
+        # Check if directory listed in dir.dat actually exists
+        if isdir(lastInputFileDirContents[1])
+            lastInputFileDir = Observable(lastInputFileDirContents[1])
+        else
+            lastInputFileDir = Observable("") # Else leave empty (Code has been set up to default to home directory if lastInputFileDir is empty string in the QML FileDialog in EnterDataStage1.qml)
+        end
+    else
+        lastInputFileDir = Observable("")  # Else leave empty (Code has been set up to default to home directory if lastInputFileDir is empty string in the QML FileDialog in EnterDataStage1.qml)
+    end
     # Define what to do when lastInputFileDir is changed
     on(lastInputFileDir) do val
         open(LAST_DIR_FILE, "w") do file  # Update file to contain last selected input file directory
@@ -772,7 +734,7 @@ if size(ARGS)[1] == 1
     end
 
     # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData, "lastInputFileDir" => lastInputFileDir))
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData, "lastInputFileDir" => lastInputFileDir, "MAX_SUBDIVISIONS" => MAX_SUBDIVISIONS, "MAX_MATERIAL_COUNT" => MAX_MATERIAL_COUNT))
     
     # Run the app
     exec()

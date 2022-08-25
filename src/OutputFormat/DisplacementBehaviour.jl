@@ -27,7 +27,7 @@ getOutput(behaviour::TotalDisplacementBehaviour) = "Total Displacements Only"
 getValue(behaviour::TotalDisplacementBehaviour) = behaviour.outputIncrements
 ###############################################
 
-### TotalDisplacementBehaviour "class" ########
+### DisplacementEachDepthBehaviour "class" ########
 struct DisplacementEachDepthBehaviour <: DisplacementInfoBehaviour
     outputIncrements::Bool
     DisplacementEachDepthBehaviour()=new(true)

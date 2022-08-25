@@ -1,3 +1,10 @@
+/*
+    Main QML file of VDisp GUI program.
+
+    Author: Emil Soleymani (soleymae@mcmaster.ca)
+    Date: August 2022
+*/
+
 import QtQuick 2.12
 import QtQuick.Window 2.12
 import org.julialang 1.0

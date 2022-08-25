@@ -1,7 +1,8 @@
 # Input Data taken from p.172 of https://www.publications.usace.army.mil/Portals/76/Publications/EngineerManuals/EM_1110-1-1904.pdf    
     FOOTING IN EXPANSIVE SOIL
 1   0   1   17  7   2
-0.5 0.5
+# Since we added abililty for each layer to have different dx values, the original input file was changed to accept a dx value for each layer, on its own line
+0.5 0.5 
 1   1
 12  2
 16  2

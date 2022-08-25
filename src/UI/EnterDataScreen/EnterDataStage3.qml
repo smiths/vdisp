@@ -1,7 +1,5 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Shapes 1.3
 import org.julialang 1.0
 
 Rectangle {
@@ -37,6 +35,7 @@ Rectangle {
     property double totalDepth: 10.0
     property variant bounds: []
     property double minLayerSize: (props.units === 0) ? 0.0254 : 1/12  // Minimum layer sizes: 2.54cm/1inch
+    property int maxSublayers: props.MAX_SUBDIVISIONS
     property bool calculatedBounds: false
 
     radius: 20
@@ -48,6 +47,7 @@ Rectangle {
     }
 
     Component.onCompleted: {
+        print(props.MAX_SUBDIVISIONS)
         // If we had input file, and materials are still the same
         if(props.inputFileSelected && !props.materialCountChanged){
             totalDepth = props.totalDepth
@@ -145,7 +145,7 @@ Rectangle {
             var dx = currentLayerHeight / props.subdivisions[currentLayerIndex]
 
 
-            return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+            return Math.max(0.001, dx)
         }
 
         Component.onCompleted: {
@@ -247,7 +247,7 @@ Rectangle {
             var dx = currentLayerHeight / props.subdivisions[currentLayerIndex]
 
 
-            return Math.max(0.001, dx) // TODO: Make 0.001 a constant (MIN_HANDLE_STEPSIZE) 
+            return Math.max(0.001, dx)
         }
 
         Component.onCompleted: {
@@ -512,7 +512,7 @@ Rectangle {
                             id: subdivisionSpinbox
                             editable: true
                             from: 2
-                            to: 50 // Should we have max?
+                            to: soilLayerFormBackground.maxSublayers
 
                             font.pixelSize: 14
 
@@ -788,7 +788,7 @@ Rectangle {
                     if(depthInput.text && depthInput.acceptableInput){
                         // Give user a popup alert about which layer(s) are the problem
                         var unitsString = (props.units === 0) ? "m" : "ft"
-                        layerErrorPopup.message = "One or more layers have height less than <b>MIN_LAYER_HEIGHT</b>(" + soilLayerFormBackground.minLayerSize.toFixed(3) + unitsString + ")"
+                        layerErrorPopup.message = "One or more layers have height less than <b>MIN_LAYER_SIZE</b>(" + soilLayerFormBackground.minLayerSize.toFixed(3) + unitsString + ")"
                         layerErrorPopup.open()
                     }
                 }

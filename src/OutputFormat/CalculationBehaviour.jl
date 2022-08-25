@@ -10,12 +10,10 @@ using PrettyTables
 
 include("../InputParser.jl")
 using .InputParser
+include("../Constants.jl")
+using .Constants
 
-export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure, getValue, schmertmannApproximation
-
-# For now these will be hardcoded into here, later they will
-# be part of a module of constants
-OUTPUT_EFFECTIVE_STRESS = false
+export CalculationOutputBehaviour, ConsolidationSwellCalculationBehaviour, LeonardFrostCalculationBehaviour, SchmertmannCalculationBehaviour, SchmertmannElasticCalculationBehaviour, CollapsibleSoilCalculationBehaviour, writeCalculationOutput, getCalculationOutput, getCalculationValue, getEffectiveStress, getSurchargePressure, getValue, schmertmannApproximation, toFixed
 
 @doc raw"""
     toFixed(n::Float64, digits::Int)
@@ -48,6 +46,12 @@ julia> toFixed(0.00024234, 3)
 This function is used by `VDisp` to round calculation results before writing tables to the output file.
 """
 function toFixed(n::Float64, digits::Int)::String
+    # Since we later check if rounding n makes us lose all data
+    # first check if the original value was 0.
+    if n == 0
+        return "0."*"0"^digits
+    end
+    
     rounded = round(n, digits=digits)
     
     if rounded == 0  # If we lost all data to rounding, convert to scientific notation
@@ -92,14 +96,27 @@ function toFixed(n::Float64, digits::Int)::String
     end
     
     # Else if data was not lost
+    s = string(rounded)
+    if !('e' in s)  # If value wasn't big enough to be given scientific notation
+        # Pad with zeros
+        s *= "0"^digits
+        # Grab everything before the decimal and the desired amount of digits past the decimal
+        index = length(split(s, ".")[1]) + digits
+    
+        # Return string up until desired index
+        return s[1:index+1]
+    else
+        num, exp = split(s, 'e')
 
-     # Add extra trailing 0s
-    s = string(rounded) * "0"^digits
-    # Grab everything before the decimal and the desired amount of digits past the decimal
-    index = length(split(s, ".")[1]) + digits
+        # Pad string before the exponent part with 0s
+        num = num * "0"^digits
 
-    # Return string up until desired index
-    return s[1:index+1]
+        # Grab everything before the decimal and the desired amount of digits past the decimal
+        index = length(split(num, ".")[1]) + digits
+        
+        # Return number in scientific notation
+        return num[1:index+1] * "e+$(exp)"
+    end
 end
 
 ### CalculationOutputBehaviour interface ##############
@@ -165,19 +182,6 @@ function getOutput(behaviour::ConsolidationSwellCalculationBehaviour)
     out *= "Material Properties:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Swell Pressure ($(pressureUnit))", "Swell Index", "Compression Index", "Preconsolidation Pressure ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
@@ -334,7 +338,6 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
             Δe = (finalVoidRatio - initialVoidRatio) / (1 + initialVoidRatio)
             
             Δp = swellPressure - pressure
-            # TODO: Round values to a fixed number of decimal places
             if size(heaveAboveFoundationTable, 1) == 0
                 heaveAboveFoundationTable = [i Δx Δe Δp]
             else
@@ -368,7 +371,6 @@ function getValue(behaviour::ConsolidationSwellCalculationBehaviour)
         
         
         Δp = swellPressure - pressure
-        # TODO: Round values to a fixed number of decimal places
         if size(heaveBelowFoundationTable, 1) == 0
             heaveBelowFoundationTable = [i Δx Δe Δp]
         else
@@ -410,19 +412,6 @@ function getOutput(behaviour::LeonardFrostCalculationBehaviour)
     P, PP, x = getValue(behaviour)
     
     out = ""
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
 
     out *= "Random value: $(x)\n"
 
@@ -488,19 +477,6 @@ function getOutput(behaviour::SchmertmannCalculationBehaviour)
     out *= "Cone Penetration Resistance of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Cone Penetration Resistance ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
@@ -572,20 +548,6 @@ function getOutput(behaviour::CollapsibleSoilCalculationBehaviour)
     P, PP, x = getValue(behaviour)
     
     out = ""
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx 
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
-
     out *= "Random value: $(x)\n"
 
     return out
@@ -651,19 +613,6 @@ function getOutput(behaviour::SchmertmannElasticCalculationBehaviour)
     out *= "Elastic Modulus of Materials:\n\n"
     out *= pretty_table(String, materialPropertiesTable; header = ["Material", "Material Name", "Elastic Modulus ($(pressureUnit))"],tf = tf_markdown)
     out *= "\n"
-
-    if OUTPUT_EFFECTIVE_STRESS
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]] 
-            out *= "$(z), $(P[i])\n"
-        end
-        out *= "\n"
-        for i=1:behaviour.nodalPoints
-            z = (i-1)*behaviour.dx[behaviour.soilLayerNumber[i]]
-            out *= "$(z), $(PP[i])\n"
-        end
-        out *= "\n"
-    end
 
     depthUnit = (behaviour.units == Int(InputParser.Imperial)) ? "ft" : "m"
 
@@ -869,7 +818,7 @@ function getSurchargePressure(behaviour, P::Array{Float64}, PP::Array{Float64})
 
     # Loop through each nodal point below foundation
     for i=behaviour.bottomPointIndex:behaviour.nodalPoints
-        if Δx < 0.01 # TODO: Why was this hardcoded to 0.01? Make this a constant. Maybe named MIN_DX?
+        if Δx < MIN_DX  # Constant MIN_DX from Constants.jl
             # This ensures pressure at bottom of foundation is equal to behaviour.appliedPressure
             P[i] += Qnet
             Δx += behaviour.dx[behaviour.soilLayerNumber[i]]

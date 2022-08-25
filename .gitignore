@@ -316,6 +316,11 @@ test/testdata/output_*.dat
 
 # Ignore everything in .data directory, this directory is used to store system specific information
 src/.data/*
+# Don't ignore the README file in the .data/ directory (this file is mainly put in the version control to force the directory to exist
+!src/.data/README.md 
 
 # Ignore FORTRAN output
 Resources/fortran_src/VDOU.DAT
+
+# Ignore viewDocs bash file
+viewDocs

@@ -1,7 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Shapes 1.3
+import QtQuick.Dialogs 1.0
 import org.julialang 1.0
 
 Rectangle {
@@ -15,7 +14,6 @@ Rectangle {
                     return false
                 }
             }
-            // TODO: check if material name is unique?
         }
         // As long as we have one material, the page is ready
         return materialsModel.count > 0
@@ -25,6 +23,7 @@ Rectangle {
     property bool formFilled: isFilled()
     property bool highlightErrors: false
     property int latestMaterialIndex: 1
+    property int maxMaterialCount: props.MAX_MATERIAL_COUNT
     property string nextScreen: "EnterDataStage3.qml"
 
     property int topFormMargin: 30 + (55-30) * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
@@ -467,7 +466,7 @@ Rectangle {
                     }else{
                         // Only highlight error for unfilled forms, not for material count
                         if(materialsModel.count < materialsList.maxMaterials) materialPropertiesFormBackground.highlightErrors = true
-                        // TODO: Add popup to alert user they have reached max material count?
+                        else tooManyMaterialsDialog.open() 
                     }
                 }
             }
@@ -485,7 +484,7 @@ Rectangle {
         id: materialsList
         model: materialsModel
         
-        property int maxMaterials: 5
+        property int maxMaterials: materialPropertiesFormBackground.maxMaterialCount
         property bool overcrowded: vdispWindow.isMinHeight() && model.count > maxMaterials
         property int maximumHeight: materialPropertiesFormBackground.materialListEntryHeight * maxMaterials
         
@@ -716,4 +715,89 @@ Rectangle {
         }
     }
     /////////////////////////
+
+    //TOO MANY MATERIALS POPUP ////
+    Popup {
+        id: tooManyMaterialsDialog
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape // | Popup.CloseOnPressOutsideParent
+
+        width: popupPadding + tooManyMaterialsDialogText.width 
+        height: popupPadding + tooManyMaterialsDialogTitle.height + tooManyMaterialsDialogText.height + tooManyMaterialsDialogButton.height + 2*tooManyMaterialsDialog.gap
+
+        anchors.centerIn: parent
+
+        property int gap: 10
+        property int popupPadding: 40
+
+        background: Rectangle {
+            color: "#483434"
+            radius: 10
+        }
+
+        contentItem: Item {
+            id: tooManyMaterialsDialogContainer
+            
+            width: tooManyMaterialsDialogText.width 
+            height: tooManyMaterialsDialogTitle.height + tooManyMaterialsDialogText.height + tooManyMaterialsDialogButton.height + 2*tooManyMaterialsDialog.gap
+            
+            anchors.centerIn: parent
+            
+            // Title
+            Text{
+                id: tooManyMaterialsDialogTitle
+                font.pixelSize: 25
+                color: "#fff3e4"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: parent.top
+                }
+                text: "Warning: Too Many Materials"
+            }
+
+            // Message
+            Text{
+                id: tooManyMaterialsDialogText
+                text: "Material count exceeded MAX_MATERIAL_COUNT (" +  materialPropertiesFormBackground.maxMaterialCount + ")"
+                
+                font.pixelSize: 18
+                color: "#fff3e4"
+                
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: tooManyMaterialsDialogTitle.bottom
+                    topMargin: tooManyMaterialsDialog.gap
+                }
+            }
+
+            // Close Button
+            Rectangle {
+                id: tooManyMaterialsDialogButton
+                width: 100
+                height: 20
+                radius: 5
+                color: "#fff3e4"
+
+                Text{
+                    text: "Ok"
+                    font.pixelSize: 15
+                    color: "#483434"
+                    anchors.centerIn: parent
+                }
+
+                anchors{
+                    top: tooManyMaterialsDialogText.bottom
+                    topMargin: tooManyMaterialsDialog.gap
+                    horizontalCenter: parent.horizontalCenter
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: tooManyMaterialsDialog.close()
+                }
+            }
+        }
+    }
+    ///////////////////////////////
 }
