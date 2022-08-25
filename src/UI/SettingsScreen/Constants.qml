@@ -132,6 +132,7 @@ Rectangle {
 
                 validator: DoubleValidator{
                     bottom: 0.000001
+                    top: (props.units === 0) ? 10 : 32.8084 // 1m = 3.28084ft
                 }
 
                 onTextChanged: {
@@ -189,11 +190,12 @@ Rectangle {
             anchors.fill: parent
             onClicked: {
                 // UPDATE MIN LAYER SIZE
+                var CONVERSION = 3.28084 // 1m = 3.28084ft
                 var val = parseFloat(minLayerSizeInput.text)
                 if(props.units === 0){
-                    props.MIN_LAYER_SIZE = [val, props.MIN_LAYER_SIZE[1]]
+                    props.MIN_LAYER_SIZE = [val, val*CONVERSION]
                 }else{
-                    props.MIN_LAYER_SIZE = [props.MIN_LAYER_SIZE[0], val]
+                    props.MIN_LAYER_SIZE = [val/CONVERSION, val]
                 }
                 minLayerSizeInput.placeholderText = val.toFixed(4)
                 // Reset valueUpdated
