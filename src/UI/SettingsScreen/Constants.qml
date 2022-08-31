@@ -10,7 +10,8 @@ Rectangle {
     
     anchors.centerIn: settingsStackView
 
-    property bool valueUpdated: false
+    property bool minLayerValueUpdated: false
+    property bool gammawValueUpdated: false
 
     color: "#6B4F4F"
     radius: 5
@@ -71,18 +72,54 @@ Rectangle {
 
             TextInput {
                 id: gammawInput
-                text: (props.units === 0) ? "9810 N/m^3" : "0.03125 tcf"
 
                 color: "#483434"
                 font.pixelSize: 18
                 
-                enabled: false
                 selectByMouse: true
                 clip: true
 
                 width: text ? text.width : gammawInputPlaceholder.width
                 
-                anchors.centerIn: parent
+                anchors {
+                    left: parent.left 
+                    leftMargin: 5
+                }
+
+                validator: DoubleValidator{
+                    bottom: 0.000001
+                    // Should we have top limit ?
+                }
+
+                onTextChanged: {
+                    if (acceptableInput) constantsBackground.gammawValueUpdated = true
+                    else constantsBackground.gammawValueUpdated = false
+                }
+
+                // Placeholder Text
+                property string placeholderText: ""
+                Component.onCompleted: placeholderText = (props.units === 0) ? (props.GAMMA_W[0]*10000).toFixed(1) : props.GAMMA_W[props.units].toFixed(4)
+                Text {
+                    id: gammawInputPlaceholder
+                    property string unitString: props.units === 0 ? " N/m^3" : " tcf"
+                    text: gammawInput.placeholderText  + unitString
+                    font.pixelSize: 18
+                    color: "#483434"
+                    opacity: 0.9
+                    visible: !gammawInput.text
+                }
+            }
+            // Units
+            Text{
+                text: (props.units === 0) ? " N/m^3" : " tcf"
+                font.pixelSize: 18
+                color: "#483434"
+                anchors {
+                    left: gammawInput.right
+                    leftMargin: 1
+                    verticalCenter: gammawInput.verticalCenter
+                }
+                visible: gammawInput.text
             }
         }
         //////////////////////////
@@ -98,7 +135,6 @@ Rectangle {
 
             anchors.verticalCenter: minLayerSizeTextbox.verticalCenter
         }
-
         Rectangle {
             id: minLayerSizeTextbox
             width: constantsForm.itemWidth
@@ -136,8 +172,8 @@ Rectangle {
                 }
 
                 onTextChanged: {
-                    if (acceptableInput) constantsBackground.valueUpdated = true
-                    else constantsBackground.valueUpdated = false
+                    if (acceptableInput) constantsBackground.minLayerValueUpdated = true
+                    else constantsBackground.minLayerValueUpdated = false
                 }
 
                 // Placeholder Text
@@ -148,6 +184,7 @@ Rectangle {
                     property string unitString: props.units === 0 ? " m" : " ft"
                     text: minLayerSizeInput.placeholderText  + unitString
                     font.pixelSize: 18
+                    opacity: 0.9
                     color: "#483434"
                     visible: !minLayerSizeInput.text
                 }
@@ -178,7 +215,7 @@ Rectangle {
         height: 25
         radius: 12
         
-        color: (constantsBackground.valueUpdated) ? "#fff3e4" : "#9d8f84"        
+        color: (constantsBackground.gammawValueUpdated | constantsBackground.minLayerValueUpdated) ? "#fff3e4" : "#9d8f84"        
 
         anchors {
             bottom: parent.bottom
@@ -189,17 +226,30 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                // UPDATE MIN LAYER SIZE
-                var CONVERSION = 3.28084 // 1m = 3.28084ft
-                var val = parseFloat(minLayerSizeInput.text)
-                if(props.units === 0){
-                    props.MIN_LAYER_SIZE = [val, val*CONVERSION]
-                }else{
-                    props.MIN_LAYER_SIZE = [val/CONVERSION, val]
+                // UPDATE GAMMA W
+                if(constantsBackground.gammawValueUpdated){
+                    var CONVERSION = 0.0000031829401427921 // 1 N/m^3 = 0.0000031829401427921 tcf, see https://www.convertunits.com/from/N/m3/to/ton/cubic+foot+[short]
+                    var gammaw = parseFloat(gammawInput.text)
+                    if(props.units === 0){
+                        props.GAMMA_W = [gammaw / 10000, gammaw * CONVERSION]
+                    }else{
+                        props.GAMMA_W = [(gammaw / CONVERSION)/10000, gammaw]
+                    }
+                    gammawInput.placeholderText = (props.units === 0) ? gammaw.toFixed(1) : gammaw.toFixed(4)
+                    constantsBackground.gammawValueUpdated = false
                 }
-                minLayerSizeInput.placeholderText = val.toFixed(4)
-                // Reset valueUpdated
-                constantsBackground.valueUpdated = false
+                // UPDATE MIN LAYER SIZE
+                if(constantsBackground.minLayerValueUpdated){
+                    var CONVERSION = 3.28084 // 1m = 3.28084ft
+                    var val = parseFloat(minLayerSizeInput.text)
+                    if(props.units === 0){
+                        props.MIN_LAYER_SIZE = [val, val*CONVERSION]
+                    }else{
+                        props.MIN_LAYER_SIZE = [val/CONVERSION, val]
+                    }
+                    minLayerSizeInput.placeholderText = val.toFixed(4)
+                    constantsBackground.minLayerValueUpdated = false
+                }
             }
         }
 

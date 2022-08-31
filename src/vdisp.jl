@@ -140,6 +140,10 @@ units = UndefInitializer # This gets defined right before loading qml (Reads val
 
 # Constants
 MIN_LAYER_SIZE = Observable([0.0254, 1/12])  # Default minimum layer size (0.0254 m = 2.54 cm or (1/12) ft = 1 in)
+GAMMA_W = Observable([0.9810, 0.03125])
+on(GAMMA_W) do val
+    println("GAMMA_W: ", val)
+end
 
 # Update QML variables
 setProblemName = on(problemName) do val
@@ -771,7 +775,7 @@ if size(ARGS)[1] == 1
     end
 
     # Load file main.qml
-    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData, "lastInputFileDir" => lastInputFileDir, "MIN_LAYER_SIZE" => MIN_LAYER_SIZE))
+    loadqml(path, props=JuliaPropertyMap("problemName" => problemName, "model" => model, "foundation" => foundation, "appliedPressure" => appliedPressure, "center" => center, "foundationLength" => foundationLength, "foundationWidth" => foundationWidth, "outputIncrements" => outputIncrements, "saturatedAboveWaterTable" => saturatedAboveWaterTable, "materials" => materials, "materialNames" => materialNamesQML, "specificGravity" => specificGravityQML, "voidRatio" => voidRatioQML, "waterContent" => waterContentQML, "bounds" => boundsQML, "subdivisions" => subdivisionsQML, "totalDepth" => totalDepth, "soilLayerNumbers" => soilLayerNumbersQML, "depthToGroundWaterTable" => depthToGroundWaterTable, "foundationDepth" => foundationDepth, "heaveActive" => heaveActive, "heaveBegin" => heaveBegin, "swellPressure" => swellPressureQML, "swellIndex" => swellIndexQML, "compressionIndex" => compressionIndexQML, "recompressionIndex" => recompressionIndexQML, "timeAfterConstruction" => timeAfterConstruction, "conePenetration" => conePenetrationQML, "elasticModulus" => elasticModulusQML, "outputFile" => outputFileQML, "units"=>units, "inputFile" => inputFile, "inputFileSelected" => inputFileSelected, "materialCountChanged" => materialCountChanged, "modelChanged" => modelChanged, "outputDataCreated" => outputDataCreated, "createOutputData" => createOutputData, "outputData"=>outputData, "graphData" => graphData, "lastInputFileDir" => lastInputFileDir, "MIN_LAYER_SIZE" => MIN_LAYER_SIZE, "GAMMA_W" => GAMMA_W))
     
     # Run the app
     exec()
