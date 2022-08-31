@@ -9,7 +9,7 @@ Rectangle {
         bounds.sort(function(a, b){return a - b});
         for(var i = 1; i < bounds.length; i++){
             // Check if layer is larger than min allowed size
-            if((bounds[i] - bounds[i-1]) < minLayerSize) {
+            if((bounds[i] - bounds[i-1]) < props.MIN_LAYER_SIZE[props.units]) {
                 return false
             }
         }
@@ -34,7 +34,8 @@ Rectangle {
     property variant values: []
     property double totalDepth: 10.0
     property variant bounds: []
-    property double minLayerSize: (props.units === 0) ? 0.0254 : 1/12  // Minimum layer sizes: 2.54cm/1inch
+    
+    property variant minLayerSize: props.MIN_LAYER_SIZE[props.units]
     property int maxSublayers: props.MAX_SUBDIVISIONS
     property bool calculatedBounds: false
 
