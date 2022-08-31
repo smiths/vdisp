@@ -35,13 +35,35 @@ Rectangle {
 
         text: "<b>VDisp</b> is a one-dimensional soil settlement analysis software, written using the Julia programming language and Qt/QML."
         color: "#fff3e4"
-        font.pixelSize: 18 + 10 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+        font.pixelSize: 18 + 14 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
 
         width: vdispWindow.width * 0.8 * 0.8
         wrapMode: Text.WordWrap
 
         anchors {
             centerIn: parent
+        }
+    }
+
+    Text {
+        id: acknowledgementLink
+
+        color: "#fff3e4"
+        font.pixelSize: 16 + 10 * (vdispWindow.width-vdispWindow.minimumWidth)/(vdispWindow.maximumWidth-vdispWindow.minimumWidth)
+        text: "<u>Acknowledgements</u>"
+        
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                Qt.openUrlExternally("https://github.com/smiths/vdisp/blob/main/Acknowledgements.md")
+            }
+        }
+
+        anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: aboutParagraph.bottom
+            topMargin: 20
         }
     }
     ///////////////////////////////

@@ -1,14 +1,20 @@
 using Test
 using vdisp
 
+# Import module specific Unit Test files
+include("./InputParserTests.jl")
+using .InputParserTests
+include("./VDispTests.jl")
+using .VDispTests
+include("./CalculationBehaviourTests.jl")
+using .CalculationBehaviourTests
+
+## TESTING MODULE INPUTPARSER.JL ###############
+
 include("../src/OutputFormat/OutputFormat.jl")
 using .OutputFormat
-
 include("../src/InputParser.jl")
 using .InputParser
-
-include("./tests.jl")
-using .Tests
 
 # Paths to test input files from runtests.jl
 FILE_NAMES = ["consolidationSwellTest", "consolidationSwellTest2", "schmertTest", "schmertElasticTest"]
@@ -54,3 +60,17 @@ end
     println("\nTesting error file 2, error expected:")
     @test_throws Main.OutputFormat.InputParser.SoilNumberError OutputData(INPUT_ERROR_PATHS[2])
 end
+
+################################################
+
+## TESTING MODULE CALCULATIONBEHAVIOUR.JL ######
+@testset "Testing toFixed()" begin
+    testToFixed()
+end
+################################################
+
+## TESTING MODULE VDISP.JL #####################
+@testset "Testing pathFromVar()" begin
+    testPathFromVar()
+end
+################################################

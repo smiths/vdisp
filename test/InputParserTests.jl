@@ -1,6 +1,16 @@
-module Tests
+"""
+This module aims to test the `InputParser.jl` module
+
+The InputParser module is responsible for both
+creating InputData objects by parsing the old 
+input file format from the original VDispl progam
+and for populating the GUI by parsing the new
+input file format specified in `vdisp/INPUT_FILE_FORMAT.md`
+"""
+module InputParserTests
 
 using Test
+
 include("../src/OutputFormat/OutputFormat.jl")
 using .OutputFormat
 
@@ -9,6 +19,16 @@ using .InputParser
 
 export consolidationSwellTest, consolidationSwellTest2, schmertTest, schmertElasticTest, consolidationSwellGUITest, schmertGUITest, schmertElasticGUITest
 
+"""
+    consolidationSwellTest(outputData)
+
+Tests the fields in `InputData` instance contained in
+`outputData` struct to see if `InputParser.jl` correctly
+parsed the file at `vdisp/test/testdata/input_consolidationSwellTest.dat`.
+
+> Note: This function is parsing an input file of the old format. These files are not used in the `VDisp` program, yet reproducing calculations from the old inputs of the original `VDispl` program was a great testing strategy. 
+
+"""
 function consolidationSwellTest(outputData)
     inputData = outputData.inputData
 
@@ -50,6 +70,22 @@ function consolidationSwellTest(outputData)
     @test heaveAboveFoundationTable[2,4] ≈ 1.9701033 rtol=1e-6
 end
 
+"""
+    consolidationSwellTest2(outputData)
+
+Tests the fields in `InputData` instance contained in
+`outputData` struct to see if `InputParser.jl` correctly
+parsed the file at `vdisp/test/testdata/input_consolidationSwellTest2.dat`.
+
+Two Consolidation/Swell method calculations are tested since 
+this second file contains a specific input combination that
+results in an extra block of code to be executed in the 
+`getEffectiveStress()` call that happens in `CalculationBehaviour.jl`.
+More about this is explained in the input file's comments.
+
+> Note: This function is parsing an input file of the old format. These files are not used in the `VDisp` program, yet reproducing calculations from the old inputs of the original `VDispl` program was a great testing strategy.
+
+"""
 function consolidationSwellTest2(outputData)
     inputData = outputData.inputData
 
@@ -90,6 +126,16 @@ function consolidationSwellTest2(outputData)
     @test PP[5] ≈ 0.0797244 rtol=1e-6
 end
 
+"""
+    schmertTest(outputData)
+
+Tests the fields in `InputData` instance contained in
+`outputData` struct to see if `InputParser.jl` correctly
+parsed the file at `vdisp/test/testdata/input_schmertTest.dat`.
+
+> Note: This function is parsing an input file of the old format. These files are not used in the `VDisp` program, yet reproducing calculations from the old inputs of the original `VDispl` program was a great testing strategy.
+
+"""
 function schmertTest(outputData)
     inputData = outputData.inputData
 
@@ -122,6 +168,16 @@ function schmertTest(outputData)
     @test settlementTable[3,3] ≈ -0.002045984 rtol=1e-6
 end
 
+"""
+    schmertElasticTest(outputData)
+
+Tests the fields in `InputData` instance contained in
+`outputData` struct to see if `InputParser.jl` correctly
+parsed the file at `vdisp/test/testdata/input_schmertElasticTest.dat`.
+
+> Note: This function is parsing an input file of the old format. These files are not used in the `VDisp` program, yet reproducing calculations from the old inputs of the original `VDispl` program was a great testing strategy.
+
+"""
 function schmertElasticTest(outputData)
     inputData = outputData.inputData
 
@@ -154,6 +210,12 @@ function schmertElasticTest(outputData)
     @test settlementTable[3,3] ≈ -0.002045984 rtol=1e-6
 end
 
+"""
+    consolidationSwellGUITest(filePath::String)
+
+Tests the fields in `GUIData` instance created by `InputParser.jl` to see if
+it correctly parsed the file at `vdisp/test/testdata/consolidationSwellGUITest.dat`.
+"""
 function consolidationSwellGUITest(filePath::String)
     guiData = GUIData(filePath)
 
@@ -196,6 +258,12 @@ function consolidationSwellGUITest(filePath::String)
     @test guiData.maxPastPressure[2] == 3.0
 end
 
+"""
+    schmertGUITest(filePath::String)
+
+Tests the fields in `GUIData` instance created by `InputParser.jl` to see if
+it correctly parsed the file at `vdisp/test/testdata/schmertGUITest.dat`.
+"""
 function schmertGUITest(filePath::String)
     guiData = GUIData(filePath)
 
@@ -240,6 +308,12 @@ function schmertGUITest(filePath::String)
     @test guiData.conePenetration[3] == 240.0
 end
 
+"""
+    schmertElasticGUITest(filePath::String)
+
+Tests the fields in `GUIData` instance created by `InputParser.jl` to see if
+it correctly parsed the file at `vdisp/test/testdata/schmertElasticGUITest.dat`.
+"""
 function schmertElasticGUITest(filePath::String)
     guiData = GUIData(filePath)
 
