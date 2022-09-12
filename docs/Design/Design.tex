@@ -78,6 +78,9 @@
     \indentpar This section aims to describe the actual design which was implemented
     in the \textbf{VDisp} software. It strays from the \hyperref[initialDesign]{ideal design} due
     to some limitations outlined in the \hyperref[juliaLimits]{Julia Limitations} section.\\
+
+    \indentpar At the moment, \emph{VDisp} is still being refactored, so the development 
+    of an actual design UML diagram is being delayed.
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     %% Julia Limitations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -264,6 +267,59 @@
         @ QML ~/.julia/packages/CxxWrap/ptbgM/src/CxxWrap.jl:619
         \end{BVerbatim}
         \end{center}
+
+        \indentpar There seems to be a bug within the \emph{CxxWrap.jl} library,
+        or in the use of this library within the \emph{QML.jl} package. 
+
+        \indentpar Once again, \emph{VDisp} uses a “hack” to get around this. This is 
+        by no means a scalable, permanent solution to the problem, but it serves as a 
+        way to get the application working until the developers update the packages. 
+        \emph{QML.jl} allows developers to pass in \emph{Observable} variables (from 
+        the \emph{Observables.jl} package) into the \emph{loadqml()} function which can 
+        be accessed globally in the QML files. Any changes made to these variables through
+        the UI logic described in the QML files will be relayed to the variables in Julia.
+        The \emph{Observables.jl} package allows developers to define an “observer” function
+        which executes each time an \emph{Observable} variable's value is changed (I'm guessing
+        the name of the package comes from the Observer design pattern which is used in the 
+        underlying code). Using this functionality, we can create an \emph{Observable} variable 
+        with a boolean value, pass it into QML, set it to true when we want to execute a function,
+        and call the function from the \emph{Observable}'s observer function. This will be easier
+        for readers to digest after examining the refactored code of the example above which 
+        implements this method:
+        
+        \begin{verbatim}
+        using Observables
+
+        # init Observable variable to be false by default
+        executeSaveFile = Observable(false)
+        
+        # define observer function for executeSaveFile
+        saveFileObserver = on(executeSaveFile) do val
+            # if the new value of executeSaveFile is true
+            if val
+                saveFile()  # call function
+            end
+        end
+
+        # Load qml file and pass in executeSaveFile as variable
+        loadqml("main.qml", executeSaveFile=executeSaveFile)
+        \end{verbatim}
+
+        \indentpar Now, the QML file will be refactored to:
+
+        \begin{verbatim}
+            import import QtQuick 2.12
+            import org.julialang 1.0
+
+            Rectangle{
+                /* Design */
+                
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: executeSaveFile = true  // Call saveFile()
+                }
+            }
+        \end{verbatim}
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
