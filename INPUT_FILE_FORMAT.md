@@ -34,10 +34,9 @@ Line 12 > subdivisionsLayer1:Int(+), subdivisionsLayer1:Int(+), ...
 ```
 
 > Line 10 must have `materials`+2 entries, with the first entry being 0 and the last being `totalDepth`.
-
 > Lines 11 and 12 must have `materials` entries.
 
-Next comes the "method specific" part of the input file. The format depends on the choice for `method` and the options are specified as follows:
+Next comes the “method specific” part of the input file. The format depends on the choice for `method` and the options are specified as follows:
 
 ### 0 — Consolidation / Swell
 
@@ -105,7 +104,6 @@ Line 14 (Repeat for each material) > materialIndex:Int[0, materials), elasticMod
 ## Sample Input File
 
 This is a sample input file, taken from the test cases for `VDisp`:
-
 
 ```text
 # Input file for GUI
